@@ -140,11 +140,11 @@ void updateAverage(vector<bool> Fprev, vector<bool> F, int frame, int gameId){
 		for(int i = 0; i < tempVector.size(); i++){
 			if(toReportAll == 1 && tempVector[i] != 0){
 				myFileBits << i << ",";
-				bytesToPrint.push_back(int((i + 1) / 8));
+				bytesToPrint.push_back(int(i/8));
 			}
 			if(toReportAll == 0 && tempVector[i] == 2){
 				myFileBits << i << ",";
-				bytesToPrint.push_back(int((i + 1) / 8));
+				bytesToPrint.push_back(int(i/8));
 			}			
 		}
 		myFileBits << endl;
@@ -189,6 +189,8 @@ int main(int argc, char** argv){
 
 	ALEInterface ale(0);
 	RAMFeatures features;
+	ale.setInt("random_seed", 1);
+	ale.setFloat("stochasticity", 0.00);
 	ale.loadROM(romPath.c_str());
 
 	for(int i = 0; i < 2 * NUM_BITS; i++){
