@@ -7,13 +7,14 @@
 ** Author: Marlos C. Machado                                                           **
 ****************************************************************************************/
 
-#include "../../../../src/common/Timer.hpp"
-
-#include "OptionSarsa.hpp"
 #include <stdio.h>
 #include <math.h>
 
-OptionSarsa::OptionSarsa(ALEInterface& ale, Features *features, Parameters *param) : RLLearner(ale, param) {
+#include "OptionSarsa.hpp"
+#include "../../../../src/common/Timer.hpp"
+#include "../../../../src/features/RAMFeatures.hpp"
+
+OptionSarsa::OptionSarsa(ALEInterface& ale, Features *features, Parameters *param) : RLLearner(ale, features, param) {
 	delta = 0.0;
 	
 	alpha = param->getAlpha();
@@ -165,6 +166,19 @@ void OptionSarsa::loadWeights(){
 	}
 }
 
+void OptionSarsa::updateTransitionVector(vector<bool> F, vector<bool> Fnext, vector<int>& transitions){
+	transitions.clear();
+	int numTransitionFeatures = F.size();
+	for(int i = 0; i < F.size(); i++){
+		if(!F[i] && Fnext[i]){ //0->1
+			transitions.push_back(i);
+		}
+		else if(F[i] && !Fnext[i]){ //1->0
+			transitions.push_back(i + numTransitionFeatures - 1);
+		}
+	}
+}
+
 void OptionSarsa::learnPolicy(ALEInterface& ale, Features *features){
 	
 	struct timeval tvBegin, tvEnd, tvDiff;
@@ -173,6 +187,10 @@ void OptionSarsa::learnPolicy(ALEInterface& ale, Features *features){
 	double cumReward = 0, prevCumReward = 0;
 	unsigned int maxFeatVectorNorm = 1;
 	sawFirstReward = 0; firstReward = 1.0;
+	//For the use of options:
+	RAMFeatures ramFeatures;
+	vector<bool> FRam, FnextRam;
+	vector<int> transitions;
 
 	//Repeat (for each episode):
 	int episode, totalNumberFrames = 0;
@@ -187,7 +205,9 @@ void OptionSarsa::learnPolicy(ALEInterface& ale, Features *features){
 			nonZeroElig[a].clear();
 		}
 		F.clear();
+		FRam.clear();
 		features->getActiveFeaturesIndices(ale.getScreen(), ale.getRAM(), F);
+		ramFeatures.getCompleteFeatureVector(ale.getScreen(), ale.getRAM(), FRam);
 		updateQValues(F, Q);
 		currentAction = epsilonGreedy(Q);
 		//Repeat(for each step of episode) until game is over:
@@ -202,14 +222,17 @@ void OptionSarsa::learnPolicy(ALEInterface& ale, Features *features){
 
 			sanityCheck();
 			//Take action, observe reward and next state:
-			act(ale, currentAction, reward);
+			act(ale, currentAction, transitions, reward);
 			cumReward  += reward[1];
 			if(!ale.game_over()){
 				//Obtain active features in the new state:
 				Fnext.clear();
+				FnextRam.clear();
 				features->getActiveFeaturesIndices(ale.getScreen(), ale.getRAM(), Fnext);
+				ramFeatures.getCompleteFeatureVector(ale.getScreen(), ale.getRAM(), FnextRam);
 				updateQValues(Fnext, Qnext);     //Update Q-values for the new active features
 				nextAction = epsilonGreedy(Qnext);
+				updateTransitionVector(FRam, FnextRam, transitions);
 			}
 			else{
 				nextAction = 0;
