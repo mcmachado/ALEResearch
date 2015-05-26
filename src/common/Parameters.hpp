@@ -47,6 +47,7 @@ class Parameters{
 		int toSaveWeightsAfterLearning; //whether we are going to save the weights learned after the whole process
 		int frequencySavingWeights;     //If we are asked to save the weights, We need to know how many frames to wait until saving them again
 		int toLoadWeights;              //whether we are going to load an already learned set of weights or not
+		int learningLength;             //The number of frames to be learned, in total. DQN uses, for example, 50,000,000.
 
 	   /**
  		* Constructor defined as private to force the use of the constructor 
@@ -207,7 +208,10 @@ class Parameters{
 		* @param path to the file containing the weights to be loaded
 		*/
 		void setPathToWeightsFiles(std::string path);
-
+		/**
+		* @param learningLength number of frames to be learned in total, e.g. 50,000,000 (DQN).
+		*/
+		void setLearningLength(int a);
 		
 	public:
 		/**
@@ -336,4 +340,8 @@ class Parameters{
 		* @return string path to the file containing the weights to be loaded
 		*/
 		std::string getPathToWeightsFiles();
+		/**
+		* @return int learningLength number of frames to be learned in total, e.g. 50,000,000 (DQN).
+		*/
+		int getLearningLength();
 };
