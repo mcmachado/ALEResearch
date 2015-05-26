@@ -36,8 +36,8 @@ Mathematics.o: ../../../src/common/Mathematics.cpp
 Timer.o: ../../../src/common/Timer.cpp
 	$(CXX) $(FLAGS) -c ../../../src/common/Timer.cpp -o bin/Timer.o
 
-Parameters.o: ../../../src/common/Parameters.cpp
-	$(CXX) $(FLAGS) -c ../../../src/common/Parameters.cpp -o bin/Parameters.o
+Parameters.o: common/Parameters.cpp
+	$(CXX) $(FLAGS) -c common/Parameters.cpp -o bin/Parameters.o
 
 Features.o: ../../../src/features/Features.cpp
 	$(CXX) $(FLAGS) -c ../../../src/features/Features.cpp -o bin/Features.o
