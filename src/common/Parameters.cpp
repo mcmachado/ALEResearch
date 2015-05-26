@@ -176,6 +176,7 @@ void Parameters::parseParametersFromConfigFile(std::string cfgFileName){
 	this->setFrequencySavingWeights(atoi(parameters["FREQUENCY_SAVING"].c_str()));
 	this->setToLoadWeights(atoi(parameters["LOAD_WEIGHTS"].c_str()));
 	this->setPathToWeightsFiles(parameters["WEIGHTS_TO_LOAD"]);
+	this->setLearningLength(atoi(parameters["TOTAL_FRAMES_LEARN"].c_str()));
 
 	if(this->getSubtractBackground()){
 		std::string folderWithBackgrounds = parameters["PATH_TO_BACKGROUND"];
@@ -405,4 +406,12 @@ std::string Parameters::getPathToWeightsFiles(){
 
 void Parameters::setPathToWeightsFiles(std::string name){
 	this->pathToWeightsFiles = name;
+}
+
+int Parameters::getLearningLength(){
+	return this->learningLength;
+}
+
+void Parameters::setLearningLength(int a){
+	this->learningLength = a;
 }
