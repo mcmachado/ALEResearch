@@ -1,13 +1,11 @@
 /****************************************************************************************
-** Implementation of Sarsa(lambda). It implements Fig. 8.8 (Linear, gradient-descent 
-** Sarsa(lambda)) from the book "R. Sutton and A. Barto; Reinforcement Learning: An 
-** Introduction. 1st edition. 1988."
-** Some updates are made to make it more efficient, as not iterating over all features.
-**
-** TODO: Make it as efficient as possible. 
-** 
-** Author: Marlos C. Machado
-***************************************************************************************/
+** Implementation of Sarsa(lambda). It implements Fig. 8.8 (Linear, gradient-descent   **
+** Sarsa(lambda)) from the book "R. Sutton and A. Barto; Reinforcement Learning: An    ** 
+** Introduction. 1st edition. 1988."                                                   **
+** Some updates are made to make it more efficient, as not iterating over all features.**
+**                                                                                     **
+** Author: Marlos C. Machado                                                           **
+****************************************************************************************/
 
 #include "../../../../src/common/Timer.hpp"
 
