@@ -8,12 +8,15 @@
 
 #ifndef AGENT_H
 #define AGENT_H
-#include "../../../../src/agents/Agent.hpp"
+#include "Agent.hpp"
 #endif
 
 class RLLearner : public Agent{
 	protected:
 		ActionVect actions;
+
+		vector<int> option;
+		string pathToRewardDescription;
 
 		double gamma, epsilon;
 		double firstReward;
@@ -37,7 +40,7 @@ class RLLearner : public Agent{
  		* the reward to be used by the RL algorithm is returned; in the second position, the game score is
  		* returned.
  		*/
-		void act(ALEInterface& ale, int action, vector<double> &reward);
+		void act(ALEInterface& ale, int action, const vector<int> transitions, vector<double> &reward);
 
 		/**
  		* Implementation of an epsilon-greedy function. Epsilon is defined in the constructor,
@@ -57,7 +60,7 @@ class RLLearner : public Agent{
  		*        file and command line.
  		*
 		*/
-		RLLearner(ALEInterface& ale, Parameters *param);
+		RLLearner(ALEInterface& ale, Features *features, Parameters *param);
 
 	public:
 	   /**

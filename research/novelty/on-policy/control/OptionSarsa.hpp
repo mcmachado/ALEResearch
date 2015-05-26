@@ -54,9 +54,12 @@ class OptionSarsa : public RLLearner{
  		* the rule: e[action][i] = gamma * lambda * e[action][i]. It is possible to also define thresholding.
  		*/
 		void updateReplTrace(int action, vector<int> &Features);
-
+		/**
+ 		* When using Replacing traces, all values not related to the current action are set to 0, while the
+ 		* values for the current action that their features are active are added 1. The traces decay following
+ 		* the rule: e[action][i] = gamma * lambda * e[action][i]. It is possible to also define thresholding.
+ 		*/
 		void updateAcumTrace(int action, vector<int> &Features);
-
 		/**
  		* Prints the weights in a file. Each line will contain a weight.
  		*/
@@ -65,6 +68,8 @@ class OptionSarsa : public RLLearner{
  		* Loads the weights saved in a file. Each line will contain a weight.
  		*/		
 		void loadWeights();
+
+		void updateTransitionVector(vector<bool> F, vector<bool> Fnext, vector<int>& transitions);
 	public:
 		OptionSarsa(ALEInterface& ale, Features *features, Parameters *param);
 		/**

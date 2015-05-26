@@ -24,8 +24,8 @@ endif
 
 all: sarsaProxyOption
 
-sarsaProxyOption:       sarsaProxyOption.o     Mathematics.o     Timer.o     Parameters.o     Features.o     Background.o     BPROFeatures.o     RLLearner.o     OptionSarsa.o
-	$(CXX) $(FLAGS) bin/sarsaProxyOption.o bin/Mathematics.o bin/Timer.o bin/Parameters.o bin/Features.o bin/Background.o bin/BPROFeatures.o bin/RLLearner.o bin/OptionSarsa.o $(LDFLAGS) -o $(OUT_FILE) 
+sarsaProxyOption:       sarsaProxyOption.o     Mathematics.o     Timer.o     Parameters.o     Features.o     Background.o     BPROFeatures.o     RAMFeatures.o     RLLearner.o     OptionSarsa.o
+	$(CXX) $(FLAGS) bin/sarsaProxyOption.o bin/Mathematics.o bin/Timer.o bin/Parameters.o bin/Features.o bin/Background.o bin/BPROFeatures.o bin/RAMFeatures.o bin/RLLearner.o bin/OptionSarsa.o $(LDFLAGS) -o $(OUT_FILE) 
 
 sarsaProxyOption.o: sarsaProxyOption.cpp
 	$(CXX) $(FLAGS) -c sarsaProxyOption.cpp -o bin/sarsaProxyOption.o
@@ -47,6 +47,9 @@ Background.o: ../../../src/features/Background.cpp
 	
 BPROFeatures.o: ../../../src/features/BPROFeatures.cpp
 	$(CXX) $(FLAGS) -c ../../../src/features/BPROFeatures.cpp -o bin/BPROFeatures.o	
+
+RAMFeatures.o: ../../../src/features/RAMFeatures.cpp
+	$(CXX) $(FLAGS) -c ../../../src/features/RAMFeatures.cpp -o bin/RAMFeatures.o		
 
 RLLearner.o: control/RLLearner.cpp
 	$(CXX) $(FLAGS) -c control/RLLearner.cpp -o bin/RLLearner.o

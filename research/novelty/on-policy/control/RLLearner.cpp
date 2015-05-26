@@ -8,7 +8,9 @@
 #include "RLLearner.hpp"
 #endif
 
-RLLearner::RLLearner(ALEInterface& ale, Parameters *param){
+#include <fstream>
+
+RLLearner::RLLearner(ALEInterface& ale, Features *features, Parameters *param){
 	randomActionTaken   = 0;
 
 	gamma               = param->getGamma();
@@ -28,6 +30,15 @@ RLLearner::RLLearner(ALEInterface& ale, Parameters *param){
 		actions = ale.getLegalActionSet();
 	}
 	numActions = actions.size();
+
+	//Reading file containing the vector that describes the reward for the option learning
+	//The first X positions encode the transition 0->1 and the other X encode 1->0.
+	pathToRewardDescription = param->getOptionRewardPath();
+	std::ifstream infile(pathToRewardDescription);
+	double value;
+	while(infile >> value){
+		option.push_back(value);
+	}
 }
 
 int RLLearner::epsilonGreedy(vector<double> &QValues){
@@ -49,7 +60,7 @@ int RLLearner::epsilonGreedy(vector<double> &QValues){
  * pass aditional information to the running algorithm (like 'real score' if one
  * is using a surrogate reward function).
  */
-void RLLearner::act(ALEInterface& ale, int action, vector<double> &reward){
+void RLLearner::act(ALEInterface& ale, int action, const vector<int> transitions, vector<double> &reward){
 	double r_alg = 0.0, r_real = 0.0;
 	
 	r_real = ale.act(actions[action]);
@@ -60,10 +71,11 @@ void RLLearner::act(ALEInterface& ale, int action, vector<double> &reward){
 		else if(r_real < 0){
 			r_alg = -1.0;
 		}
-	//Normalizing reward according to the first
-	//reward, Marc did this in his JAIR paper:
 	} else{
-		if(r_real != 0.0){
+		for(int i = 0; i < transitions.size(); i++){
+			r_alg += option[transitions[i]];
+		}
+		if(r_alg != 0.0){
 			if(!sawFirstReward){
 				firstReward = std::abs(r_real);
 				sawFirstReward = 1;
@@ -71,10 +83,10 @@ void RLLearner::act(ALEInterface& ale, int action, vector<double> &reward){
 		}
 		if(sawFirstReward){
 			if(toBeOptimistic){
-				r_alg = (r_real - firstReward)/firstReward + gamma;
+				r_alg = (r_alg - firstReward)/firstReward + gamma;
 			}
 			else{
-				r_alg = r_real/firstReward;	
+				r_alg = r_alg/firstReward;	
 			}
 		}
 		else{

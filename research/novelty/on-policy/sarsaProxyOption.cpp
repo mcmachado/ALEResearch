@@ -18,7 +18,6 @@
 #include "control/OptionSarsa.hpp"
 
 void printBasicInfo(Parameters param){
-	printf("Seed: %d\n", param.getSeed());
 	printf("\nCommand Line Arguments:\nPath to Config. File: %s\nPath to ROM File: %s\nPath to Backg. File: %s\n", 
 		param.getConfigPath().c_str(), param.getRomPath().c_str(), param.getPathToBackground().c_str());
 	if(param.getSubtractBackground()){
