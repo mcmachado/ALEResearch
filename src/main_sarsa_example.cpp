@@ -44,12 +44,21 @@ int main(int argc, char** argv){
 	//Reading parameters from file defined as input in the run command:
 	Parameters param(argc, argv);
 	srand(param.getSeed());
+	
 	//Using Basic features:
 	BasicFeatures features(&param);
 	//Reporting parameters read:
 	printBasicInfo(param);
 	
 	ALEInterface ale(param.getDisplay());
+
+	//TODO: I have to change my Sarsa implementation to consider these flags:
+	ale.setFloat("stochasticity", 0.00);
+	ale.setInt("random_seed", param.getSeed());
+	ale.setFloat("frame_skip", param.getNumStepsPerAction());
+	ale.setInt("max_num_frames_per_episode", param.getEpisodeLength());
+	ale.setInt("max_num_frames", param.getLearningLength());
+
 	ale.loadROM(param.getRomPath().c_str());
 
 	//Instantiating the learning algorithm:
