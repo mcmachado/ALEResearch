@@ -15,7 +15,7 @@ class RLLearner : public Agent{
 	protected:
 		ActionVect actions;
 
-		vector<int> option;
+		vector<double> option;
 		string pathToRewardDescription;
 
 		double gamma, epsilon;
