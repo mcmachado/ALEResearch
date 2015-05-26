@@ -75,6 +75,7 @@ void RLLearner::act(ALEInterface& ale, int action, const vector<int> transitions
 		for(int i = 0; i < transitions.size(); i++){
 			r_alg += option[transitions[i]];
 		}
+		/*
 		if(r_alg != 0.0){
 			if(!sawFirstReward){
 				firstReward = std::abs(r_real);
@@ -90,10 +91,11 @@ void RLLearner::act(ALEInterface& ale, int action, const vector<int> transitions
 			}
 		}
 		else{
+		*/
 			if(toBeOptimistic){
 				r_alg = gamma - 1.0;
 			}
-		}
+		/*}*/
 	}
 	reward[0] = r_alg;
 	reward[1] = r_real;

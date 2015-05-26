@@ -185,6 +185,7 @@ void OptionSarsa::learnPolicy(ALEInterface& ale, Features *features){
 	vector<double> reward;
 	double elapsedTime;
 	double cumReward = 0, prevCumReward = 0;
+	double cumIntrReward = 0, prevCumIntrReward = 0;
 	unsigned int maxFeatVectorNorm = 1;
 	sawFirstReward = 0; firstReward = 1.0;
 	//For the use of options:
@@ -223,6 +224,7 @@ void OptionSarsa::learnPolicy(ALEInterface& ale, Features *features){
 			sanityCheck();
 			//Take action, observe reward and next state:
 			act(ale, currentAction, transitions, reward);
+			cumIntrReward += reward[0];
 			cumReward  += reward[1];
 			if(!ale.game_over()){
 				//Obtain active features in the new state:
@@ -257,6 +259,7 @@ void OptionSarsa::learnPolicy(ALEInterface& ale, Features *features){
 				}
 			}
 			F = Fnext;
+			FRam = FnextRam;
 			currentAction = nextAction;
 		}
 		gettimeofday(&tvEnd, NULL);
@@ -264,10 +267,12 @@ void OptionSarsa::learnPolicy(ALEInterface& ale, Features *features){
 		elapsedTime = double(tvDiff.tv_sec) + double(tvDiff.tv_usec)/1000000.0;
 		
 		double fps = double(ale.getEpisodeFrameNumber())/elapsedTime;
-		printf("episode: %d,\t%.0f points,\tavg. return: %.1f,\t%d frames,\t%.0f fps\n", 
-			episode + 1, (cumReward-prevCumReward), (double)cumReward/(episode + 1.0), ale.getEpisodeFrameNumber(), fps);
+		printf("episode: %d,\t%.0f points,\tavg. return: %.1f,\tnovelty reward: %.2f (%.2f),\t%d frames,\t%.0f fps\n",
+			episode + 1, cumReward - prevCumReward, (double)cumReward/(episode + 1.0),
+			cumIntrReward - prevCumIntrReward, cumIntrReward/(episode + 1.0), ale.getEpisodeFrameNumber(), fps);
 		totalNumberFrames += ale.getEpisodeFrameNumber();
 		prevCumReward = cumReward;
+		prevCumIntrReward = cumIntrReward;
 		ale.reset_game();
 		if(toSaveWeightsAfterLearning && episode%saveWeightsEveryXSteps == 0 && episode > 0){
 			stringstream ss;
