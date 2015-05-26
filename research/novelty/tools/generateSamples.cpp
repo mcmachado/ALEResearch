@@ -14,8 +14,8 @@
 
 #include <ale_interface.hpp>
 
-#include "../../src/common/Graphics.hpp"
-#include "../../src/features/RAMFeatures.hpp"
+#include "../../../src/common/Graphics.hpp"
+#include "../../../src/features/RAMFeatures.hpp"
 
 //Features:
 #define NUM_BYTE 128

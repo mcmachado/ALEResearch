@@ -2,7 +2,7 @@
 #
 # Author: Marlos C. Machado
 
-ALE := ../../../MyALE/
+ALE := ../../../../MyALE/
 
 
 # -O3 Optimize code (urns on all optimizations specified by -O2 and also turns on the -finline-functions, -funswitch-loops, -fpredictive-commoning, -fgcse-after-reload, -ftree-loop-vectorize, -ftree-slp-vectorize, -fvect-cost-model, -ftree-partial-pre and -fipa-cp-clone options).
@@ -25,11 +25,11 @@ generateSamples: generateSamples.o Features.o RAMFeatures.o
 generateSamples.o: generateSamples.cpp
 	$(CXX) $(FLAGS) -c generateSamples.cpp -o bin/generateSamples.o
 
-Features.o: ../../src/features/Features.cpp
-	$(CXX) $(FLAGS) -c ../../src/features/Features.cpp -o bin/Features.o
+Features.o: ../../../src/features/Features.cpp
+	$(CXX) $(FLAGS) -c ../../../src/features/Features.cpp -o bin/Features.o
 
-RAMFeatures.o: ../../src/features/RAMFeatures.cpp
-	$(CXX) $(FLAGS) -c ../../src/features/RAMFeatures.cpp -o bin/RAMFeatures.o
+RAMFeatures.o: ../../../src/features/RAMFeatures.cpp
+	$(CXX) $(FLAGS) -c ../../../src/features/RAMFeatures.cpp -o bin/RAMFeatures.o
 
 clean:
 	rm -rf ${OUT_FILE} bin/*.o	
