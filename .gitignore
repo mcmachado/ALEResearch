@@ -5,3 +5,4 @@ research/novelty/on-policy/bin/*
 research/novelty/on-policy/sarsaProxyOption
 research/novelty/tools/bin/*
 research/novelty/tools/generateSamples
+research/novelty/tools/genEigVectors.sh
