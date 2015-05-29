@@ -52,12 +52,10 @@ int main(int argc, char** argv){
 	
 	ALEInterface ale(param.getDisplay());
 
-	//TODO: I have to change my Sarsa implementation to consider these flags:
 	ale.setFloat("stochasticity", 0.00);
 	ale.setInt("random_seed", param.getSeed());
 	ale.setFloat("frame_skip", param.getNumStepsPerAction());
 	ale.setInt("max_num_frames_per_episode", param.getEpisodeLength());
-	ale.setInt("max_num_frames", param.getLearningLength());
 
 	ale.loadROM(param.getRomPath().c_str());
 
@@ -65,6 +63,7 @@ int main(int argc, char** argv){
 	SarsaLearner sarsaLearner(ale, &features, &param);
     //Learn a policy:
     sarsaLearner.learnPolicy(ale, &features);
+
     printf("\n\n== Evaluation without Learning == \n\n");
     sarsaLearner.evaluatePolicy(ale, &features);
 	

@@ -19,9 +19,10 @@ class RLLearner : public Agent{
 		double firstReward;
 		bool   sawFirstReward;
 
-		int    frame, toUseOnlyRewardSign, toBeOptimistic;
-		int    randomActionTaken, numActions, numStepsPerAction;
-		int    episodeLength, numEpisodesLearn, numEpisodesEval;
+		int    toUseOnlyRewardSign, toBeOptimistic;
+		int    randomActionTaken, numActions;
+		int    episodeLength, numEpisodesEval;
+		int    totalNumberOfFramesToLearn;
 
 		/**
  		* It acts in the environment and makes the proper operations in the reward signal (normalizing,
