@@ -34,7 +34,9 @@ void Parameters::printHelp(char** argv){
 	printf("   -c     %s[REQUIRED]%s path to file with configuration info.\n", ANSI_COLOR_RED, ANSI_COLOR_RESET);
 	printf("   -r     %s[REQUIRED]%s path to the rom to be played by the agent.\n", ANSI_COLOR_RED, ANSI_COLOR_RESET);
 	printf("   -t     %s[REQUIRED IF SAVE_TRAJECTORY = 1]%s path to file that will store the agent's trajectory.\n", ANSI_COLOR_RED, ANSI_COLOR_RESET);
-	printf("   -h     print this help and exit\n");
+	printf("   -w     If one wants to save intermediate weights, this is prefix to files that will store the agent's learned weights every FREQUENCY_SAVING episodes.\n");
+	printf("   -l     If one wants to load an stored set of weights, this should contain the path to such file.\n");
+	printf("   -h     Print this help and exit\n");
 	printf("\n");
 }
 
@@ -89,7 +91,7 @@ std::vector<std::string> Parameters::parseLine(std::string line){
 
 void Parameters::readParameters(int argc, char* argv[]){
 	int option = 0;
-	while ((option = getopt(argc, argv, "c:r:s:t:w:h")) != -1)
+	while ((option = getopt(argc, argv, "c:r:s:t:w:l:h")) != -1)
 	{
 		if (option == -1){
 			break;
@@ -114,7 +116,11 @@ void Parameters::readParameters(int argc, char* argv[]){
 			case 'w':
 				this->setFileWithWeights(optarg);
 				this->setToSaveWeightsAfterLearning(1);
-				break;				
+				break;
+			case 'l':
+				this->setPathToWeightsFiles(optarg);
+				this->setToLoadWeights(1);
+				break;
 			case ':':
          	case '?':
          		fprintf(stderr, "Try `%s -h' for more information.\n", argv[0]);
@@ -176,8 +182,6 @@ void Parameters::parseParametersFromConfigFile(std::string cfgFileName){
 	this->setOptimisticInitialization(atoi(parameters["OPTIMISTIC_INIT"].c_str()));
 
 	this->setFrequencySavingWeights(atoi(parameters["FREQUENCY_SAVING"].c_str()));
-	this->setToLoadWeights(atoi(parameters["LOAD_WEIGHTS"].c_str()));
-	this->setPathToWeightsFiles(parameters["WEIGHTS_TO_LOAD"]);
 	this->setLearningLength(atoi(parameters["TOTAL_FRAMES_LEARN"].c_str()));
 
 	if(this->getSubtractBackground()){
