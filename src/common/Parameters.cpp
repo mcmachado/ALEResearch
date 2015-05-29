@@ -89,7 +89,7 @@ std::vector<std::string> Parameters::parseLine(std::string line){
 
 void Parameters::readParameters(int argc, char* argv[]){
 	int option = 0;
-	while ((option = getopt(argc, argv, "c:r:s:t:h")) != -1)
+	while ((option = getopt(argc, argv, "c:r:s:t:w:h")) != -1)
 	{
 		if (option == -1){
 			break;
@@ -111,6 +111,10 @@ void Parameters::readParameters(int argc, char* argv[]){
 			case 's':
 				this->setSeed(optarg);
 				break;
+			case 'w':
+				this->setFileWithWeights(optarg);
+				this->setToSaveWeightsAfterLearning(1);
+				break;				
 			case ':':
          	case '?':
          		fprintf(stderr, "Try `%s -h' for more information.\n", argv[0]);
@@ -171,8 +175,6 @@ void Parameters::parseParametersFromConfigFile(std::string cfgFileName){
 	this->setToSaveTrajectory(atoi(parameters["SAVE_TRAJECTORY"].c_str()));
 	this->setOptimisticInitialization(atoi(parameters["OPTIMISTIC_INIT"].c_str()));
 
-	this->setToSaveWeightsAfterLearning(atoi(parameters["SAVE_WEIGHTS"].c_str()));
-	this->setFileWithWeights(parameters["PATH_WEIGHTS_FILE"]);
 	this->setFrequencySavingWeights(atoi(parameters["FREQUENCY_SAVING"].c_str()));
 	this->setToLoadWeights(atoi(parameters["LOAD_WEIGHTS"].c_str()));
 	this->setPathToWeightsFiles(parameters["WEIGHTS_TO_LOAD"]);
