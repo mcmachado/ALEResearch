@@ -100,7 +100,9 @@ void QLearner::learnPolicy(ALEInterface& ale, Features *features){
 	sawFirstReward = 0; firstReward = 1.0;
 
 	//Repeat (for each episode):
-	for(int episode = 0; episode < numEpisodesLearn; episode++){
+	int episode, totalNumberFrames = 0;
+	//This is going to be interrupted by the ALE code since I set max_num_frames beforehand
+	for(episode = 0; totalNumberFrames < totalNumberOfFramesToLearn; episode++){ 
 		
 		//We have to clean the traces every episode:
 		for(unsigned int a = 0; a < nonZeroElig.size(); a++){
@@ -119,9 +121,9 @@ void QLearner::learnPolicy(ALEInterface& ale, Features *features){
 			maxFeatVectorNorm = F.size();
 		}
 		gettimeofday(&tvBegin, NULL);
-		frame = 0;
-		//Repeat(for each step of episode) until game is over:
-		while(frame < episodeLength && !ale.game_over()){
+
+		//This also stops when the maximum number of steps per episode is reached
+		while(!ale.game_over()){
 			reward.clear();
 			reward.push_back(0.0);
 			reward.push_back(0.0);
@@ -185,16 +187,17 @@ void QLearner::learnPolicy(ALEInterface& ale, Features *features){
 			}
 			F = Fnext;
 		}
-		ale.reset_game();
 		gettimeofday(&tvEnd, NULL);
 		timeval_subtract(&tvDiff, &tvEnd, &tvBegin);
 		elapsedTime = double(tvDiff.tv_sec) + double(tvDiff.tv_usec)/1000000.0;
 		
-		double fps = double(frame)/elapsedTime;
-		printf("episode: %d,\t%.0f points,\tavg. return: %.1f,\t%d frames,\t%.0f fps\n", 
-			episode + 1, (cumReward-prevCumReward), (double)cumReward/(episode + 1.0), frame, fps);
-
+		double fps = double(ale.getEpisodeFrameNumber())/elapsedTime;
+		printf("episode: %d,\t%.0f points,\tavg. return: %.1f,\t%d frames,\t%.0f fps\n",
+			episode + 1, cumReward - prevCumReward, (double)cumReward/(episode + 1.0),
+			ale.getEpisodeFrameNumber(), fps);
+		totalNumberFrames += ale.getEpisodeFrameNumber();
 		prevCumReward = cumReward;
+		ale.reset_game();
 	}
 }
 
@@ -213,10 +216,7 @@ void QLearner::evaluatePolicy(ALEInterface& ale, Features *features){
 			updateQValues(F, Q);       //Update Q-values for each possible action
 			currentAction = epsilonGreedy(Q);
 			//Take action, observe reward and next state:
-			reward = 0;
-			for(int i = 0; i < numStepsPerAction && !ale.game_over() ; i++){
-				reward += ale.act(actions[currentAction]);
-			}
+			reward = ale.act(actions[currentAction]);
 			cumReward  += reward;
 		}
 		ale.reset_game();

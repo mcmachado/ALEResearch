@@ -178,11 +178,11 @@ void SarsaLearner::learnPolicy(ALEInterface& ale, Features *features){
 	unsigned int maxFeatVectorNorm = 1;
 	sawFirstReward = 0; firstReward = 1.0;
 
-	int totalNumFrames = 0;
 	//Repeat (for each episode):
-	for(int episode = 0; episode < numEpisodesLearn; episode++){
+	int episode, totalNumberFrames = 0;
+	//This is going to be interrupted by the ALE code since I set max_num_frames beforehand
+	for(episode = 0; totalNumberFrames < totalNumberOfFramesToLearn; episode++){ 
 		//We have to clean the traces every episode:
-
 		for(unsigned int a = 0; a < nonZeroElig.size(); a++){
 			for(unsigned int i = 0; i < nonZeroElig[a].size(); i++){
 				int idx = nonZeroElig[a][i];
@@ -197,45 +197,23 @@ void SarsaLearner::learnPolicy(ALEInterface& ale, Features *features){
 		//Repeat(for each step of episode) until game is over:
 		gettimeofday(&tvBegin, NULL);
 
-//		printf("\nCurrent action: %d\n", currentAction);
-//		printf("Q-values:\n[");
-//		for(int i = 0; i < 18; i++){
-//			printf("%.3f ", Q[i]);
-//		}
-//		printf("]\n");
-
-		frame = 0;
-		while(frame < episodeLength && !ale.game_over()){
+		//This also stops when the maximum number of steps per episode is reached
+		while(!ale.game_over()){
 			reward.clear();
 			reward.push_back(0.0);
 			reward.push_back(0.0);
 			updateQValues(F, Q);
 
-//			printf("Q-values:\n[");
-//			for(int i = 0; i < 18; i++){
-//				printf("%.3f ", Q[i]);
-//			}
-//			printf("]\n");			
-
 			sanityCheck();
 			//Take action, observe reward and next state:
 			act(ale, currentAction, reward);
-//			printf("--- Reward: %f\n",reward[0]);
 			cumReward  += reward[1];
 			if(!ale.game_over()){
 				//Obtain active features in the new state:
 				Fnext.clear();
 				features->getActiveFeaturesIndices(ale.getScreen(), ale.getRAM(), Fnext);
 				updateQValues(Fnext, Qnext);     //Update Q-values for the new active features
-
-//				printf("Q-values:\n[");
-//				for(int i = 0; i < 18; i++){
-//					printf("%.3f ", Q[i]);
-//				}
-//				printf("]\n");				
-
 				nextAction = epsilonGreedy(Qnext);
-//				printf("\nNext action: %d\n", nextAction);
 			}
 			else{
 				nextAction = 0;
@@ -249,9 +227,7 @@ void SarsaLearner::learnPolicy(ALEInterface& ale, Features *features){
 				maxFeatVectorNorm = F.size();
 			}
 
-			//printf("%f\n", reward[0]);
 			delta = reward[0] + gamma * Qnext[nextAction] - Q[currentAction];
-//			printf("delta = %f + %f * %f - %f = %f\n", reward[0], gamma, Qnext[nextAction], Q[currentAction], delta);
 
 			updateReplTrace(currentAction, F);
 			//Update weights vector:
@@ -261,20 +237,20 @@ void SarsaLearner::learnPolicy(ALEInterface& ale, Features *features){
 					w[a][idx] = w[a][idx] + (alpha/maxFeatVectorNorm) * delta * e[a][idx];
 				}
 			}
-//			getchar();
 			F = Fnext;
 			currentAction = nextAction;
 		}
-		ale.reset_game();
 		gettimeofday(&tvEnd, NULL);
 		timeval_subtract(&tvDiff, &tvEnd, &tvBegin);
 		elapsedTime = double(tvDiff.tv_sec) + double(tvDiff.tv_usec)/1000000.0;
 		
-		double fps = double(frame)/elapsedTime;
-		printf("episode: %d,\t%.0f points,\tavg. return: %.1f,\t%d frames,\t%.0f fps\n", 
-			episode + 1, (cumReward-prevCumReward), (double)cumReward/(episode + 1.0), frame, fps);
+		double fps = double(ale.getEpisodeFrameNumber())/elapsedTime;
+		printf("episode: %d,\t%.0f points,\tavg. return: %.1f,\t%d frames,\t%.0f fps\n",
+			episode + 1, cumReward - prevCumReward, (double)cumReward/(episode + 1.0),
+			ale.getEpisodeFrameNumber(), fps);
+		totalNumberFrames += ale.getEpisodeFrameNumber();
 		prevCumReward = cumReward;
-		totalNumFrames += frame;
+		ale.reset_game();
 		if(toSaveWeightsAfterLearning && episode%saveWeightsEveryXSteps == 0 && episode > 0){
 			stringstream ss;
 			ss << episode;
@@ -283,7 +259,7 @@ void SarsaLearner::learnPolicy(ALEInterface& ale, Features *features){
 	}
 	if(toSaveWeightsAfterLearning){
 		stringstream ss;
-		ss << numEpisodesLearn;
+		ss << episode;
 		saveWeightsToFile(ss.str());
 	}
 }
@@ -292,6 +268,8 @@ void SarsaLearner::evaluatePolicy(ALEInterface& ale, Features *features){
 	double reward = 0;
 	double cumReward = 0; 
 	double prevCumReward = 0;
+	struct timeval tvBegin, tvEnd, tvDiff;
+	double elapsedTime;
 
 	//Repeat (for each episode):
 	for(int episode = 0; episode < numEpisodesEval; episode++){
@@ -303,17 +281,18 @@ void SarsaLearner::evaluatePolicy(ALEInterface& ale, Features *features){
 			updateQValues(F, Q);       //Update Q-values for each possible action
 			currentAction = epsilonGreedy(Q);
 			//Take action, observe reward and next state:
-			reward = 0;
-			for(int i = 0; i < numStepsPerAction && !ale.game_over() ; i++){
-				reward += ale.act(actions[currentAction]);
-			}
+			reward = ale.act(actions[currentAction]);
 			cumReward  += reward;
 		}
+		gettimeofday(&tvEnd, NULL);
+		timeval_subtract(&tvDiff, &tvEnd, &tvBegin);
+		elapsedTime = double(tvDiff.tv_sec) + double(tvDiff.tv_usec)/1000000.0;
+		double fps = double(ale.getEpisodeFrameNumber())/elapsedTime;
+
+		printf("episode: %d,\t%.0f points,\tavg. return: %.1f,\t%d frames,\t%.0f fps\n", 
+			episode + 1, (cumReward-prevCumReward), (double)cumReward/(episode + 1.0), ale.getEpisodeFrameNumber(), fps);
+
 		ale.reset_game();
-		sanityCheck();
-		
-		printf("%d, %f, %f \n", episode + 1, (double)cumReward/(episode + 1.0), cumReward-prevCumReward);
-		
 		prevCumReward = cumReward;
 	}
 }

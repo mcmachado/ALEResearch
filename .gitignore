@@ -8,3 +8,6 @@ research/novelty/tools/generateSamples
 research/novelty/tools/genEigVectors.sh
 tools/replay/bin/
 tools/replay/replay
+src/bin/
+src/learner
+src/main.cpp
