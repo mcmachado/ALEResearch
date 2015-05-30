@@ -34,6 +34,8 @@ void Parameters::printHelp(char** argv){
 	printf("   -c     %s[REQUIRED]%s path to file with configuration info.\n", ANSI_COLOR_RED, ANSI_COLOR_RESET);
 	printf("   -r     %s[REQUIRED]%s path to the rom to be played by the agent.\n", ANSI_COLOR_RED, ANSI_COLOR_RESET);
 	printf("   -t     %s[REQUIRED]%s path to file that contains the eigenvector description (for the reward).\n", ANSI_COLOR_RED, ANSI_COLOR_RESET);
+	printf("   -i     %s[REQUIRED]%s prefix path to files that contain mean and var. of the data (from SVD).\n", ANSI_COLOR_RED, ANSI_COLOR_RESET);
+	printf("   -w     If one wants to save intermediate weights, this is prefix to files that will store the agent's learned weights every FREQUENCY_SAVING episodes.\n");
 	printf("   -h     print this help and exit\n");
 	printf("\n");
 }
@@ -89,7 +91,7 @@ std::vector<std::string> Parameters::parseLine(std::string line){
 
 void Parameters::readParameters(int argc, char* argv[]){
 	int option = 0;
-	while ((option = getopt(argc, argv, "c:r:s:t:w:h")) != -1)
+	while ((option = getopt(argc, argv, "c:r:s:t:w:i:h")) != -1)
 	{
 		if (option == -1){
 			break;
@@ -115,6 +117,9 @@ void Parameters::readParameters(int argc, char* argv[]){
 				this->setFileWithWeights(optarg);
 				this->setToSaveWeightsAfterLearning(1);
 				break;
+			case 'i':
+				this->setDataStatsPath(optarg);
+				break;
 			case ':':
          	case '?':
          		fprintf(stderr, "Try `%s -h' for more information.\n", argv[0]);
@@ -127,7 +132,8 @@ void Parameters::readParameters(int argc, char* argv[]){
 		}
 	}
 	//Check if all parameters were properly set, otherwise interrupt	
-	if(this->getRomPath().compare("") == 0 || this->getConfigPath().compare("") == 0 || this->getSeed() == 0){
+	if(this->getRomPath().compare("") == 0 || this->getConfigPath().compare("") == 0 || this->getSeed() == 0
+		|| (this->getToSaveWeightsAfterLearning() && this->getDataStatsPath().compare("") == 0)){
 		printHelp(argv);
 		exit(-1);
 	}
@@ -407,4 +413,12 @@ int Parameters::getLearningLength(){
 
 void Parameters::setLearningLength(int a){
 	this->learningLength = a;
+}
+
+void Parameters::setDataStatsPath(std::string name){
+	this->pathToDataStatsPath = name;
+}
+
+std::string Parameters::getDataStatsPath(){
+	return this->pathToDataStatsPath;
 }
