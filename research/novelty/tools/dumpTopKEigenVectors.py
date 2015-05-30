@@ -2,10 +2,12 @@ import sys
 import numpy as np
 from sklearn.preprocessing import StandardScaler
 
+np.set_printoptions(threshold='nan')
+
 '''This program receives a file containing a feature vector per line. Each line has the
 	indices that are different from zero when flipping. The first X are 0->1 flips and
-	the last X are 1->0 flips. It then runs an SVD on them, dumping the top eigenvector
-	with one element per line on a file.'''
+	the last X are 1->0 flips. It then runs an SVD on them, dumping the top k eigenvectors
+	with one element per line on a file. It also prints out the centering vector.'''
 
 if __name__ == "__main__":
 
@@ -13,18 +15,11 @@ if __name__ == "__main__":
 	### Deal with command line/parameters ###
 	#########################################
 	if len(sys.argv) != 5:
-		print 'please run \'python dumpTopEigenVector.py <input_file> <num_features> <center_matrix> <output_file>\''
+		print 'please run \'python dumpTopKEigenVectors.py <input_file> <num_features> <k> <output_file>\''
 		sys.exit(1)
 	inputFile      = sys.argv[1]
 	numFeatures    = int(sys.argv[2])
-	toCenterMatrix = sys.argv[3]
-	if toCenterMatrix == '1':
-		toCenterMatrix = True
-	elif toCenterMatrix == '0':
-		toCenterMatrix = False
-	else:
-		print 'The third parameter has an invalid value'
-		sys.exit(1)
+	numToDump      = int(sys.argv[3])
 	outputFile     = sys.argv[4]
 
 	#####################################
@@ -47,17 +42,32 @@ if __name__ == "__main__":
     ###########################
 	### Really runs the SVD ###
 	###########################
-	if toCenterMatrix:
-		X_std = StandardScaler().fit_transform(Data)
-		cov_mat = np.cov(X_std.T)
-	else:
-		cov_mat = np.cov(Data.T)
+	
+	X_std = StandardScaler().fit_transform(Data)
+	Stats = StandardScaler().fit(Data)
+	mean  = Stats.mean_
+	std   = Stats.std_
 
+	cov_mat = np.cov(X_std.T)
+	
 	U, eig_vals, eig_vecs = np.linalg.svd(cov_mat)
 
 	#############################
 	### Print top eigenvector ###
 	#############################
-	f = open(outputFile + '.out', 'w')
-	for i in eig_vecs[0]:
+	for i in xrange(numToDump):
+		f = open(outputFile + '_' + str(i) + '.out', 'w')
+		for j in eig_vecs[i]:
+			f.write(str(j) + '\n')
+
+	################################
+	### Print stats to be loaded ###
+	################################
+
+	f = open(outputFile + '_std.out', 'w')
+	for i in std:
+		f.write(str(i) + '\n')
+
+	f = open(outputFile + '_mean.out', 'w')
+	for i in mean:
 		f.write(str(i) + '\n')
