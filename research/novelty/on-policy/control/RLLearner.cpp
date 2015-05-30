@@ -34,10 +34,19 @@ RLLearner::RLLearner(ALEInterface& ale, Features *features, Parameters *param){
 	//Reading file containing the vector that describes the reward for the option learning
 	//The first X positions encode the transition 0->1 and the other X encode 1->0.
 	pathToRewardDescription = param->getOptionRewardPath();
-	std::ifstream infile(pathToRewardDescription);
+	std::ifstream infile1(pathToRewardDescription);
 	double value;
-	while(infile >> value){
+	while(infile1 >> value){
 		option.push_back(value);
+	}
+	pathToStatsDescription = param->getDataStatsPath();
+	std::ifstream infile2(pathToStatsDescription + "_mean.out");
+	while(infile2 >> value){
+		mean.push_back(value);
+	}
+	std::ifstream infile3(pathToStatsDescription + "_std.out");
+	while(infile3 >> value){
+		std.push_back(value);
 	}
 }
 
@@ -60,9 +69,13 @@ int RLLearner::epsilonGreedy(vector<double> &QValues){
  * pass aditional information to the running algorithm (like 'real score' if one
  * is using a surrogate reward function).
  */
-void RLLearner::act(ALEInterface& ale, int action, const vector<int> transitions, vector<double> &reward){
+void RLLearner::act(ALEInterface& ale, int action, vector<int>& transitions, vector<double> &reward){
 	double r_alg = 0.0, r_real = 0.0;
 	
+	for(int i = 0; i < transitions.size(); i++){
+		transitions[i] = (transitions[i] - mean[i])/std[i];
+	}
+
 	r_real = ale.act(actions[action]);
 	if(toUseOnlyRewardSign){
 		if(r_real > 0){ 

@@ -25,6 +25,7 @@ class Parameters{
 		std::string modelPath;          //path to the file containing the model learned by the logistic regression
 		std::string fileWithWeights;    //path to the file that we will write the weights after we are done learning
 		std::string pathToWeightsFiles; //path to the file that we will load the weights from
+		std::string pathToDataStatsPath;//path to the file with mean and variance of the dataset
 		double alpha;                   //learning rate
 		double gamma;                   //discount factor
 		double epsilon;                 //exploration probability
@@ -113,6 +114,8 @@ class Parameters{
  		* @param std::string path to the file that will store the learned weights.
  		*/
 		void setFileWithWeights(std::string name);
+
+		void setDataStatsPath(std::string name);
 		/**
 		* @param int wether we are going to save the learned weights at the end
 		*/
@@ -246,6 +249,8 @@ class Parameters{
  		*   This parameter is optional.
  		*/
 		std::string getFileWithWeights();
+
+		std::string getDataStatsPath();
 		/**
 		* @return whether we have to save the weights after learning or not
 		*/
