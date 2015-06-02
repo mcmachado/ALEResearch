@@ -17,7 +17,7 @@
 #include <stdio.h>
 #include <math.h>
 
-SarsaLearner::SarsaLearner(Environment& env, Parameters *param) : RLLearner<bool>(env, param) {
+SarsaLearner::SarsaLearner(Environment<bool>& env, Parameters *param) : RLLearner<bool>(env, param) {
 	delta = 0.0;
 	
 	alpha = param->getAlpha();
@@ -169,7 +169,7 @@ void SarsaLearner::loadWeights(){
 	}
 }
 
-void SarsaLearner::learnPolicy(Environment& env, Features *features){
+void SarsaLearner::learnPolicy(Environment<bool>& env, Features *features){
 	
 	struct timeval tvBegin, tvEnd, tvDiff;
 	vector<double> reward;
@@ -265,7 +265,7 @@ void SarsaLearner::learnPolicy(Environment& env, Features *features){
 	}
 }
 
-void SarsaLearner::evaluatePolicy(Environment& env, Features *features){
+void SarsaLearner::evaluatePolicy(Environment<bool>& env, Features *features){
 	double reward = 0;
 	double cumReward = 0; 
 	double prevCumReward = 0;

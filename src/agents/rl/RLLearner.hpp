@@ -41,7 +41,7 @@ class RLLearner : public Agent<FeatureType>{
  		* the reward to be used by the RL algorithm is returned; in the second position, the game score is
  		* returned.
  		*/
-		void act(Environment& env, int action, vector<double> &reward);
+    void act(Environment<FeatureType>& env, int action, vector<double> &reward);
 
 		/**
  		* Implementation of an epsilon-greedy function. Epsilon is defined in the constructor,
@@ -61,7 +61,7 @@ class RLLearner : public Agent<FeatureType>{
  		*        file and command line.
  		*
 		*/
-		RLLearner(Environment& env, Parameters *param);
+    RLLearner(Environment<FeatureType>& env, Parameters *param);
 
 	public:
 	   /**
@@ -76,7 +76,7 @@ class RLLearner : public Agent<FeatureType>{
  		* @param Features *features object that defines what feature function that will be used by the RL
  		*        agents.
  		*/
-		virtual void learnPolicy(Environment& env, Features *features) = 0;
+    virtual void learnPolicy(Environment<FeatureType>& env, Features *features) = 0;
 
 		/**
  		* Pure virtual method that needs to be implemented by any agent. Once the agent learned a
@@ -90,7 +90,7 @@ class RLLearner : public Agent<FeatureType>{
  		* @param Features *features object that defines what feature function that will be used by the RL
  		*        agents. It may be null for other approaches as in Planning.
  		*/
-		virtual void evaluatePolicy(Environment& env, Features *features) = 0;
+    virtual void evaluatePolicy(Environment<FeatureType>& env, Features *features) = 0;
 
 		/**
 		* Destructor, not necessary in this class.

@@ -12,13 +12,13 @@
 #define ENV_H
 
 #include <vector>
+
+template<typename FeatureType>
 class Environment{
 
 public:
 
     Environment() {}
-
-
 
     /**@brief This function puts back the environment in its original state
      *
@@ -58,20 +58,6 @@ public:
         return getLegalActionSet();
     }
 
-    virtual int getEpisodeFrameNumber()=0;
-
-    virtual int getNumberOfFeatures()=0;
-
-    virtual void getActiveFeaturesIndices(std::vector<int >& active_feat) = 0;
-            
-
-};
-
-template<typename FeatureComputer>
-class t_Environment : public Environment{
-public:
-    typedef typename FeatureComputer::FeatureType FeatureType;
-    t_Environment(FeatureComputer* feat) : m_feat(feat){}
     /** @brief Return all the features, as computed by the featurecomputer
      *
      * @param features a return parameter containing the features
@@ -83,8 +69,18 @@ public:
      * @param active_feat a return parameter containing the active features
      */
     virtual void getActiveFeaturesIndices(std::vector<std::pair<int,FeatureType> >& active_feat) = 0;
+    virtual void getActiveFeaturesIndices(std::vector<int>& active_feat) = 0;
 
     virtual int getNumberOfFeatures() = 0;
+
+    virtual int getEpisodeFrameNumber() = 0;
+
+};
+
+template<typename FeatureComputer>
+class t_Environment : public Environment<typename FeatureComputer::FeatureType>{
+public:
+    t_Environment(FeatureComputer* feat) : m_feat(feat) {}
 protected:
     FeatureComputer* m_feat;
 

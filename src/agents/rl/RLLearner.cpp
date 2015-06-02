@@ -1,5 +1,5 @@
 template<typename FeatureType>
-RLLearner<FeatureType>::RLLearner(Environment& env, Parameters *param){
+RLLearner<FeatureType>::RLLearner(Environment<FeatureType>& env, Parameters *param){
 	randomActionTaken   = 0;
 
 	gamma               = param->getGamma();
@@ -43,7 +43,7 @@ int RLLearner<FeatureType>::epsilonGreedy(vector<double> &QValues){
  * is using a surrogate reward function).
  */
 template<typename FeatureType>
-void RLLearner<FeatureType>::act(Environment& env, int action, vector<double> &reward){
+void RLLearner<FeatureType>::act(Environment<FeatureType>& env, int action, vector<double> &reward){
 	double r_alg = 0.0, r_real = 0.0;
 	
 	r_real = env.act(actions[action]);

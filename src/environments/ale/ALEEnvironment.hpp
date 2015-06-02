@@ -87,7 +87,7 @@ class impl_ALEEnvironment<FeatureComputer,typename std::enable_if<
                                                   >::value>::type> : public t_Environment<FeatureComputer>
 {
 public:
-     typedef typename FeatureComputer::FeatureType FeatureType;
+    typedef typename FeatureComputer::FeatureType FeatureType;
     impl_ALEEnvironment(ALEInterface* ale,FeatureComputer* feat) : t_Environment<FeatureComputer>(feat),m_ale(ale){}
 
     virtual void getActiveFeatureIndices(std::vector<std::pair<int,FeatureType>>& active_feat)

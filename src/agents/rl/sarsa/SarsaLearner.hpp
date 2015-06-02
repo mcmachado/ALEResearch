@@ -69,7 +69,7 @@ class SarsaLearner : public RLLearner<bool>{
  		*/		
 		void loadWeights();
 	public:
-		SarsaLearner(Environment& env, Parameters *param);
+    SarsaLearner(Environment<bool>& env, Parameters *param);
 		/**
  		* Implementation of an agent controller. This implementation is Sarsa(lambda).
  		*
@@ -77,7 +77,7 @@ class SarsaLearner : public RLLearner<bool>{
  		*        actions, obtain simulator's screen, RAM, etc.
  		* @param Features *features object that defines what feature function that will be used.
  		*/
-		void learnPolicy(Environment& env, Features *features);
+		void learnPolicy(Environment<bool>& env, Features *features);
 		/**
  		* After the policy was learned it is necessary to evaluate its quality. Therefore, a given number
  		* of episodes is run without learning (the vector of weights and the trace are not updated).
@@ -86,7 +86,7 @@ class SarsaLearner : public RLLearner<bool>{
  		*        actions, obtain simulator's screen, RAM, etc.
  		* @param Features *features object that defines what feature function that will be used.
  		*/
-		void evaluatePolicy(Environment& env, Features *features);
+		void evaluatePolicy(Environment<bool>& env, Features *features);
 		/**
 		* Destructor, not necessary in this class.
 		*/
