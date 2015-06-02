@@ -1,86 +1,42 @@
 # Makefile
 #
-# Author: Marlos C. Machado
+# Author: Marlos C. Machado, Nicolas Carion
+
+CXX := clang++
 
 ALE := ../../Arcade-Learning-Environment
 
 # Set this to 1 to enable SDL and display_screen
 USE_SDL     := 1
 
-# -O3 Optimize code (urns on all optimizations specified by -O2 and also turns on the -finline-functions, -funswitch-loops, -fpredictive-commoning, -fgcse-after-reload, -ftree-loop-vectorize, -ftree-slp-vectorize, -fvect-cost-model, -ftree-partial-pre and -fipa-cp-clone options).
+# -O3 Optimize code (turns on all optimizations specified by -O2 and also turns on the -finline-functions, -funswitch-loops, -fpredictive-commoning, -fgcse-after-reload, -ftree-loop-vectorize, -ftree-slp-vectorize, -fvect-cost-model, -ftree-partial-pre and -fipa-cp-clone options).
 # -D__USE_SDL Ensures we can use SDL to see the game screen
 # -D_GNU_SOURCE=1 means the compiler will use the GNU standard of compilation, the superset of all other standards under GNU C libraries.
 # -D_REENTRANT causes the compiler to use thread safe (i.e. re-entrant) versions of several functions in the C library.
-FLAGS := -O3 -I$(ALE)/src -I/opt/local/include -L$(ALE) -D_GNU_SOURCE=1 -D_REENTRANT -std=c++11 -Wno-deprecated-declarations -g
-CXX := clang++
-OUT_FILE := learner
+CFLAGS := -c -O3 -I$(ALE)/src -I/opt/local/include -D_GNU_SOURCE=1 -D_REENTRANT -std=c++11 -Wno-deprecated-declarations -Wall
+EXE := learner
 # Search for library 'ale' and library 'z' when linking.
-LDFLAGS := -lale -lz -lm
+LDFLAGS := -L$(ALE) -lale -lz -lm
 
 ifeq ($(strip $(USE_SDL)), 1)
   FLAGS +=  -D__USE_SDL `sdl-config --cflags --libs`
   LDFLAGS += -lSDL
 endif
 
-all: learner
+#This variable contains the paths in which there are files to compile (separated by a : )
+VPATH = common:features:agents/rl/sarsa:agents/rl/qlearning
 
-#learner: main.o Mathematics.o Parameters.o Timer.o Features.o Background.o BasicFeatures.o BASSFeatures.o BPROFeatures.o RAMFeatures.o SarsaLearner.o QLearner.o TRSarsaLearner.o RandomAgent.o ConstantAgent.o PerturbAgent.o HumanAgent.o
-#$(CXX) $(FLAGS) bin/main.o bin/Mathematics.o bin/Timer.o bin/Parameters.o bin/Features.o bin/Background.o bin/BasicFeatures.o bin/BASSFeatures.o bin/BPROFeatures.o bin/RAMFeatures.o bin/RLLearner.o bin/SarsaLearner.o bin/QLearner.o bin/TRSarsaLearner.o bin/RandomAgent.o bin/ConstantAgent.o bin/PerturbAgent.o bin/HumanAgent.o $(LDFLAGS) -o $(OUT_FILE) 
-learner: main.o Mathematics.o Parameters.o Timer.o Features.o Background.o BasicFeatures.o BASSFeatures.o BPROFeatures.o RAMFeatures.o SarsaLearner.o 
-	$(CXX) $(FLAGS) bin/main.o bin/Mathematics.o bin/Timer.o bin/Parameters.o bin/Features.o bin/Background.o bin/BasicFeatures.o bin/BASSFeatures.o bin/BPROFeatures.o bin/RAMFeatures.o  bin/SarsaLearner.o $(LDFLAGS) -o $(OUT_FILE) 
+SRCS = main.cpp Mathematics.cpp Parameters.cpp Timer.cpp Features.cpp Background.cpp BasicFeatures.cpp BASSFeatures.cpp BPROFeatures.cpp RAMFeatures.cpp SarsaLearner.cpp #QLearner.cpp TRSarsaLearner.cpp RandomAgent.cpp ConstantAgent.cpp PerturbAgent.cpp HumanAgent.cpp
+OBJS = $(subst .cpp,.o, $(addprefix bin/,$(SRCS)))
 
-main.o: main.cpp
-	$(CXX) $(FLAGS) -c main.cpp -o bin/main.o
+all: $(EXE)
 
-Mathematics.o: common/Mathematics.cpp
-	$(CXX) $(FLAGS) -c common/Mathematics.cpp -o bin/Mathematics.o
+$(EXE): $(OBJS)
+	$(CXX) $(LDFLAGS) $(OBJS) -o $(EXE)
 
-Timer.o: common/Timer.cpp
-	$(CXX) $(FLAGS) -c common/Timer.cpp -o bin/Timer.o
+bin/%.o: %.cpp
+	$(CC) -o $@ -c $< $(CFLAGS)
 
-Parameters.o: common/Parameters.cpp
-	$(CXX) $(FLAGS) -c common/Parameters.cpp -o bin/Parameters.o
-
-Features.o: features/Features.cpp
-	$(CXX) $(FLAGS) -c features/Features.cpp -o bin/Features.o
-
-Background.o: features/Background.cpp
-	$(CXX) $(FLAGS) -c features/Background.cpp -o bin/Background.o
-
-BasicFeatures.o: features/BasicFeatures.cpp
-	$(CXX) $(FLAGS) -c features/BasicFeatures.cpp -o bin/BasicFeatures.o
-
-BASSFeatures.o: features/BASSFeatures.cpp
-	$(CXX) $(FLAGS) -c features/BASSFeatures.cpp -o bin/BASSFeatures.o
-
-BPROFeatures.o: features/BPROFeatures.cpp
-	$(CXX) $(FLAGS) -c features/BPROFeatures.cpp -o bin/BPROFeatures.o	
-
-RAMFeatures.o: features/RAMFeatures.cpp
-	$(CXX) $(FLAGS) -c features/RAMFeatures.cpp -o bin/RAMFeatures.o	
-
-SarsaLearner.o: agents/rl/sarsa/SarsaLearner.cpp
-	$(CXX) $(FLAGS) -c agents/rl/sarsa/SarsaLearner.cpp -o bin/SarsaLearner.o
-
-QLearner.o: agents/rl/qlearning/QLearner.cpp
-	$(CXX) $(FLAGS) -c agents/rl/qlearning/QLearner.cpp -o bin/QLearner.o
-
-TRSarsaLearner.o: agents/rl/true_online_sarsa/TrueOnlineSarsaLearner.cpp
-	$(CXX) $(FLAGS) -c agents/rl/true_online_sarsa/TrueOnlineSarsaLearner.cpp -o bin/TRSarsaLearner.o	
-
-RandomAgent.o: agents/baseline/RandomAgent.cpp
-	$(CXX) $(FLAGS) -c agents/baseline/RandomAgent.cpp -o bin/RandomAgent.o	
-
-ConstantAgent.o: agents/baseline/ConstantAgent.cpp
-	$(CXX) $(FLAGS) -c agents/baseline/ConstantAgent.cpp -o bin/ConstantAgent.o	
-
-PerturbAgent.o: agents/baseline/PerturbAgent.cpp
-	$(CXX) $(FLAGS) -c agents/baseline/PerturbAgent.cpp -o bin/PerturbAgent.o		
-
-HumanAgent.o: agents/human/HumanAgent.cpp
-	$(CXX) $(FLAGS) -c agents/human/HumanAgent.cpp -o bin/HumanAgent.o		
-clean:
-	rm -rf ${OUT_FILE} bin/*.o	
 
 
 #This command needs to be executed in a osX before running the code:
