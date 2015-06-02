@@ -74,18 +74,16 @@ class SarsaLearner : public RLLearner<bool>{
  		*
  		* @param Environment& env Arcade Learning Environment interface: object used to define agents'
  		*        actions, obtain simulator's screen, RAM, etc.
- 		* @param Features *features object that defines what feature function that will be used.
  		*/
-		void learnPolicy(Environment<bool>& env, Features *features);
+		void learnPolicy(Environment<bool>& env);
 		/**
  		* After the policy was learned it is necessary to evaluate its quality. Therefore, a given number
  		* of episodes is run without learning (the vector of weights and the trace are not updated).
  		*
  		* @param Environment& env Arcade Learning Environment interface: object used to define agents'
  		*        actions, obtain simulator's screen, RAM, etc.
- 		* @param Features *features object that defines what feature function that will be used.
  		*/
-		void evaluatePolicy(Environment<bool>& env, Features *features);
+		void evaluatePolicy(Environment<bool>& env);
 		/**
 		* Destructor, not necessary in this class.
 		*/

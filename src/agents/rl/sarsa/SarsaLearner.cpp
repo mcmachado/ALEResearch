@@ -166,7 +166,7 @@ void SarsaLearner::loadWeights(){
 	}
 }
 
-void SarsaLearner::learnPolicy(Environment<bool>& env, Features *features){
+void SarsaLearner::learnPolicy(Environment<bool>& env){
 	
 	struct timeval tvBegin, tvEnd, tvDiff;
 	vector<double> reward;
@@ -262,7 +262,7 @@ void SarsaLearner::learnPolicy(Environment<bool>& env, Features *features){
 	}
 }
 
-void SarsaLearner::evaluatePolicy(Environment<bool>& env, Features *features){
+void SarsaLearner::evaluatePolicy(Environment<bool>& env){
 	double reward = 0;
 	double cumReward = 0; 
 	double prevCumReward = 0;
