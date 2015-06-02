@@ -15,6 +15,7 @@
 #include "agents/rl/sarsa/SarsaLearner.hpp"
 #include "agents/baseline/ConstantAgent.hpp"
 #include "agents/baseline/PerturbAgent.hpp"
+#include "agents/baseline/RandomAgent.hpp"
 #include "features/BasicFeatures.hpp"
 #include "environments/ale/ALEEnvironment.hpp"
 
@@ -53,7 +54,7 @@ int main(int argc, char** argv){
     ALEEnvironment<BasicFeatures> env(&ale,&features);
 
 	//Instantiating the learning algorithm:
-	PerturbAgent sarsaLearner(&param);
+	RandomAgent sarsaLearner(&param);
     //Learn a policy:
     sarsaLearner.learnPolicy(env);
 
