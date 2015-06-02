@@ -90,6 +90,8 @@ std::vector<std::string> Parameters::parseLine(std::string line){
 }
 
 void Parameters::readParameters(int argc, char* argv[]){
+    this->setToLoadWeights(0);
+    this->setToSaveWeightsAfterLearning(0);
 	int option = 0;
 	while ((option = getopt(argc, argv, "c:r:s:t:w:l:h")) != -1)
 	{
