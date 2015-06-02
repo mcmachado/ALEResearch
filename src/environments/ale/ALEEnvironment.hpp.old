@@ -16,7 +16,7 @@
 #include <vector>
 #include <ale_interface.hpp>
 #include "../../common/Traits.hpp"
-#include "../Environment.hpp"
+
 //here we do a little bit of template black magic:
 //two cases may arise either the features can be binary, or they can be general (doubles,...)
 //There are two possible interfaces for the active features: either we return only the indices of the active features, or we return the indices and the corresponding feature value.
@@ -27,16 +27,16 @@
 CREATE_MEMBER_DETECTOR(getActiveFeaturesIndices)
 
 //this the case where the features are not binary (hence have to provide the second interface)
-template < typename FeatureComputer, typename = void>
-class impl_ALEEnvironment : public t_Environment<FeatureComputer>
+template < typename FeatureComputer, typename = void, typename = void>
+class impl_ALEEnvironment : t_Environment<FeatureComputer>
 {
 public:
     typedef typename FeatureComputer::FeatureType FeatureType;
     impl_ALEEnvironment(ALEInterface* ale,FeatureComputer* feat) : t_Environment<FeatureComputer>(feat),m_ale(ale){}
 
-    virtual void getActiveFeaturesIndices(std::vector<std::pair<int,FeatureType>>& active_feat)
+    virtual void getActiveFeatureIndices(std::vector<std::pair<int,FeatureType>>& active_feat)
     {
-        this->m_feat->getActiveFeatureIndices(active_feat,m_ale);
+        m_feat->getActiveFeatureIndices(active_feat,m_ale);
     }
 
     //this function makes no sense in that case, so we just return an empty vector
@@ -44,34 +44,33 @@ public:
     {
         active_feat.clear();
     }
-
+protected:
     ALEInterface* m_ale;
 };
 
 
 //this is the case where features are boolean, but the class seemingly doesn't provide a fast interface
-template<typename FeatureComputer>
-class impl_ALEEnvironment<FeatureComputer,typename std::enable_if<std::is_same<typename FeatureComputer::FeatureType,bool>::value>::type> : public t_Environment<FeatureComputer>
+template<typename FeatureComputer, typename = void>
+class impl_ALEEnvironment<FeatureComputer,void,typename std::enable_if<std::is_same<typename FeatureComputer::FeatureType,bool>::value>::type> : t_Environment<FeatureComputer>
 {
 public:
-    typedef typename FeatureComputer::FeatureType FeatureType;
     impl_ALEEnvironment(ALEInterface* ale,FeatureComputer* feat) : t_Environment<FeatureComputer>(feat),m_ale(ale){}
 
     //in this case, we have to make up this interface, since it is not provided
-    virtual void getActiveFeaturesIndices(std::vector<std::pair<int,FeatureType>>& active_feat)
+    virtual void getActiveFeatureIndices(std::vector<std::pair<>>& active_feat)
     {
         std::vector<int> temp;
         getActiveFeaturesIndices(temp);
         active_feat = std::vector<pair<int,bool> >(temp.size());
         for(unsigned i=0;i<temp.size();i++){
-            active_feat[i] = {temp[i], true};
+            active_feat[i] = {active_feat[i], true};
         }
        
     }
 
     virtual void getActiveFeaturesIndices(std::vector<int >& active_feat)
     {
-        this->m_feat->getActiveFeaturesIndices(m_ale->getScreen(),m_ale->getRAM(),active_feat);
+        m_feat->getActiveFeaturesIndices(m_ale->getScreen(),m_ale->getRAM(),active_feat);
     }
 protected:
     ALEInterface* m_ale;
@@ -80,23 +79,20 @@ protected:
 
 //This is the last case, where the feature are boolean and an interface is provided.
 template<typename FeatureComputer>
-class impl_ALEEnvironment<FeatureComputer,typename std::enable_if<
-                                              function_traits::_implem::static_and<
-                                                  function_traits::has_getActiveFeaturesIndices<FeatureComputer,void(std::vector<std::pair<int,typename FeatureComputer::FeatureType>>&,ALEInterface*)>::value,
-                                                  std::is_same<typename FeatureComputer::FeatureType,bool>::value
-                                                  >::value>::type> : public t_Environment<FeatureComputer>
+class impl_ALEEnvironment<FeatureComputer,typename std::enable_if<function_traits::has_getActiveFeatureIndices<FeatureComputer,void(std::vector<std::pair<int,typename FeatureComputer::FeatureType>>&,ALEInterface*)>::value>::type,typename std::enable_if<std::is_same<typename FeatureComputer::FeatureType,bool>::value>::type> : t_Environment<FeatureComputer>
 {
 public:
-     typedef typename FeatureComputer::FeatureType FeatureType;
+    impl_ALEEnvironment(ALEInterface* ale,FeatureComputer* feat) : t_Environment<FeatureComputer>(feat),m_ale(ale){}
+     typename FeatureComputer::FeatureType FeatureType;
     impl_ALEEnvironment(ALEInterface* ale,FeatureComputer* feat) : t_Environment<FeatureComputer>(feat),m_ale(ale){}
 
     virtual void getActiveFeatureIndices(std::vector<std::pair<int,FeatureType>>& active_feat)
     {
-        this->m_feat->getActiveFeatureIndices(active_feat,m_ale);
+        m_feat->getActiveFeatureIndices(active_feat,m_ale);
     }
     virtual void getActiveFeaturesIndices(std::vector<int >& active_feat)
     {
-        this->m_feat->getActiveFeaturesIndices(m_ale->getScreen(),m_ale->getRAM(),active_feat);
+        m_feat->getActiveFeaturesIndices(ale.getScreen(),ale.getRAM(),active_feat);
     }
 protected:
     ALEInterface* m_ale;
@@ -107,7 +103,7 @@ template<typename FeatureComputer>
 class ALEEnvironment : public impl_ALEEnvironment<FeatureComputer>{
 
 public:
-    typedef typename FeatureComputer::FeatureType FeatureType;
+    typename FeatureComputer::FeatureType FeatureType;
     ALEEnvironment(ALEInterface* ale,FeatureComputer* feat) : impl_ALEEnvironment<FeatureComputer>(ale,feat){}
 
     
@@ -116,7 +112,7 @@ public:
      * 
      */
     virtual void reset(){
-        this->m_ale->reset_game();
+        ale->reset();
     }
     
     /** @brief This function tells whether the environment has reached a terminal state
@@ -124,7 +120,7 @@ public:
      * @return a boolean
      */
     virtual bool isTerminal(){
-        return this->m_ale->game_over();
+        return ale->game_over();
     }
     
     /** @brief This function is used to simulate one step in the environment 
@@ -134,19 +130,35 @@ public:
      * @param score a return parameter corresponding to the raw score obtained in the environment
      * @param reward a return parameter which tells the corresponding reward.
      */
-    virtual double act(Action action){
+    virtual double act(int action){
         std::vector<double> r;
-        return this->m_ale->act(action);
+        return ale->act(action);
     }
 
+    /** @brief Return all the features, as computed by the featurecomputer
+     * 
+     * @param features a return parameter containing the features
+     */
+    virtual void getFeatures(std::vector<double>& features){
+        m_feat->getFeatures(features,this);
+    }
+
+    /** @brief Return the indices of the non-zero features, allong with their values
+     * 
+     * @param active_feat a return parameter containing the active features
+     */
+    virtual void getActiveFeatures(std::vector<std::pair<unsigned,double> >& active_feat)
+    {
+        m_feat->getActiveFeatures(active_feat,this);
+    }
     
     /** @brief Return the set of actions that can be taken in this environment
      * 
      * @return a vector of integers representing the actions
      */
-    virtual std::vector<Action> getLegalActionSet()
+    virtual std::vector<int> getLegalActionSet()
     {
-        return this->m_ale->getLegalActionSet();
+        return ale->getLegalActionSet();
     }
 
     
@@ -154,25 +166,34 @@ public:
      * In some cases, some actions are legal but not usefull. This actions are not returned by this function
      * @return a vector of integers representing the actions
      */
-    virtual std::vector<Action> getMinimalActionSet()
+    virtual std::vector<int> getMinimalActionSet()
     {
-        return this->m_ale->getMinimalActionSet();
+        return ale->getMinimalActionSet();
     }
 
     virtual int getEpisodeFrameNumber()
     {
-        return this->m_ale->getEpisodeFrameNumber();
+        return ale->getEpisodeFrameNumber();
     }
 
-    virtual void getCompleteFeatureVector(std::vector<FeatureType>& features){
-        this->m_feat->getCompleteFeatureVector(this->m_ale->getScreen(),this->m_ale->getRAM(),features);
+    virtual void getFeatures(std::vector<FeatureType>& features){
+        m_feat->getFeatures(features,this);
+    }
+
+    /** @brief Return the indices of the non-zero features, allong with their values
+     *
+     * @param active_feat a return parameter containing the active features
+     */
+    virtual void getActiveFeaturesIndices(std::vector<std::pair<int,FeatureType> >& active_feat)
+    {
+        m_feat->getActiveFeatures(active_feat,this);
     }
 
 
 
     virtual int getNumberOfFeatures()
     {
-        return this->m_feat->getNumberOfFeatures();
+        m_feat->getNumberOfFeatures();
     }
 protected:
 };

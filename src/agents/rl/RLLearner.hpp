@@ -10,8 +10,12 @@
 #define AGENT_H
 #include "../Agent.hpp"
 #endif
+#include "../../environments/Environment.hpp"
+#include "../../common/Mathematics.hpp"
 
-class RLLearner : public Agent{
+
+template<typename FeatureType>
+class RLLearner : public Agent<FeatureType>{
 	protected:
 		ActionVect actions;
 
@@ -37,7 +41,7 @@ class RLLearner : public Agent{
  		* the reward to be used by the RL algorithm is returned; in the second position, the game score is
  		* returned.
  		*/
-		void act(ALEInterface& ale, int action, vector<double> &reward);
+		void act(Environment& env, int action, vector<double> &reward);
 
 		/**
  		* Implementation of an epsilon-greedy function. Epsilon is defined in the constructor,
@@ -57,7 +61,7 @@ class RLLearner : public Agent{
  		*        file and command line.
  		*
 		*/
-		RLLearner(ALEInterface& ale, Parameters *param);
+		RLLearner(Environment& env, Parameters *param);
 
 	public:
 	   /**
@@ -67,12 +71,12 @@ class RLLearner : public Agent{
  		*       Additionally, it may be important to persist what was learned, maybe with another
  		*       pure virtual method?
  		*
- 		* @param ALEInterface& ale Arcade Learning Environment interface: object used to define agents'
+ 		* @param ALEInterface& env Arcade Learning Environment interface: object used to define agents'
  		*        actions, obtain simulator's screen, RAM, etc.
  		* @param Features *features object that defines what feature function that will be used by the RL
  		*        agents.
  		*/
-		virtual void learnPolicy(ALEInterface& ale, Features *features) = 0;
+		virtual void learnPolicy(Environment& env, Features *features) = 0;
 
 		/**
  		* Pure virtual method that needs to be implemented by any agent. Once the agent learned a
@@ -81,15 +85,18 @@ class RLLearner : public Agent{
  		*
  		* TODO it may be useful to return something for the caller, as an indicator of performance. 
  		*
- 		* @param ALEInterface& ale Arcade Learning Environment interface: object used to define agents'
+ 		* @param ALEInterface& env Arcade Learning Environment interface: object used to define agents'
  		*        actions, obtain simulator screen, RAM, etc.
  		* @param Features *features object that defines what feature function that will be used by the RL
  		*        agents. It may be null for other approaches as in Planning.
  		*/
-		virtual void evaluatePolicy(ALEInterface& ale, Features *features) = 0;
+		virtual void evaluatePolicy(Environment& env, Features *features) = 0;
 
 		/**
 		* Destructor, not necessary in this class.
 		*/
 		virtual ~RLLearner(){};
 };
+
+
+#include "RLLearner.cpp"
