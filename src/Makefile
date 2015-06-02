@@ -2,7 +2,7 @@
 #
 # Author: Marlos C. Machado, Nicolas Carion
 
-CXX := clang++
+CXX := g++
 
 ALE := ../../Arcade-Learning-Environment
 
@@ -14,6 +14,7 @@ USE_SDL     := 1
 # -D_GNU_SOURCE=1 means the compiler will use the GNU standard of compilation, the superset of all other standards under GNU C libraries.
 # -D_REENTRANT causes the compiler to use thread safe (i.e. re-entrant) versions of several functions in the C library.
 CFLAGS := -c -O3 -I$(ALE)/src -I/opt/local/include -D_GNU_SOURCE=1 -D_REENTRANT -std=c++11 -Wno-deprecated-declarations -Wall
+
 EXE := learner
 # Search for library 'ale' and library 'z' when linking.
 LDFLAGS := -L$(ALE) -lale -lz -lm
@@ -37,7 +38,8 @@ $(EXE): $(OBJS)
 bin/%.o: %.cpp
 	$(CC) -o $@ -c $< $(CFLAGS)
 
-
+clean:
+	rm -rf $(OBJS)
 
 #This command needs to be executed in a osX before running the code:
 #export DYLD_LIBRARY_PATH="${DYLD_LIBRARY_PATH}:../lib/ale_0_4"
