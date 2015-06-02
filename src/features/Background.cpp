@@ -10,7 +10,7 @@
 #endif
 #include <fstream>
 #include <stdlib.h>
-
+#include <stdexcept>
 Background::Background(){}
 
 Background::Background(Parameters *param){
@@ -24,7 +24,6 @@ Background::Background(Parameters *param){
 
 	//Open background file
 	std::ifstream backgroundFile(param->getPathToBackground().c_str());
-
 	if (backgroundFile.is_open()){
 		//First read the matrix dimensions and allocate background
 		getline(backgroundFile, line);
@@ -56,7 +55,9 @@ Background::Background(Parameters *param){
 			}
 		}
 		backgroundFile.close();
-	}
+	}else{
+        throw std::runtime_error("The background file for this game could not be opened. Please check paths and permissions");
+    }
 }
 
 int Background::getPixel(int x, int y){
