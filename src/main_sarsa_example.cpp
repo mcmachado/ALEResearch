@@ -13,6 +13,7 @@
 #include "common/Parameters.hpp"
 #include "agents/rl/qlearning/QLearner.hpp"
 #include "agents/rl/sarsa/SarsaLearner.hpp"
+#include "agents/baseline/ConstantAgent.hpp"
 #include "features/BasicFeatures.hpp"
 #include "environments/ale/ALEEnvironment.hpp"
 
@@ -51,7 +52,7 @@ int main(int argc, char** argv){
     ALEEnvironment<BasicFeatures> env(&ale,&features);
 
 	//Instantiating the learning algorithm:
-	SarsaLearner sarsaLearner(env, &param);
+	ConstantAgent sarsaLearner(&param);
     //Learn a policy:
     sarsaLearner.learnPolicy(env);
 

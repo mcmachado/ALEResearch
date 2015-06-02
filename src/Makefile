@@ -25,9 +25,9 @@ ifeq ($(strip $(USE_SDL)), 1)
 endif
 
 #This variable contains the paths in which there are files to compile (separated by a : )
-VPATH = common:features:agents/rl/sarsa:agents/rl/qlearning
+VPATH = common:features:agents/rl/sarsa:agents/rl/qlearning:agents/baseline
 
-SRCS = main_sarsa_example.cpp Mathematics.cpp Parameters.cpp Timer.cpp Features.cpp Background.cpp BasicFeatures.cpp BASSFeatures.cpp BPROFeatures.cpp RAMFeatures.cpp SarsaLearner.cpp QLearner.cpp #TRSarsaLearner.cpp RandomAgent.cpp ConstantAgent.cpp PerturbAgent.cpp HumanAgent.cpp
+SRCS = main_sarsa_example.cpp Mathematics.cpp Parameters.cpp Timer.cpp Features.cpp Background.cpp BasicFeatures.cpp BASSFeatures.cpp BPROFeatures.cpp RAMFeatures.cpp SarsaLearner.cpp QLearner.cpp ConstantAgent.cpp #TRSarsaLearner.cpp RandomAgent.cpp  PerturbAgent.cpp HumanAgent.cpp
 OBJS = $(subst .cpp,.o, $(addprefix bin/,$(SRCS)))
 
 all: $(EXE)
