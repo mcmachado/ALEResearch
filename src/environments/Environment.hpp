@@ -24,13 +24,13 @@ public:
      *
      */
     virtual void reset()=0;
-
+    void reset_game(){reset();}
     /** @brief This function tells whether the environment has reached a terminal state
      *
      * @return a boolean
      */
     virtual bool isTerminal() = 0;
-
+    bool game_over(){return isTerminal();}
     /** @brief This function is used to simulate one step in the environment
      *
      *

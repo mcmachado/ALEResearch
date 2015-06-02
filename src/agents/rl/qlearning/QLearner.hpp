@@ -14,7 +14,7 @@
 #include "../RLLearner.hpp"
 #include <vector>
 
-class QLearner : public RLLearner{
+class QLearner : public RLLearner<bool>{
 	private:
 		double alpha, delta, lambda, traceThreshold;
 		int numFeatures, currentAction, nextAction;
@@ -56,26 +56,26 @@ class QLearner : public RLLearner{
  		*/
 		void updateReplTrace(int action);
 	public:
-		QLearner(ALEInterface& ale, Features *features, Parameters *param);
+    QLearner(Environment<bool>& env, Parameters *param);
 		/**
  		* Implementation of an agent controller. This implementation is Q(lambda).
  		*
  		* TODO it may be useful to return something for the caller, as the total reward or policy. 
  		*
- 		* @param ALEInterface& ale Arcade Learning Environment interface: object used to define agents'
+ 		* @param Environment& env Arcade Learning Environment interface: object used to define agents'
  		*        actions, obtain simulator's screen, RAM, etc.
  		* @param Features *features object that defines what feature function that will be used.
  		*/
-		void learnPolicy(ALEInterface& ale, Features *features);
+		void learnPolicy(Environment<bool>& env);
 		/**
  		* After the policy was learned it is necessary to evaluate its quality. Therefore, a given number
  		* of episodes is run without learning (the vector of weights and the trace are not updated).
  		*
- 		* @param ALEInterface& ale Arcade Learning Environment interface: object used to define agents'
+ 		* @param Environment& env Arcade Learning Environment interface: object used to define agents'
  		*        actions, obtain simulator's screen, RAM, etc.
  		* @param Features *features object that defines what feature function that will be used.
  		*/
-		void evaluatePolicy(ALEInterface& ale, Features *features);
+		void evaluatePolicy(Environment<bool>& env);
 		/**
 		* Destructor, not necessary in this class.
 		*/

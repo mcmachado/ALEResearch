@@ -11,7 +11,7 @@
 
 #include <ale_interface.hpp>
 #include "common/Parameters.hpp"
-#include "agents/rl/sarsa/SarsaLearner.hpp"
+#include "agents/rl/qlearning/QLearner.hpp"
 #include "features/BasicFeatures.hpp"
 #include "environments/ale/ALEEnvironment.hpp"
 
@@ -50,12 +50,12 @@ int main(int argc, char** argv){
     ALEEnvironment<BasicFeatures> env(&ale,&features);
 
 	//Instantiating the learning algorithm:
-	SarsaLearner sarsaLearner(env, &param);
+	QLearner sarsaLearner(env, &param);
     //Learn a policy:
-    sarsaLearner.learnPolicy(env, &features);
+    sarsaLearner.learnPolicy(env);
 
     printf("\n\n== Evaluation without Learning == \n\n");
-    sarsaLearner.evaluatePolicy(env, &features);
+    sarsaLearner.evaluatePolicy(env);
 	
     return 0;
 }

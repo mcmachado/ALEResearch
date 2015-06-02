@@ -27,10 +27,8 @@ class Agent{
  		*
  		* @param ALEInterface& ale Arcade Learning Environment interface: object used to define agents'
  		*        actions, obtain simulator screen, RAM, etc.
- 		* @param Features *features object that defines what feature function that will be used by the RL
- 		*        agents. It may be null for other approaches as in Planning.
  		*/
-    virtual void learnPolicy(Environment<FeatureType>& env, Features *features) = 0;
+    virtual void learnPolicy(Environment<FeatureType>& env) = 0;
 	   /**
  		* Pure virtual method that needs to be implemented by any agent. Once the agent learned a
  		* policy it executes this policy for a given number of episodes. The policy is stored in
@@ -40,10 +38,8 @@ class Agent{
  		*
  		* @param ALEInterface& ale Arcade Learning Environment interface: object used to define agents'
  		*        actions, obtain simulator screen, RAM, etc.
- 		* @param Features *features object that defines what feature function that will be used by the RL
- 		*        agents. It may be null for other approaches as in Planning.
  		*/
-    virtual void evaluatePolicy(Environment<FeatureType>& env, Features *features) = 0;
+    virtual void evaluatePolicy(Environment<FeatureType>& env) = 0;
 		/**
 		* Destructor, not necessary in this class.
 		*/
