@@ -25,7 +25,7 @@
 #define BASIC_H
 #include "features/BasicFeatures.hpp"
 #endif
-
+#include "environments/ale/ALEEnvironment.hpp"
 void printBasicInfo(Parameters param){
 	printf("Seed: %d\n", param.getSeed());
 	printf("\nCommand Line Arguments:\nPath to Config. File: %s\nPath to ROM File: %s\nPath to Backg. File: %s\n", 
@@ -58,14 +58,16 @@ int main(int argc, char** argv){
 	ale.setInt("max_num_frames_per_episode", param.getEpisodeLength());
 
 	ale.loadROM(param.getRomPath().c_str());
+    ALEEnvironment<BasicFeatures> env(&ale,&features);
 
+    //Environment<bool> e = env;
 	//Instantiating the learning algorithm:
-	SarsaLearner sarsaLearner(ale, &features, &param);
+	SarsaLearner sarsaLearner(env, &param);
     //Learn a policy:
-    sarsaLearner.learnPolicy(ale, &features);
+    sarsaLearner.learnPolicy(env, &features);
 
     printf("\n\n== Evaluation without Learning == \n\n");
-    sarsaLearner.evaluatePolicy(ale, &features);
+    sarsaLearner.evaluatePolicy(env, &features);
 	
     return 0;
 }
