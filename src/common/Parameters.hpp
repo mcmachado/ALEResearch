@@ -10,7 +10,8 @@
 **
 ** Author: Marlos C. Machado
 ***************************************************************************************/
-
+#ifndef PARAMS_H
+#define PARAMS_H
 #include <getopt.h>
 #include <string>
 #include <vector>
@@ -345,3 +346,6 @@ class Parameters{
 		*/
 		int getLearningLength();
 };
+
+
+#endif

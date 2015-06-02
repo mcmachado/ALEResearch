@@ -9,10 +9,9 @@
 ** Author: Marlos C. Machado
 ***************************************************************************************/
 
-#ifndef RLLEARNER_H
-#define RLLEARNER_H
+#ifndef SARSALEARNER_H
+#define SARSALEARNER_H
 #include "../RLLearner.hpp"
-#endif
 #include <vector>
 
 class SarsaLearner : public RLLearner<bool>{
@@ -92,3 +91,6 @@ class SarsaLearner : public RLLearner<bool>{
 		*/
 		~SarsaLearner();
 };
+
+
+#endif

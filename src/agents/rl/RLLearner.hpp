@@ -6,10 +6,9 @@
 ** Author: Marlos C. Machado
 ***************************************************************************************/
 
-#ifndef AGENT_H
-#define AGENT_H
+#ifndef RLLEARNER_H
+#define RLLEARNER_H
 #include "../Agent.hpp"
-#endif
 #include "../../environments/Environment.hpp"
 #include "../../common/Mathematics.hpp"
 
@@ -100,3 +99,4 @@ class RLLearner : public Agent<FeatureType>{
 
 
 #include "RLLearner.cpp"
+#endif

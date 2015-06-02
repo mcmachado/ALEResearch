@@ -8,10 +8,9 @@
 ** Author: Marlos C. Machado
 ***************************************************************************************/
 
-#ifndef AGENT_H
-#define AGENT_H
+#ifndef HUMANAGENT_H
+#define HUMANAGENT_H
 #include "../Agent.hpp"
-#endif
 
 class HumanAgent : public Agent{
 	private:
@@ -99,3 +98,6 @@ class HumanAgent : public Agent{
 		~HumanAgent();
 
 };
+
+
+#endif

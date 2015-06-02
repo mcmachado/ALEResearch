@@ -11,14 +11,11 @@
 ** Author: Marlos C. Machado
 ***************************************************************************************/
 
-#ifndef PARAMETERS_H
-#define PARAMETERS_H
+#ifndef BASSFEAT_H
+#define BASSFEAT_H
 #include "../common/Parameters.hpp"
-#endif
-#ifndef FEATURES_H
-#define FEATURES_H
 #include "Features.hpp"
-#endif
+
 
 class BASSFeatures : public Features::Features{
 	private:
@@ -83,3 +80,6 @@ class BASSFeatures : public Features::Features{
  		*/
 		int getNumberOfFeatures();
 };
+
+
+#endif

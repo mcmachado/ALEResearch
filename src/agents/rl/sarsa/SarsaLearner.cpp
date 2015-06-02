@@ -9,10 +9,7 @@
 ** Author: Marlos C. Machado
 ***************************************************************************************/
 
-#ifndef TIMER_H
-#define TIMER_H
 #include "../../../common/Timer.hpp"
-#endif
 #include "SarsaLearner.hpp"
 #include <stdio.h>
 #include <math.h>

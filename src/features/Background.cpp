@@ -4,10 +4,7 @@
 ** Author: Marlos C. Machado
 ***************************************************************************************/
 
-#ifndef BACKGROUND_H
-#define BACKGROUND_H
 #include "Background.hpp"
-#endif
 #include <fstream>
 #include <stdlib.h>
 #include <stdexcept>

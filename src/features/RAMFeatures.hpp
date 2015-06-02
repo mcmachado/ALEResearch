@@ -9,10 +9,9 @@
 ** Author: Marlos C. Machado
 ***************************************************************************************/
 
-#ifndef FEATURES_H
-#define FEATURES_H
+#ifndef RAMFEATURES_H
+#define RAMFEATURES_H
 #include "Features.hpp"
-#endif
 
 class RAMFeatures : public Features::Features{
 	private:
@@ -52,3 +51,6 @@ class RAMFeatures : public Features::Features{
 		*/
 		~RAMFeatures();
 };
+
+
+#endif

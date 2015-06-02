@@ -9,23 +9,12 @@
 ** Author: Marlos C. Machado
 ***************************************************************************************/
 
-#ifndef ALE_INTERFACE_H
-#define ALE_INTERFACE_H
 #include <ale_interface.hpp>
-#endif
-#ifndef PARAMETERS_H
-#define PARAMETERS_H
 #include "common/Parameters.hpp"
-#endif
-#ifndef SARSA_H
-#define SARSA_H
 #include "agents/rl/sarsa/SarsaLearner.hpp"
-#endif
-#ifndef BASIC_H
-#define BASIC_H
 #include "features/BasicFeatures.hpp"
-#endif
 #include "environments/ale/ALEEnvironment.hpp"
+
 void printBasicInfo(Parameters param){
 	printf("Seed: %d\n", param.getSeed());
 	printf("\nCommand Line Arguments:\nPath to Config. File: %s\nPath to ROM File: %s\nPath to Backg. File: %s\n", 
@@ -60,7 +49,6 @@ int main(int argc, char** argv){
 	ale.loadROM(param.getRomPath().c_str());
     ALEEnvironment<BasicFeatures> env(&ale,&features);
 
-    //Environment<bool> e = env;
 	//Instantiating the learning algorithm:
 	SarsaLearner sarsaLearner(env, &param);
     //Learn a policy:

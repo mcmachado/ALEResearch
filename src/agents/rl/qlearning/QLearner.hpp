@@ -9,10 +9,9 @@
 ** Author: Marlos C. Machado
 ***************************************************************************************/
 
-#ifndef RLLEARNER_H
-#define RLLEARNER_H
+#ifndef QLEARNER_H
+#define QLEARNER_H
 #include "../RLLearner.hpp"
-#endif
 #include <vector>
 
 class QLearner : public RLLearner{
@@ -82,3 +81,6 @@ class QLearner : public RLLearner{
 		*/
 		~QLearner();
 };
+
+
+#endif
