@@ -34,17 +34,17 @@ RLLearner::RLLearner(ALEInterface& ale, Features *features, Parameters *param){
 	//Reading file containing the vector that describes the reward for the option learning
 	//The first X positions encode the transition 0->1 and the other X encode 1->0.
 	pathToRewardDescription = param->getOptionRewardPath();
-	std::ifstream infile1(pathToRewardDescription);
+	std::ifstream infile1(pathToRewardDescription.c_str());
 	double value;
 	while(infile1 >> value){
 		option.push_back(value);
 	}
 	pathToStatsDescription = param->getDataStatsPath();
-	std::ifstream infile2(pathToStatsDescription + "_mean.out");
+	std::ifstream infile2((pathToStatsDescription + "_mean.out").c_str());
 	while(infile2 >> value){
 		mean.push_back(value);
 	}
-	std::ifstream infile3(pathToStatsDescription + "_std.out");
+	std::ifstream infile3((pathToStatsDescription + "_std.out").c_str());
 	while(infile3 >> value){
 		std.push_back(value);
 	}
