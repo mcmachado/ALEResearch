@@ -26,12 +26,12 @@ SarsaLearner::SarsaLearner(Environment<bool>& env, Parameters *param) : RLLearne
 	pathWeightsFileToLoad = param->getPathToWeightsFiles();
 
     e.resize(numActions);
+    w.resize(numActions);
 	for(int i = 0; i < numActions; i++){
 		//Initialize Q;
 		Q.push_back(0);
 		Qnext.push_back(0);
 		//Initialize e:
-		w.push_back(vector<double>(numFeatures, 0.0));
 	}
 
 	if(toSaveWeightsAfterLearning){
@@ -51,7 +51,8 @@ void SarsaLearner::updateQValues(vector<int> &Features, vector<double> &QValues)
 	for(int a = 0; a < numActions; a++){
 		double sumW = 0;
 		for(unsigned int i = 0; i < Features.size(); i++){
-			sumW += w[a][Features[i]];
+            if(w[a].count(Features[i]) != 0)
+                sumW += w[a][Features[i]];
 		}
 		QValues[a] = sumW;
 	}
@@ -122,13 +123,11 @@ void SarsaLearner::sanityCheck(){
 void SarsaLearner::saveWeightsToFile(string suffix){
 	std::ofstream weightsFile ((nameWeightsFile + suffix).c_str());
 	if(weightsFile.is_open()){
-		weightsFile << w.size() << " " << w[0].size() << std::endl;
+		weightsFile << w.size() << " " << numFeatures << std::endl;
 		for(unsigned int i = 0; i < w.size(); i++){
-			for(unsigned int j = 0; j < w[i].size(); j++){
-				if(w[i][j] != 0){
-					weightsFile << i << " " << j << " " << w[i][j] << std::endl;
-				}
-			}
+            for(const auto& weight : w[i]){
+                weightsFile << i << " " << weight.first << " " << weight.second << std::endl;                
+            }
 		}
 		weightsFile.close();
 	}
@@ -216,7 +215,14 @@ void SarsaLearner::learnPolicy(Environment<bool>& env){
 			for(unsigned int a = 0; a < e.size(); a++){
                 for(const auto& trace : e[a]){
                     int idx = trace.first;
+                    if(w[a].count(idx) == 0){
+                        w[a][idx] = 0;
+                    }
 					w[a][idx] = w[a][idx] + (alpha/maxFeatVectorNorm) * delta * trace.second;
+                    //if the weight is too small, we discard it.
+                    if(w[a][idx]<1e-18){
+                        w[a].erase(idx);
+                    }
 				}
 			}
 			F = Fnext;
