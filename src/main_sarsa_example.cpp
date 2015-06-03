@@ -18,7 +18,7 @@
 #include "agents/baseline/PerturbAgent.hpp"
 #include "agents/baseline/RandomAgent.hpp"
 #include "agents/human/HumanAgent.hpp"
-#include "features/BasicFeatures.hpp"
+#include "features/BPROFeatures.hpp"
 #include "environments/ale/ALEEnvironment.hpp"
 
 void printBasicInfo(Parameters param){
@@ -41,7 +41,7 @@ int main(int argc, char** argv){
 	srand(param.getSeed());
 	
 	//Using Basic features:
-	BasicFeatures features(&param);
+	BPROFeatures features(&param);
 	//Reporting parameters read:
 	printBasicInfo(param);
 	
@@ -53,7 +53,7 @@ int main(int argc, char** argv){
 	ale.setInt("max_num_frames_per_episode", param.getEpisodeLength());
 
 	ale.loadROM(param.getRomPath().c_str());
-    ALEEnvironment<BasicFeatures> env(&ale,&features);
+    ALEEnvironment<BPROFeatures> env(&ale,&features);
 
 	//Instantiating the learning algorithm:
 	TrueOnlineSarsaLearner<bool> sarsaLearner(env,&param);

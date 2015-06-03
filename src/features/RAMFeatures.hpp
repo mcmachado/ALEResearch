@@ -16,6 +16,7 @@
 class RAMFeatures : public Features::Features{
 	private:
 	public:
+    typedef bool FeatureType;
 		/**
  		* Constructor. 
  		*

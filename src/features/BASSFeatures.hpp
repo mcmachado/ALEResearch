@@ -35,7 +35,8 @@ class BASSFeatures : public Features::Features{
 		void addPairwiseFeatures(vector<int>& features, int offset);
 
 	public:
-		/**
+    typedef bool FeatureType;
+    /**
 		* Destructor, not necessary in this class.
 		*/
 		~BASSFeatures();

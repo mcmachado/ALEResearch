@@ -77,7 +77,6 @@ void SarsaLearner::updateReplTrace(int action, vector<int> &Features){
 		}
 		nonZeroElig[a].resize(numNonZero);
 	}
-
 	//For all i in Fa:
 	for(unsigned int i = 0; i < F.size(); i++){
 		int idx = Features[i];

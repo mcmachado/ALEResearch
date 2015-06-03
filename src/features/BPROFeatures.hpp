@@ -28,6 +28,7 @@ class BPROFeatures : public Features::Features{
 		void addRelativeFeaturesIndices(const ALEScreen &screen, int featureIndex,
 									vector<vector<vector<int> > > &whichColors, vector<int>& features);
 	public:
+    typedef bool FeatureType;
 		/**
 		* Destructor, used to delete the background, which is allocated dynamically.
 		*/
