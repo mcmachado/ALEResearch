@@ -13,6 +13,7 @@
 #include "common/Parameters.hpp"
 #include "agents/rl/qlearning/QLearner.hpp"
 #include "agents/rl/sarsa/SarsaLearner.hpp"
+#include "agents/rl/true_online_sarsa/TrueOnlineSarsaLearner.hpp"
 #include "agents/baseline/ConstantAgent.hpp"
 #include "agents/baseline/PerturbAgent.hpp"
 #include "agents/baseline/RandomAgent.hpp"
@@ -55,7 +56,7 @@ int main(int argc, char** argv){
     ALEEnvironment<BasicFeatures> env(&ale,&features);
 
 	//Instantiating the learning algorithm:
-	SarsaLearner sarsaLearner(env,&param);
+	TrueOnlineSarsaLearner<bool> sarsaLearner(env,&param);
     //Learn a policy:
     sarsaLearner.learnPolicy(env);
 
