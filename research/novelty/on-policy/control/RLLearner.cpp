@@ -75,7 +75,6 @@ void RLLearner::act(ALEInterface& ale, int action, vector<int>& transitions, vec
 	for(int i = 0; i < transitions.size(); i++){
 		transitions[i] = (transitions[i] - mean[i])/std[i];
 	}
-
 	r_real = ale.act(actions[action]);
 	if(toUseOnlyRewardSign){
 		if(r_real > 0){ 
@@ -86,29 +85,13 @@ void RLLearner::act(ALEInterface& ale, int action, vector<int>& transitions, vec
 		}
 	} else{
 		for(int i = 0; i < transitions.size(); i++){
-			r_alg += option[transitions[i]];
+			//printf("%d: %d %d\n", i, option.size(), transitions.size());
+			//printf("%f %f\n", option[i], transitions[i]);
+			r_alg += option[i] * transitions[i];
 		}
-		/*
-		if(r_alg != 0.0){
-			if(!sawFirstReward){
-				firstReward = std::abs(r_real);
-				sawFirstReward = 1;
-			}
+		if(toBeOptimistic){
+			r_alg = gamma - 1.0;
 		}
-		if(sawFirstReward){
-			if(toBeOptimistic){
-				r_alg = (r_alg - firstReward)/firstReward + gamma;
-			}
-			else{
-				r_alg = r_alg/firstReward;	
-			}
-		}
-		else{
-		*/
-			if(toBeOptimistic){
-				r_alg = gamma - 1.0;
-			}
-		/*}*/
 	}
 	reward[0] = r_alg;
 	reward[1] = r_real;
