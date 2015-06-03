@@ -21,22 +21,27 @@ public:
     Environment() {}
 
     /**@brief This function puts back the environment in its original state
-     *
      */
     virtual void reset()=0;
+    /**@brief Same as reset ; provided for compatibility 
+     */
     void reset_game(){reset();}
+    
     /** @brief This function tells whether the environment has reached a terminal state
-     *
      * @return a boolean
      */
     virtual bool isTerminal() = 0;
+    
+    /**@brief Same as isTerminal, provided for compatibility 
+     * @return a boolean
+     */
     bool game_over(){return isTerminal();}
+    
     /** @brief This function is used to simulate one step in the environment
      *
      *
      * @param action an integer describing the action taken by the agent
-     * @param score a return parameter corresponding to the raw score obtained in the environment
-     * @param reward a return parameter which tells the corresponding reward.
+     * @return the reward obtained by triggering the action
      */
     virtual double act(Action action) = 0;
 
@@ -69,10 +74,21 @@ public:
      * @param active_feat a return parameter containing the active features
      */
     virtual void getActiveFeaturesIndices(std::vector<std::pair<int,FeatureType> >& active_feat) = 0;
+
+    /** @brief Return the indices of the non-zero features (usefull only if the features are boolean)
+     *
+     * @param active_feat a return parameter containing the active features
+     */    
     virtual void getActiveFeaturesIndices(std::vector<int>& active_feat) = 0;
 
+    /** 
+     * @return an integer representing the number of unique features 
+     */
     virtual int getNumberOfFeatures() = 0;
-
+    
+    /**      
+     * @return the number of the current frame in the episode
+     */
     virtual int getEpisodeFrameNumber() = 0;
 
 };

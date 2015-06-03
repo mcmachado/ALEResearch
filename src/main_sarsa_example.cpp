@@ -55,7 +55,7 @@ int main(int argc, char** argv){
     ALEEnvironment<BasicFeatures> env(&ale,&features);
 
 	//Instantiating the learning algorithm:
-	HumanAgent sarsaLearner(&param);
+	SarsaLearner sarsaLearner(env,&param);
     //Learn a policy:
     sarsaLearner.learnPolicy(env);
 
