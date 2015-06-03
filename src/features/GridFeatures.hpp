@@ -43,7 +43,6 @@ public:
     }
 };
 
-<<<<<<< HEAD
 class VisualGridFeatures
 {
 public:
@@ -77,8 +76,6 @@ public:
     }
 
 };
-=======
->>>>>>> first working grid example
 
 
 #endif
