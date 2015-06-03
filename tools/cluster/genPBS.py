@@ -69,7 +69,7 @@ for s in xrange(args.num_seeds):
 
 	f.write('cd $PBS_O_WORKDIR\n\n')
 
-	f.write('./learner -c ' + str(args.config_file) + ' -r ' + str(args.rom_file) + ' -s ' + str(s))
+	f.write('./learner -c ' + str(args.config_file) + ' -r ' + str(args.rom_file) + ' -s ' + str(s + 1))
 
 	if args.weights_save != None:
 		f.write(' -w ' + str(args.weights_save))
