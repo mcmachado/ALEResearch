@@ -13,6 +13,7 @@
 #define SARSALEARNER_H
 #include "../RLLearner.hpp"
 #include <vector>
+#include <unordered_map>
 
 class SarsaLearner : public RLLearner<bool>{
 	private:
@@ -26,7 +27,7 @@ class SarsaLearner : public RLLearner<bool>{
 		vector<int> Fnext;              //Set of features active in next state
 		vector<double> Q;               //Q(a) entries
 		vector<double> Qnext;           //Q(a) entries for next action
-		vector<vector<double> > e;      //Eligibility trace
+        vector<unordered_map<int,double> > e;      //Eligibility trace
 		vector<vector<double> > w;      //Theta, weights vector
 		vector<vector<int> >nonZeroElig;//To optimize the implementation
 

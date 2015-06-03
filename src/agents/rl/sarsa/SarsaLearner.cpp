@@ -24,13 +24,13 @@ SarsaLearner::SarsaLearner(Environment<bool>& env, Parameters *param) : RLLearne
 	toSaveWeightsAfterLearning = param->getToSaveWeightsAfterLearning();
 	saveWeightsEveryXSteps = param->getFrequencySavingWeights();
 	pathWeightsFileToLoad = param->getPathToWeightsFiles();
-	
+
+    e.resize(numActions);
 	for(int i = 0; i < numActions; i++){
 		//Initialize Q;
 		Q.push_back(0);
 		Qnext.push_back(0);
 		//Initialize e:
-		e.push_back(vector<double>(numFeatures, 0.0));
 		w.push_back(vector<double>(numFeatures, 0.0));
 		nonZeroElig.push_back(vector<int>());
 	}
@@ -92,31 +92,26 @@ void SarsaLearner::updateReplTrace(int action, vector<int> &Features){
 void SarsaLearner::updateAcumTrace(int action, vector<int> &Features){
 	//e <- gamma * lambda * e
 	for(unsigned int a = 0; a < nonZeroElig.size(); a++){
-		int numNonZero = 0;
-	 	for(unsigned int i = 0; i < nonZeroElig[a].size(); i++){
-	 		int idx = nonZeroElig[a][i];
-	 		//To keep the trace sparse, if it is
-	 		//less than a threshold it is zero-ed.
-			e[a][idx] = gamma * lambda * e[a][idx];
-			if(e[a][idx] < traceThreshold){
-				e[a][idx] = 0;
-			}
-			else{
-				nonZeroElig[a][numNonZero] = idx;
-		  		numNonZero++;
-			}
+        for (auto it = e[a].begin(); it != e[a].end() /* not hoisted */; /* no increment */)
+        {
+            //here it is an iterator on the map. it.first hold the index of the value, and it.second, the value itself
+            (*it).second = gamma * lambda * (*it).second;
+            if ((*it).second < traceThreshold)
+            {
+                e[a].erase(it++);
+            }else{
+                ++it;
+            }
 		}
-		nonZeroElig[a].resize(numNonZero);
 	}
 
 	//For all i in Fa:
 	for(unsigned int i = 0; i < F.size(); i++){
 		int idx = Features[i];
-		//If the trace is zero it is not in the vector
-		//of non-zeros, thus it needs to be added
-		if(e[action][idx] == 0){
-	       nonZeroElig[action].push_back(idx);
-	    }
+        //if the element doesn't exist, we create it
+        if(e[action].count(idx) == 0){
+            e[action][idx] = 0;
+        }
 		e[action][idx] += 1;
 	}
 }
@@ -179,12 +174,8 @@ void SarsaLearner::learnPolicy(Environment<bool>& env){
 	//This is going to be interrupted by the ALE code since I set max_num_frames beforehand
 	for(episode = 0; totalNumberFrames < totalNumberOfFramesToLearn; episode++){ 
 		//We have to clean the traces every episode:
-		for(unsigned int a = 0; a < nonZeroElig.size(); a++){
-			for(unsigned int i = 0; i < nonZeroElig[a].size(); i++){
-				int idx = nonZeroElig[a][i];
-				e[a][idx] = 0.0;
-			}
-			nonZeroElig[a].clear();
+		for(unsigned int a = 0; a < e.size(); a++){
+            e[a].clear();
 		}
 		F.clear();
 
@@ -228,10 +219,10 @@ void SarsaLearner::learnPolicy(Environment<bool>& env){
 
 			updateReplTrace(currentAction, F);
 			//Update weights vector:
-			for(unsigned int a = 0; a < nonZeroElig.size(); a++){
-				for(unsigned int i = 0; i < nonZeroElig[a].size(); i++){
-					int idx = nonZeroElig[a][i];
-					w[a][idx] = w[a][idx] + (alpha/maxFeatVectorNorm) * delta * e[a][idx];
+			for(unsigned int a = 0; a < e.size(); a++){
+                for(const auto& trace : e[a]){
+                    int idx = trace.first;
+					w[a][idx] = w[a][idx] + (alpha/maxFeatVectorNorm) * delta * trace.second;
 				}
 			}
 			F = Fnext;
