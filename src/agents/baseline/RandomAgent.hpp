@@ -8,12 +8,11 @@
 ** Author: Marlos C. Machado
 ***************************************************************************************/
 
-#ifndef AGENT_H
-#define AGENT_H
+#ifndef RANDAGENT_H
+#define RANDAGENT_H
 #include "../Agent.hpp"
-#endif
 
-class RandomAgent : public Agent{
+class RandomAgent : public Agent<bool>{
 	private:
 		int maxStepsInEpisode;
 		int numEpisodesToEval;
@@ -32,23 +31,22 @@ class RandomAgent : public Agent{
 		/**
  		* This method is useless for this agent. To act randomly no learning is required.
  		*
- 		* @param ALEInterface& ale Arcade Learning Environment interface: object used to define agents'
+ 		* @param Environment<bool>& env Arcade Learning Environment interface: object used to define agents'
  		*        actions, obtain simulator screen, RAM, etc.
- 		* @param Features *features object that defines what feature function that will be used by the RL
- 		*        agents. Since no features are relevant here this parameter is set to null by default.
  		*/
-		void learnPolicy(ALEInterface& ale, Features *features = NULL);
+        void learnPolicy(Environment<bool>& env);
 		/**
  		* Implementation of an agent that selects actions randomly.
  		*
- 		* @param ALEInterface& ale Arcade Learning Environment interface: object used to define agents'
+ 		* @param Environment<bool>& env Arcade Learning Environment interface: object used to define agents'
  		*        actions, obtain simulator screen, RAM, etc.
- 		* @param Features *features object that defines what feature function that will be used by the RL
- 		*        agents. Since no features are relevant here this parameter is set to null by default.
  		*/
-		void evaluatePolicy(ALEInterface& ale, Features *features = NULL);
+		void evaluatePolicy(Environment<bool>& env);
 		/**
 		* Destructor, not necessary in this class.
 		*/
 		~RandomAgent();
 };
+
+
+#endif

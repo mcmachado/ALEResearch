@@ -8,14 +8,11 @@
 ** Author: Marlos C. Machado
 ***************************************************************************************/
 
-#ifndef FEATURES_H
-#define FEATURES_H
+#ifndef BPROFEATURES_H
+#define BPROFEATURES_H
 #include "Features.hpp"
-#endif
-#ifndef BACKGROUND_H
-#define BACKGROUND_H
 #include "Background.hpp"
-#endif
+
 
 class BPROFeatures : public Features::Features{
 	private:
@@ -73,3 +70,6 @@ class BPROFeatures : public Features::Features{
  		*/
 		int getNumberOfFeatures();
 };
+
+
+#endif

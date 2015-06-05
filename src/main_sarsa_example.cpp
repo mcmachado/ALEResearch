@@ -9,22 +9,16 @@
 ** Author: Marlos C. Machado
 ***************************************************************************************/
 
-#ifndef ALE_INTERFACE_H
-#define ALE_INTERFACE_H
 #include <ale_interface.hpp>
-#endif
-#ifndef PARAMETERS_H
-#define PARAMETERS_H
 #include "common/Parameters.hpp"
-#endif
-#ifndef SARSA_H
-#define SARSA_H
+#include "agents/rl/qlearning/QLearner.hpp"
 #include "agents/rl/sarsa/SarsaLearner.hpp"
-#endif
-#ifndef BASIC_H
-#define BASIC_H
+#include "agents/baseline/ConstantAgent.hpp"
+#include "agents/baseline/PerturbAgent.hpp"
+#include "agents/baseline/RandomAgent.hpp"
+#include "agents/human/HumanAgent.hpp"
 #include "features/BasicFeatures.hpp"
-#endif
+#include "environments/ale/ALEEnvironment.hpp"
 
 void printBasicInfo(Parameters param){
 	printf("Seed: %d\n", param.getSeed());
@@ -58,14 +52,15 @@ int main(int argc, char** argv){
 	ale.setInt("max_num_frames_per_episode", param.getEpisodeLength());
 
 	ale.loadROM(param.getRomPath().c_str());
+    ALEEnvironment<BasicFeatures> env(&ale,&features);
 
 	//Instantiating the learning algorithm:
-	SarsaLearner sarsaLearner(ale, &features, &param);
+	SarsaLearner sarsaLearner(env,&param);
     //Learn a policy:
-    sarsaLearner.learnPolicy(ale, &features);
+    sarsaLearner.learnPolicy(env);
 
     printf("\n\n== Evaluation without Learning == \n\n");
-    sarsaLearner.evaluatePolicy(ale, &features);
+    sarsaLearner.evaluatePolicy(env);
 	
     return 0;
 }

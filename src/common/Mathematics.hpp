@@ -5,7 +5,8 @@
 ** 
 ** Author: Marlos C. Machado
 ***************************************************************************************/
-
+#ifndef MATH_HH
+#define MATH_HH
 #include <vector>
 #include <math.h>
 
@@ -24,3 +25,6 @@ class Mathematics{
  		*/
 		static int argmax(std::vector<double> array);
 };
+
+
+#endif

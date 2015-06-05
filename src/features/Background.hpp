@@ -6,10 +6,9 @@
 ** Author: Marlos C. Machado
 ***************************************************************************************/
 
-#ifndef PARAMETERS_H
-#define PARAMETERS_H
+#ifndef BACKGROUND_H
+#define BACKGROUND_H
 #include "../common/Parameters.hpp"
-#endif
 
 class Background{
 	private:
@@ -53,3 +52,6 @@ class Background{
 		*/
 		int getHeight();
 };
+
+
+#endif

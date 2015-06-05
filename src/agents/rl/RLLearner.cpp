@@ -1,14 +1,5 @@
-#ifndef MATHEMATICS_H
-#define MATHEMATICS_H
-#include "../../common/Mathematics.hpp"
-#endif
-
-#ifndef RL_LEARNER_H
-#define RL_LEARNER_H
-#include "RLLearner.hpp"
-#endif
-
-RLLearner::RLLearner(ALEInterface& ale, Parameters *param){
+template<typename FeatureType>
+RLLearner<FeatureType>::RLLearner(Environment<FeatureType>& env, Parameters *param){
 	randomActionTaken   = 0;
 
 	gamma               = param->getGamma();
@@ -22,15 +13,17 @@ RLLearner::RLLearner(ALEInterface& ale, Parameters *param){
 
 	//Get the number of effective actions:
 	if(param->isMinimalAction()){
-		actions = ale.getMinimalActionSet();
+		actions = env.getMinimalActionSet();
 	}
 	else{
-		actions = ale.getLegalActionSet();
+		actions = env.getLegalActionSet();
 	}
 	numActions = actions.size();
 }
 
-int RLLearner::epsilonGreedy(vector<double> &QValues){
+
+template<typename FeatureType>
+int RLLearner<FeatureType>::epsilonGreedy(vector<double> &QValues){
 	randomActionTaken = 0;
 
 	int action = Mathematics::argmax(QValues);
@@ -49,10 +42,11 @@ int RLLearner::epsilonGreedy(vector<double> &QValues){
  * pass aditional information to the running algorithm (like 'real score' if one
  * is using a surrogate reward function).
  */
-void RLLearner::act(ALEInterface& ale, int action, vector<double> &reward){
+template<typename FeatureType>
+void RLLearner<FeatureType>::act(Environment<FeatureType>& env, int action, vector<double> &reward){
 	double r_alg = 0.0, r_real = 0.0;
 	
-	r_real = ale.act(actions[action]);
+	r_real = env.act(actions[action]);
 	if(toUseOnlyRewardSign){
 		if(r_real > 0){ 
 			r_alg = 1.0;
@@ -89,8 +83,8 @@ void RLLearner::act(ALEInterface& ale, int action, vector<double> &reward){
 	//to "die" soon to avoid -1 as reward at each step, when
 	//the agent dies we give him -1 for each time step remaining,
 	//this would be the worst case ever...
-	if(ale.game_over() && toBeOptimistic){
-		int missedSteps = episodeLength - ale.getEpisodeFrameNumber() + 1;
+	if(env.isTerminal() && toBeOptimistic){
+		int missedSteps = episodeLength - env.getEpisodeFrameNumber() + 1;
 		double penalty = pow(gamma, missedSteps) - 1;
 		reward[0] -= penalty;
 	}

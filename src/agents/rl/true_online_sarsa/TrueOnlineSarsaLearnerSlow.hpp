@@ -9,10 +9,9 @@
 ** Author: Marlos C. Machado
 ***************************************************************************************/
 
-#ifndef RLLEARNER_H
-#define RLLEARNER_H
+#ifndef STOSARSALEARNER_H
+#define STOSARSALEARNER_H
 #include "../RLLearner.hpp"
-#endif
 #include <vector>
 
 class TrueOnlineSarsaLearner : public RLLearner{
@@ -74,3 +73,6 @@ class TrueOnlineSarsaLearner : public RLLearner{
 		*/
 		~TrueOnlineSarsaLearner();
 };
+
+
+#endif

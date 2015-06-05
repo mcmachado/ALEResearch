@@ -9,12 +9,11 @@
 ** Author: Marlos C. Machado
 ***************************************************************************************/
 
-#ifndef AGENT_H
-#define AGENT_H
+#ifndef PERTURBAGENT_H
+#define PERTURBAGENT_H
 #include "../Agent.hpp"
-#endif
 
-class PerturbAgent : public Agent{
+class PerturbAgent : public Agent<bool>{
 	private:
 		int bestAction;
 		int maxStepsInEpisode;
@@ -38,24 +37,21 @@ class PerturbAgent : public Agent{
  		* therefore each action is tried for one complete episode and the action with maximum
  		* return is returned.
  		*
- 		* @param ALEInterface& ale Arcade Learning Environment interface: object used to define agents'
+ 		* @param Environment<bool>& env Arcade Learning Environment interface: object used to define agents'
  		*        actions, obtain simulator screen, RAM, etc.
- 		* @param Features *features object that defines what feature function that will be used by the RL
- 		*        agents. Since no features are relevant here this parameter is set to null by default.
  		*/
-		void learnPolicy(ALEInterface& ale, Features *features = NULL);
+		void learnPolicy(Environment<bool>& env);
 		/**
  		* Implementation of an agent that selects the action that obtains a higher return 1 - epsilon 
  		* percent of the time and epsilon percent of the time acts randomly.
  		*
- 		* @param ALEInterface& ale Arcade Learning Environment interface: object used to define agents'
+ 		* @param Environment<bool>& env Arcade Learning Environment interface: object used to define agents'
  		*        actions, obtain simulator screen, RAM, etc.
- 		* @param Features *features object that defines what feature function that will be used by the RL
- 		*        agents. Since no features are relevant here this parameter is set to null by default.
  		*/
-		void evaluatePolicy(ALEInterface& ale, Features *features = NULL);
+		void evaluatePolicy(Environment<bool>& env);
 		/**
 		* Destructor, not necessary in this class.
 		*/
 		~PerturbAgent();
 };
+#endif

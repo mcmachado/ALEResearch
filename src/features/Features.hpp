@@ -11,10 +11,9 @@
 ** Author: Marlos C. Machado
 ***************************************************************************************/
 
-#ifndef ALE_INTERFACE_H
-#define ALE_INTERFACE_H
+#ifndef FEATURES_H
+#define FEATURES_H
 #include <ale_interface.hpp>
-#endif
 
 class Features{
 	private:
@@ -77,3 +76,7 @@ class Features{
 		*/
 		virtual ~Features();
 };
+
+
+
+#endif

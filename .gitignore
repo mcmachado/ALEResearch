@@ -11,3 +11,4 @@ tools/replay/replay
 src/bin/
 src/learner
 src/main.cpp
+*~

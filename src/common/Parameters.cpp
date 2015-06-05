@@ -90,6 +90,8 @@ std::vector<std::string> Parameters::parseLine(std::string line){
 }
 
 void Parameters::readParameters(int argc, char* argv[]){
+    this->setToLoadWeights(0);
+    this->setToSaveWeightsAfterLearning(0);
 	int option = 0;
 	this->setToLoadWeights(0);
 	this->setToSaveWeightsAfterLearning(0);

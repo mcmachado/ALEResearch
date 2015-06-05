@@ -9,32 +9,26 @@
 ** Author: Marlos C. Machado
 ***************************************************************************************/
 
-#ifndef MATHEMATICS_H
-#define MATHEMATICS_H
 #include "../../../common/Mathematics.hpp"
-#endif
-#ifndef TIMER_H
-#define TIMER_H
 #include "../../../common/Timer.hpp"
-#endif
 #include "QLearner.hpp"
 #include <stdio.h>
 #include <math.h>
 
-QLearner::QLearner(ALEInterface& ale, Features *features, Parameters *param) : RLLearner(ale, param) {
+QLearner::QLearner(Environment<bool>& env, Parameters *param) : RLLearner<bool>(env, param) {
 	delta = 0.0;
 	traceThreshold = param->getTraceThreshold();
 	alpha = param->getAlpha();
 	lambda = param->getLambda();
 	
-	numFeatures = features->getNumberOfFeatures();
+	numFeatures = env.getNumberOfFeatures();
 	
 	//Get the number of effective actions:
 	if(param->isMinimalAction()){
-		actions = ale.getMinimalActionSet();
+		actions = env.getMinimalActionSet();
 	}
 	else{
-		actions = ale.getLegalActionSet();
+		actions = env.getLegalActionSet();
 	}
 	numActions = actions.size();
 	for(int i = 0; i < numActions; i++){
@@ -72,7 +66,7 @@ void QLearner::updateReplTrace(int action){
 	}
 }
 
-void QLearner::updateQValues(vector<int> &Features, vector<double> &QValues){
+void QLearner::updateQValues(vector<int> &Features,vector<double> &QValues){
 	for(int a = 0; a < numActions; a++){
 		double sumW = 0;
 		for(unsigned int i = 0; i < Features.size(); i++){
@@ -91,7 +85,7 @@ void QLearner::sanityCheck(){
 	}
 }
 
-void QLearner::learnPolicy(ALEInterface& ale, Features *features){
+void QLearner::learnPolicy(Environment<bool>& env){
 	struct timeval tvBegin, tvEnd, tvDiff;
 	vector<double> reward;
 	double elapsedTime;
@@ -114,7 +108,7 @@ void QLearner::learnPolicy(ALEInterface& ale, Features *features){
 		}
 
 		F.clear();
-		features->getActiveFeaturesIndices(ale.getScreen(), ale.getRAM(), F);
+		env.getActiveFeaturesIndices( F);
 		//To ensure the learning rate will never increase along
 		//the time, Marc used such approach in his JAIR paper		
 		if (F.size() > maxFeatVectorNorm){
@@ -123,7 +117,7 @@ void QLearner::learnPolicy(ALEInterface& ale, Features *features){
 		gettimeofday(&tvBegin, NULL);
 
 		//This also stops when the maximum number of steps per episode is reached
-		while(!ale.game_over()){
+		while(!env.game_over()){
 			reward.clear();
 			reward.push_back(0.0);
 			reward.push_back(0.0);
@@ -132,13 +126,13 @@ void QLearner::learnPolicy(ALEInterface& ale, Features *features){
 
 			//Take action, observe reward and next state:
 			currentAction = epsilonGreedy(Q);
-			act(ale, currentAction, reward);
+			act(env, currentAction, reward);
 			cumReward  += reward[1];
 
-			if(!ale.game_over()){
-				//Obtain active features in the new state:
+			if(!env.game_over()){
+				//Obtain active featuresy in the new state:
 				Fnext.clear();
-				features->getActiveFeaturesIndices(ale.getScreen(), ale.getRAM(), Fnext);
+				env.getActiveFeaturesIndices( Fnext);
 				//To ensure the learning rate will never increase along
 				//the time, Marc used such approach in his JAIR paper
 				if (Fnext.size() > maxFeatVectorNorm){
@@ -191,17 +185,17 @@ void QLearner::learnPolicy(ALEInterface& ale, Features *features){
 		timeval_subtract(&tvDiff, &tvEnd, &tvBegin);
 		elapsedTime = double(tvDiff.tv_sec) + double(tvDiff.tv_usec)/1000000.0;
 		
-		double fps = double(ale.getEpisodeFrameNumber())/elapsedTime;
+		double fps = double(env.getEpisodeFrameNumber())/elapsedTime;
 		printf("episode: %d,\t%.0f points,\tavg. return: %.1f,\t%d frames,\t%.0f fps\n",
 			episode + 1, cumReward - prevCumReward, (double)cumReward/(episode + 1.0),
-			ale.getEpisodeFrameNumber(), fps);
-		totalNumberFrames += ale.getEpisodeFrameNumber();
+			env.getEpisodeFrameNumber(), fps);
+		totalNumberFrames += env.getEpisodeFrameNumber();
 		prevCumReward = cumReward;
-		ale.reset_game();
+		env.reset_game();
 	}
 }
 
-void QLearner::evaluatePolicy(ALEInterface& ale, Features *features){
+void QLearner::evaluatePolicy(Environment<bool>& env){
 	double reward = 0;
 	double cumReward = 0; 
 	double prevCumReward = 0;
@@ -209,17 +203,17 @@ void QLearner::evaluatePolicy(ALEInterface& ale, Features *features){
 	//Repeat (for each episode):
 	for(int episode = 0; episode < numEpisodesEval; episode++){
 		//Repeat(for each step of episode) until game is over:
-		for(int step = 0; !ale.game_over() && step < episodeLength; step++){
+		for(int step = 0; !env.game_over() && step < episodeLength; step++){
 			//Get state and features active on that state:		
 			F.clear();
-			features->getActiveFeaturesIndices(ale.getScreen(), ale.getRAM(), F);
+			env.getActiveFeaturesIndices(F);
 			updateQValues(F, Q);       //Update Q-values for each possible action
 			currentAction = epsilonGreedy(Q);
 			//Take action, observe reward and next state:
-			reward = ale.act(actions[currentAction]);
+			reward = env.act(actions[currentAction]);
 			cumReward  += reward;
 		}
-		ale.reset_game();
+		env.reset_game();
 		sanityCheck();
 		
 		printf("%d, %f, %f\n", episode + 1, (double)cumReward/(episode + 1.0), cumReward-prevCumReward);

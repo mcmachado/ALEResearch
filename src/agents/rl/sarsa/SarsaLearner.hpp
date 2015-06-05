@@ -9,13 +9,12 @@
 ** Author: Marlos C. Machado
 ***************************************************************************************/
 
-#ifndef RLLEARNER_H
-#define RLLEARNER_H
+#ifndef SARSALEARNER_H
+#define SARSALEARNER_H
 #include "../RLLearner.hpp"
-#endif
 #include <vector>
 
-class SarsaLearner : public RLLearner{
+class SarsaLearner : public RLLearner<bool>{
 	private:
 		double alpha, delta, lambda, traceThreshold;
 		int numFeatures, currentAction, nextAction;
@@ -69,26 +68,27 @@ class SarsaLearner : public RLLearner{
  		*/		
 		void loadWeights();
 	public:
-		SarsaLearner(ALEInterface& ale, Features *features, Parameters *param);
+    SarsaLearner(Environment<bool>& env, Parameters *param);
 		/**
  		* Implementation of an agent controller. This implementation is Sarsa(lambda).
  		*
- 		* @param ALEInterface& ale Arcade Learning Environment interface: object used to define agents'
+ 		* @param Environment& env Arcade Learning Environment interface: object used to define agents'
  		*        actions, obtain simulator's screen, RAM, etc.
- 		* @param Features *features object that defines what feature function that will be used.
  		*/
-		void learnPolicy(ALEInterface& ale, Features *features);
+		void learnPolicy(Environment<bool>& env);
 		/**
  		* After the policy was learned it is necessary to evaluate its quality. Therefore, a given number
  		* of episodes is run without learning (the vector of weights and the trace are not updated).
  		*
- 		* @param ALEInterface& ale Arcade Learning Environment interface: object used to define agents'
+ 		* @param Environment& env Arcade Learning Environment interface: object used to define agents'
  		*        actions, obtain simulator's screen, RAM, etc.
- 		* @param Features *features object that defines what feature function that will be used.
  		*/
-		void evaluatePolicy(ALEInterface& ale, Features *features);
+		void evaluatePolicy(Environment<bool>& env);
 		/**
 		* Destructor, not necessary in this class.
 		*/
 		~SarsaLearner();
 };
+
+
+#endif
