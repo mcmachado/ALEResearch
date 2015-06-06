@@ -12,7 +12,9 @@ USE_SDL     := 1
 # -D_REENTRANT causes the compiler to use thread safe (i.e. re-entrant) versions of several functions in the C library.
 FLAGS := -O3 -I$(ALE)/src -I/opt/local/include -L$(ALE) -D_GNU_SOURCE=1 -D_REENTRANT
 CXX := g++
-OUT_FILE := replay
+OUT_FILE1 := replay
+OUT_FILE2 := intrRewardOptionsFreq
+
 # Search for library 'ale' and library 'z' when linking.
 LDFLAGS := -lale -lz -lm
 
@@ -21,16 +23,25 @@ ifeq ($(strip $(USE_SDL)), 1)
   LDFLAGS += -lSDL -lSDL_gfx -lSDL_image 
 endif
 
-all: replay
+all: replay intrRewardOptionsFreq
 
 replay:                 main.o     BPROFeatures.o     Background.o
-	$(CXX) $(FLAGS) bin/main.o bin/BPROFeatures.o bin/Background.o $(LDFLAGS) -o $(OUT_FILE) 
+	$(CXX) $(FLAGS) bin/main.o bin/BPROFeatures.o bin/Background.o $(LDFLAGS) -o $(OUT_FILE1) 
+
+intrRewardOptionsFreq:  intrRewardOptionsFreq.o     BPROFeatures.o     RAMFeatures.o     Background.o
+	$(CXX) $(FLAGS) bin/intrRewardOptionsFreq.o bin/BPROFeatures.o bin/RAMFeatures.o bin/Background.o $(LDFLAGS) -o $(OUT_FILE2) 
+
+intrRewardOptionsFreq.o: intrRewardOptionsFreq.cpp
+	$(CXX) $(FLAGS) -c intrRewardOptionsFreq.cpp -o bin/intrRewardOptionsFreq.o
 
 main.o: main.cpp
 	$(CXX) $(FLAGS) -c main.cpp -o bin/main.o
 
 BPROFeatures.o: BPROFeatures.cpp
 	$(CXX) $(FLAGS) -c BPROFeatures.cpp -o bin/BPROFeatures.o
+
+RAMFeatures.o: RAMFeatures.cpp
+	$(CXX) $(FLAGS) -c RAMFeatures.cpp -o bin/RAMFeatures.o
 
 Background.o: Background.cpp
 	$(CXX) $(FLAGS) -c Background.cpp -o bin/Background.o

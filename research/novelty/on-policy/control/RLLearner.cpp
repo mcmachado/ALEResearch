@@ -69,7 +69,7 @@ int RLLearner::epsilonGreedy(vector<double> &QValues){
  * pass aditional information to the running algorithm (like 'real score' if one
  * is using a surrogate reward function).
  */
-void RLLearner::act(ALEInterface& ale, int action, vector<int>& transitions, vector<double> &reward){
+void RLLearner::act(ALEInterface& ale, int action, vector<double>& transitions, vector<double> &reward){
 	double r_alg = 0.0, r_real = 0.0;
 	
 	for(int i = 0; i < transitions.size(); i++){
