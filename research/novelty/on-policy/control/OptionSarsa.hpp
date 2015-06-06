@@ -69,7 +69,7 @@ class OptionSarsa : public RLLearner{
  		*/		
 		void loadWeights();
 
-		void updateTransitionVector(vector<bool> F, vector<bool> Fnext, vector<int>& transitions);
+		void updateTransitionVector(vector<bool> F, vector<bool> Fnext, vector<double>& transitions);
 	public:
 		OptionSarsa(ALEInterface& ale, Features *features, Parameters *param);
 		/**

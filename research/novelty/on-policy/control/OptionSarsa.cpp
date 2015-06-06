@@ -166,7 +166,7 @@ void OptionSarsa::loadWeights(){
 	}
 }
 
-void OptionSarsa::updateTransitionVector(vector<bool> F, vector<bool> Fnext, vector<int>& transitions){
+void OptionSarsa::updateTransitionVector(vector<bool> F, vector<bool> Fnext, vector<double>& transitions){
 	int numTransitionFeatures = F.size();
 	
 	for(int i = 0; i < F.size(); i++){
@@ -197,7 +197,7 @@ void OptionSarsa::learnPolicy(ALEInterface& ale, Features *features){
 	//For the use of options:
 	RAMFeatures ramFeatures;
 	vector<bool> FRam, FnextRam;
-	vector<int> transitions((ramFeatures.getNumberOfFeatures() - 1)*2, 0);
+	vector<double> transitions((ramFeatures.getNumberOfFeatures() - 1)*2, 0);
 
 	//Repeat (for each episode):
 	int episode, totalNumberFrames = 0;

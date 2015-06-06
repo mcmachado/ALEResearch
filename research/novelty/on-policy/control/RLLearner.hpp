@@ -43,7 +43,7 @@ class RLLearner : public Agent{
  		* the reward to be used by the RL algorithm is returned; in the second position, the game score is
  		* returned.
  		*/
-		void act(ALEInterface& ale, int action, vector<int> &transitions, vector<double> &reward);
+		void act(ALEInterface& ale, int action, vector<double> &transitions, vector<double> &reward);
 
 		/**
  		* Implementation of an epsilon-greedy function. Epsilon is defined in the constructor,
