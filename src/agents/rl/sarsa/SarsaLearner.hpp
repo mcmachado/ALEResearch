@@ -28,7 +28,7 @@ class SarsaLearner : public RLLearner<bool>{
 		vector<double> Q;               //Q(a) entries
 		vector<double> Qnext;           //Q(a) entries for next action
         vector<unordered_map<int,double> > e;      //Eligibility trace
-        vector<unordered_map<int,double> > w;      //Theta, weights vector
+		vector<vector<double> > w;      //Theta, weights vector
 
 		/**
  		* Constructor declared as private to force the user to instantiate SarsaLearner
