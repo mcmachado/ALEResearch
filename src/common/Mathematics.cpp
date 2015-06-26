@@ -34,3 +34,25 @@ int Mathematics::argmax(std::vector<double> array){
 	//Now we randomly pick one of the best
 	return indices[rand()%indices.size()];
 }
+
+int Mathematics::argmax(std::vector<float> array){
+	assert(array.size() > 0);
+	//Discover max value of the array:
+	float max = array[0];
+	for (unsigned int i = 0; i < array.size(); i++){
+		if(max < array[i]){
+			max = array[i];
+		}
+	}
+	//We need to break ties, thus we save all  
+	//indices that hold the same max value:
+	std::vector<int> indices;
+	for(unsigned int i = 0; i < array.size(); i++){
+		if(fabs(array[i] - max) < 1e-10){
+			indices.push_back(i);
+		}
+	}
+	assert(indices.size() > 0);
+	//Now we randomly pick one of the best
+	return indices[rand()%indices.size()];
+}

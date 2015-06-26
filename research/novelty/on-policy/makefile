@@ -13,7 +13,8 @@ USE_SDL     := 1
 # -D_REENTRANT causes the compiler to use thread safe (i.e. re-entrant) versions of several functions in the C library.
 FLAGS := -O3 -I$(ALE)/src -I/opt/local/include -L$(ALE) -D_GNU_SOURCE=1 -D_REENTRANT -D__STDC_CONSTANT_MACROS
 CXX := g++
-OUT_FILE := sarsaProxyOption
+OUT_FILE1 := sarsaProxyOption
+OUT_FILE2 := loadAndLearn
 # Search for library 'ale' and library 'z' when linking.
 LDFLAGS := -lale -lz -lm
 
@@ -22,10 +23,16 @@ ifeq ($(strip $(USE_SDL)), 1)
   LDFLAGS += -lSDL -lSDL_gfx -lSDL_image 
 endif
 
-all: sarsaProxyOption
+all: sarsaProxyOption loadAndLearn
 
 sarsaProxyOption:       sarsaProxyOption.o     Mathematics.o     Timer.o     Parameters.o     Features.o     Background.o     BPROFeatures.o     RAMFeatures.o     RLLearner.o     OptionSarsa.o
-	$(CXX) $(FLAGS) bin/sarsaProxyOption.o bin/Mathematics.o bin/Timer.o bin/Parameters.o bin/Features.o bin/Background.o bin/BPROFeatures.o bin/RAMFeatures.o bin/RLLearner.o bin/OptionSarsa.o $(LDFLAGS) -o $(OUT_FILE) 
+	$(CXX) $(FLAGS) bin/sarsaProxyOption.o bin/Mathematics.o bin/Timer.o bin/Parameters.o bin/Features.o bin/Background.o bin/BPROFeatures.o bin/RAMFeatures.o bin/RLLearner.o bin/OptionSarsa.o $(LDFLAGS) -o $(OUT_FILE1) 
+
+loadAndLearn:           loadAndLearn.o     Mathematics.o     Timer.o     Features.o     BackgroundLocal.o     BPROFeaturesLocal.o     RAMFeatures.o 
+	$(CXX) $(FLAGS) bin/loadAndLearn.o bin/Mathematics.o bin/Timer.o bin/Features.o bin/BackgroundLocal.o bin/BPROFeaturesLocal.o bin/RAMFeatures.o  $(LDFLAGS) -o $(OUT_FILE2) 
+
+loadAndLearn.o: loadAndLearn.cpp
+	$(CXX) $(FLAGS) -c loadAndLearn.cpp -o bin/loadAndLearn.o
 
 sarsaProxyOption.o: sarsaProxyOption.cpp
 	$(CXX) $(FLAGS) -c sarsaProxyOption.cpp -o bin/sarsaProxyOption.o
@@ -44,9 +51,15 @@ Features.o: ../../../src/features/Features.cpp
 
 Background.o: ../../../src/features/Background.cpp
 	$(CXX) $(FLAGS) -c ../../../src/features/Background.cpp -o bin/Background.o	
+
+BackgroundLocal.o: features/Background.cpp
+	$(CXX) $(FLAGS) -c features/Background.cpp -o bin/BackgroundLocal.o		
 	
 BPROFeatures.o: ../../../src/features/BPROFeatures.cpp
 	$(CXX) $(FLAGS) -c ../../../src/features/BPROFeatures.cpp -o bin/BPROFeatures.o	
+
+BPROFeaturesLocal.o: features/BPROFeatures.cpp
+	$(CXX) $(FLAGS) -c features/BPROFeatures.cpp -o bin/BPROFeaturesLocal.o	
 
 RAMFeatures.o: ../../../src/features/RAMFeatures.cpp
 	$(CXX) $(FLAGS) -c ../../../src/features/RAMFeatures.cpp -o bin/RAMFeatures.o		

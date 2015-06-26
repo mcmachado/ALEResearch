@@ -23,4 +23,5 @@ class Mathematics{
  		* @return indice of an element with highest value, ties are broke randomly.
  		*/
 		static int argmax(std::vector<double> array);
+		static int argmax(std::vector<float> array);
 };
