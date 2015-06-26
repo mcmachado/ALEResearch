@@ -22,7 +22,7 @@
 #include "../../../src/features/RAMFeatures.hpp"
 #include "../../../src/common/Mathematics.hpp"
 
-#define NUM_MIN_ARGS       11
+#define NUM_MIN_ARGS       13
 //Features:
 #define NUM_BITS         1024
 //Agent's:
@@ -40,6 +40,7 @@ vector<string> optionsWgts;         //Vector containing the files with weights r
 vector<vector<vector<float> > > w;  //Theta, weights vector
 
 //Parameters:
+string game_param;
 string romPath_param;
 string outputPath_param;
 
@@ -60,6 +61,7 @@ void printHelp(char** argv){
 	printf("   -t     %s[REQUIRED]%s threshold to consider the transitions as 'novel'.\n", ANSI_COLOR_RED, ANSI_COLOR_RESET);
 	printf("   -c     %s[REQUIRED]%s to report transitions that are not relevant as well [0 or 1].\n", ANSI_COLOR_RED, ANSI_COLOR_RESET);
 	printf("   -n     %s[REQUIRED]%s number of weights to be loaded.\n", ANSI_COLOR_RED, ANSI_COLOR_RESET);
+	printf("   -g     %s[REQUIRED]%s game name to be played.\n", ANSI_COLOR_RED, ANSI_COLOR_RESET);
 	printf("   -h     print this help and exit\n");
 	printf("\n");
 }
@@ -71,7 +73,7 @@ void printHelp(char** argv){
 */
 void readParameters(int argc, char** argv){
 	int option = 0;
-	while ((option = getopt(argc, argv, "r:o:t:c:n:h")) != -1)
+	while ((option = getopt(argc, argv, "r:o:t:c:n:g:h")) != -1)
 	{
 		if (option == -1){
 			break;
@@ -92,6 +94,9 @@ void readParameters(int argc, char** argv){
 			case 'n':
 				numOptions_param = atoi(optarg);
 				break;
+			case 'g':
+				game_param = optarg;
+				break;				
 			case 'h': //Asking for help about the parameters
 				printHelp(argv);
 				exit(-1);
@@ -110,7 +115,8 @@ void readParameters(int argc, char** argv){
 	//Check whether all required information is available in the command line:
 	if(romPath_param.compare("") == 0 || outputPath_param.compare("") == 0
 		|| freqThreshold_param <= 0.0 || (toReportAll_param != 1 && toReportAll_param != 0)
-		|| numOptions_param < 0 || argc != NUM_MIN_ARGS + numOptions_param){
+		|| numOptions_param < 0 || argc != NUM_MIN_ARGS + numOptions_param 
+		|| game_param.compare("") == 0){
 			printHelp(argv);
 			exit(1);
 	}
@@ -133,6 +139,7 @@ void updateAverage(vector<bool> Fprev, vector<bool> F, int frame, int gameId){
 			frequency[i] = (frequency[i] * (frame - 1) + 1) / frame;
 			tempVector[i] = 1;
 			if(frame > FRAMES_TO_WAIT && frequency[i] < freqThreshold_param){
+//				cout << i << " " << frequency[i] << " " << freqThreshold_param << endl;
 				tempVector[i] = 2; //1 denotes flip, 2 denotes relevant flip
 				toPrint = true;
 			}
@@ -143,6 +150,7 @@ void updateAverage(vector<bool> Fprev, vector<bool> F, int frame, int gameId){
 			frequency[i + NUM_BITS] = (frequency[i + NUM_BITS] * (frame - 1) + 1) / frame;
 			tempVector[i + NUM_BITS] = 1;
 			if(frame > FRAMES_TO_WAIT && frequency[i + NUM_BITS] < freqThreshold_param){
+//				cout << i << " " << frequency[i + NUM_BITS] << " " << freqThreshold_param << endl;
 				tempVector[i + NUM_BITS] = 2;
 				toPrint = true;
 			}
@@ -231,7 +239,9 @@ int playActionUpdatingAvg(ALEInterface& ale, RAMFeatures *ram, BPROFeatures *fea
 //		int numTimesPlayed = 0;
 
 		int option = nextAction - NUM_ACTIONS;
+//		printf("%d: ", option);
 		while(rand()%1000 > 1000 * PROB_TERMINATION && !ale.game_over()){
+//			printf("*");
 //			numTimesPlayed++;
 			//Get state and features active on that state:		
 			Fbpro.clear();
@@ -240,8 +250,15 @@ int playActionUpdatingAvg(ALEInterface& ale, RAMFeatures *ram, BPROFeatures *fea
 			currentAction = epsilonGreedy(Q);
 			//Take action, observe reward and next state:
 			reward += ale.act((Action) currentAction);
+			frame++;
+			Fprev.swap(F);
+			F.clear();
+			ram->getCompleteFeatureVector(ale.getScreen(), ale.getRAM(), F);
+			F.pop_back();
+			updateAverage(Fprev, F, frame, gameId);
 		}
 //		cout << numTimesPlayed << endl;
+//		printf("\n");
 	}
 
 	return reward;
@@ -294,7 +311,7 @@ int main(int argc, char** argv){
 	readParameters(argc, argv);
 	
 	RAMFeatures ramFeatures;
-	BPROFeatures bproFeatures;
+	BPROFeatures bproFeatures(game_param);
 
 	loadWeights(&bproFeatures);
 	
