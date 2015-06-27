@@ -48,3 +48,5 @@ tools/replay/rewards_private_eye_2.out
 tools/replay/rewards_private_eye_3.out
 tools/replay/rewards_private_eye_4.out
 tools/replay/run.sh
+research/novelty/on-policy/loadAndLearn
+research/novelty/on-policy/run.sh

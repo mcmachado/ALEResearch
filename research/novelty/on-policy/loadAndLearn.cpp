@@ -318,7 +318,7 @@ int main(int argc, char** argv){
 	ALEInterface ale(0);
 	ale.setFloat("stochasticity", 0.00);
 	ale.setInt("random_seed", seed_param);
-	
+	ale.setInt("max_num_frames_per_episode", 18000);	
 	ale.loadROM(romPath_param.c_str());
 
 	for(int i = 0; i < 2 * NUM_BITS; i++){
