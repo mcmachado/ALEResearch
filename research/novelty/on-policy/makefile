@@ -23,10 +23,13 @@ ifeq ($(strip $(USE_SDL)), 1)
   LDFLAGS += -lSDL -lSDL_gfx -lSDL_image 
 endif
 
-all: sarsaProxyOption loadAndLearn
+all: sarsaProxyOption loadAndLearn sarsaLoadWeightsProxyOption
 
 sarsaProxyOption:       sarsaProxyOption.o     Mathematics.o     Timer.o     Parameters.o     Features.o     Background.o     BPROFeatures.o     RAMFeatures.o     RLLearner.o     OptionSarsa.o
 	$(CXX) $(FLAGS) bin/sarsaProxyOption.o bin/Mathematics.o bin/Timer.o bin/Parameters.o bin/Features.o bin/Background.o bin/BPROFeatures.o bin/RAMFeatures.o bin/RLLearner.o bin/OptionSarsa.o $(LDFLAGS) -o $(OUT_FILE1) 
+
+sarsaLoadWeightsProxyOption: sarsaLoadWeightsProxyOption.o     Mathematics.o     Timer.o     ParametersLoadingWeights.o     Features.o     Background.o     BPROFeatures.o     RAMFeatures.o     RLLearner.o     OptionSarsaExtended.o
+	$(CXX) $(FLAGS)      bin/sarsaLoadWeightsProxyOption.o bin/Mathematics.o bin/Timer.o bin/ParametersLoadingWeights.o bin/Features.o bin/Background.o bin/BPROFeatures.o bin/RAMFeatures.o bin/RLLearner.o bin/OptionSarsaExtended.o $(LDFLAGS) -o $(OUT_FILE1) 
 
 loadAndLearn:           loadAndLearn.o     Mathematics.o     Timer.o     Features.o     BackgroundLocal.o     BPROFeaturesLocal.o     RAMFeatures.o 
 	$(CXX) $(FLAGS) bin/loadAndLearn.o bin/Mathematics.o bin/Timer.o bin/Features.o bin/BackgroundLocal.o bin/BPROFeaturesLocal.o bin/RAMFeatures.o  $(LDFLAGS) -o $(OUT_FILE2) 
@@ -37,6 +40,9 @@ loadAndLearn.o: loadAndLearn.cpp
 sarsaProxyOption.o: sarsaProxyOption.cpp
 	$(CXX) $(FLAGS) -c sarsaProxyOption.cpp -o bin/sarsaProxyOption.o
 
+sarsaLoadWeightsProxyOption.o: sarsaLoadWeightsProxyOption.cpp
+	$(CXX) $(FLAGS) -c sarsaLoadWeightsProxyOption.cpp -o bin/sarsaLoadWeightsProxyOption.o
+
 Mathematics.o: ../../../src/common/Mathematics.cpp
 	$(CXX) $(FLAGS) -c ../../../src/common/Mathematics.cpp -o bin/Mathematics.o
 
@@ -45,6 +51,9 @@ Timer.o: ../../../src/common/Timer.cpp
 
 Parameters.o: common/Parameters.cpp
 	$(CXX) $(FLAGS) -c common/Parameters.cpp -o bin/Parameters.o
+
+ParametersLoadingWeights.o: common/ParametersLoadingWeights.cpp
+	$(CXX) $(FLAGS) -c      common/ParametersLoadingWeights.cpp -o bin/ParametersLoadingWeights.o
 
 Features.o: ../../../src/features/Features.cpp
 	$(CXX) $(FLAGS) -c ../../../src/features/Features.cpp -o bin/Features.o
@@ -69,6 +78,9 @@ RLLearner.o: control/RLLearner.cpp
 
 OptionSarsa.o: control/OptionSarsa.cpp
 	$(CXX) $(FLAGS) -c control/OptionSarsa.cpp -o bin/OptionSarsa.o
+
+OptionSarsaExtended.o: control/OptionSarsaExtended.cpp
+	$(CXX) $(FLAGS) -c control/OptionSarsaExtended.cpp -o bin/OptionSarsaExtended.o
 
 clean:
 	rm -rf ${OUT_FILE} bin/*.o	
