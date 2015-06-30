@@ -65,7 +65,7 @@ int RLLearner::epsilonGreedy(vector<float> &QValues){
 	if((random % int(nearbyint(1.0/epsilon))) == 0) {
 	//if((rand()%int(1.0/epsilon)) == 0){
 		randomActionTaken = 1;
-		action = rand() % numTotalActions;
+		action = rand() % QValues.size();
 	}
 	return action;
 }
@@ -74,7 +74,6 @@ int RLLearner::playOption(ALEInterface& ale, int option, Features *features,
 	vector<vector<vector<float> > > &learnedOptions){
 
 	int r_real = 0;
-	//TODO:GET TRANSITION VECTOR TO KEEP UPDATING THE VALUE; NORMALIZE THE REWARD VECTOR
 	float termProb = 0.01;
 	int currentAction;
 	vector<int> Fbpro;	                      //Set of features active
