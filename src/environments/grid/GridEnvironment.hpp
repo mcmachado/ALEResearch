@@ -57,7 +57,7 @@ public:
         return this->m_feat->getNumberOfFeatures(this);
     }
 
-    double act(Action action)
+    double doAct(Action action)
     {
         switch(action){
         case PLAYER_A_UP:

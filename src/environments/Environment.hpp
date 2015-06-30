@@ -38,13 +38,21 @@ public:
     bool game_over(){return isTerminal();}
     
     /** @brief This function is used to simulate one step in the environment
-     *
+     * This function should not be overloaded by derived classes. Overload doAct instead.
      *
      * @param action an integer describing the action taken by the agent
      * @return the reward obtained by triggering the action
      */
-    virtual double act(Action action) = 0;
+    double act(Action action){
+        return doAct(action);
+    };
 
+    /**  @brief This function is used to simulate one step in the environment
+     * This is the one that must be overloaded in derived classes.
+     * @param action an integer describing the action taken by the agent
+     * @return the reward obtained by triggering the action
+     */
+    virtual double doAct(Action action) = 0;
 
 
     /** @brief Return the set of actions that can be taken in this environment
