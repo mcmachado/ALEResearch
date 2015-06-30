@@ -80,7 +80,7 @@ int main(int argc, char** argv){
 	//Instantiating the learning algorithm:
 	OptionSarsaExtended optionSarsa(ale, &features, &param);
     //Learn a policy:
-    optionSarsa.learnPolicy(ale, &features , &w);
+    optionSarsa.learnPolicy(ale, &features , w);
     printf("\n\n== Evaluation without Learning == \n\n");
     optionSarsa.evaluatePolicy(ale, &features);
 	

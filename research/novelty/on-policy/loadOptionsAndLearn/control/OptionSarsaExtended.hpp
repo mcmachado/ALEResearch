@@ -79,7 +79,7 @@ class OptionSarsaExtended : public RLLearner{
  		*        actions, obtain simulator's screen, RAM, etc.
  		* @param Features *features object that defines what feature function that will be used.
  		*/
-		void learnPolicy(ALEInterface& ale, Features *features, vector<vector<vector<float> > > *learnedOptions);
+		void learnPolicy(ALEInterface& ale, Features *features, vector<vector<vector<float> > > &learnedOptions);
 		/**
  		* After the policy was learned it is necessary to evaluate its quality. Therefore, a given number
  		* of episodes is run without learning (the vector of weights and the trace are not updated).
