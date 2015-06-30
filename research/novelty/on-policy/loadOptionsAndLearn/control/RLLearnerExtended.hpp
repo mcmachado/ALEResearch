@@ -44,7 +44,7 @@ class RLLearner : public Agent{
  		* the reward to be used by the RL algorithm is returned; in the second position, the game score is
  		* returned.
  		*/
-		void act(ALEInterface& ale, int action, vector<float> &transitions, vector<float> &reward);
+		void act(ALEInterface& ale, int action, vector<float> &transitions, Features *features, vector<float> &reward, vector<vector<vector<float> > > &learnedOptions);
 
 		/**
  		* Implementation of an epsilon-greedy function. Epsilon is defined in the constructor,
@@ -66,6 +66,8 @@ class RLLearner : public Agent{
 		*/
 		RLLearner(ALEInterface& ale, Features *features, Parameters *param);
 
+		int playOption(ALEInterface& ale, int option, Features *features, vector<vector<vector<float> > > &learnedOptions);
+
 	public:
 	   /**
  		* Pure virtual method that needs to be implemented by any RL agent.
@@ -79,7 +81,7 @@ class RLLearner : public Agent{
  		* @param Features *features object that defines what feature function that will be used by the RL
  		*        agents.
  		*/
-		virtual void learnPolicy(ALEInterface& ale, Features *features, vector<vector<vector<float> > > *learnedOptions) = 0;
+		virtual void learnPolicy(ALEInterface& ale, Features *features, vector<vector<vector<float> > > &learnedOptions) = 0;
 
 		/**
  		* Pure virtual method that needs to be implemented by any agent. Once the agent learned a

@@ -185,7 +185,7 @@ void OptionSarsaExtended::updateTransitionVector(vector<bool> F, vector<bool> Fn
 	}
 }
 
-void OptionSarsaExtended::learnPolicy(ALEInterface& ale, Features *features, vector<vector<vector<float> > > *learnedOptions){
+void OptionSarsaExtended::learnPolicy(ALEInterface& ale, Features *features, vector<vector<vector<float> > > &learnedOptions){
 	struct timeval tvBegin, tvEnd, tvDiff;
 	vector<float> reward;
 	float elapsedTime;
@@ -229,7 +229,7 @@ void OptionSarsaExtended::learnPolicy(ALEInterface& ale, Features *features, vec
 
 			sanityCheck();
 			//Take action, observe reward and next state:
-			act(ale, currentAction, transitions, reward);
+			act(ale, currentAction, transitions, features, reward, learnedOptions);
 			cumIntrReward += reward[0];
 			cumReward  += reward[1];
 			if(!ale.game_over()){

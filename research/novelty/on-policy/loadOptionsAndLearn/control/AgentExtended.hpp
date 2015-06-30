@@ -12,7 +12,7 @@
 #endif
 #ifndef PARAMETERS_H
 #define PARAMETERS_H
-#include "../../common/ParametersLoadingWeights.hpp"
+#include "../common/ParametersLoadingWeights.hpp"
 #endif
 #ifndef FEATURES_H
 #define FEATURES_H
@@ -31,7 +31,7 @@ class Agent{
  		* @param Features *features object that defines what feature function that will be used by the RL
  		*        agents. It may be null for other approaches as in Planning.
  		*/
-		virtual void learnPolicy(ALEInterface& ale, Features *features , vector<vector<vector<float> > > *learnedOptions) = 0;
+		virtual void learnPolicy(ALEInterface& ale, Features *features , vector<vector<vector<float> > > &learnedOptions) = 0;
 	   /**
  		* Pure virtual method that needs to be implemented by any agent. Once the agent learned a
  		* policy it executes this policy for a given number of episodes. The policy is stored in
