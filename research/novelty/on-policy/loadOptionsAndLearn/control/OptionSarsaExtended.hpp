@@ -11,13 +11,13 @@
 
 #ifndef RLLEARNER_H
 #define RLLEARNER_H
-#include "RLLearner.hpp"
+#include "RLLearnerExtended.hpp"
 #endif
 #include <vector>
 
 class OptionSarsaExtended : public RLLearner{
 	private:
-		double alpha, delta, lambda, traceThreshold;
+		float alpha, delta, lambda, traceThreshold;
 		int numFeatures, currentAction, nextAction;
 		int toSaveWeightsAfterLearning, saveWeightsEveryXSteps;
 
@@ -25,10 +25,10 @@ class OptionSarsaExtended : public RLLearner{
 
 		vector<int> F;					//Set of features active
 		vector<int> Fnext;              //Set of features active in next state
-		vector<double> Q;               //Q(a) entries
-		vector<double> Qnext;           //Q(a) entries for next action
-		vector<vector<double> > e;      //Eligibility trace
-		vector<vector<double> > w;      //Theta, weights vector
+		vector<float> Q;               //Q(a) entries
+		vector<float> Qnext;           //Q(a) entries for next action
+		vector<vector<float> > e;      //Eligibility trace
+		vector<vector<float> > w;      //Theta, weights vector
 		vector<vector<int> >nonZeroElig;//To optimize the implementation
 
 		/**
@@ -44,10 +44,10 @@ class OptionSarsaExtended : public RLLearner{
 		/**
  		* In Sarsa the Q-values (one per action) are updated as the sum of weights for that given action.
  		* To avoid writing it more than once on the code, its update was extracted to a separate function.
- 		* It updates the vector<double> Q assuming that vector<int> F is filled, as it sums just the weights
+ 		* It updates the vector<float> Q assuming that vector<int> F is filled, as it sums just the weights
  		* that are active in F.
  		*/
-		void updateQValues(vector<int> &Features, vector<double> &QValues);
+		void updateQValues(vector<int> &Features, vector<float> &QValues);
 		/**
  		* When using Replacing traces, all values not related to the current action are set to 0, while the
  		* values for the current action that their features are active are set to 1. The traces decay following
@@ -69,7 +69,7 @@ class OptionSarsaExtended : public RLLearner{
  		*/		
 		void loadWeights();
 
-		void updateTransitionVector(vector<bool> F, vector<bool> Fnext, vector<double>& transitions);
+		void updateTransitionVector(vector<bool> F, vector<bool> Fnext, vector<float>& transitions);
 	public:
 		OptionSarsaExtended(ALEInterface& ale, Features *features, Parameters *param);
 		/**
@@ -79,7 +79,7 @@ class OptionSarsaExtended : public RLLearner{
  		*        actions, obtain simulator's screen, RAM, etc.
  		* @param Features *features object that defines what feature function that will be used.
  		*/
-		void learnPolicy(ALEInterface& ale, Features *features);
+		void learnPolicy(ALEInterface& ale, Features *features, vector<vector<vector<float> > > *learnedOptions);
 		/**
  		* After the policy was learned it is necessary to evaluate its quality. Therefore, a given number
  		* of episodes is run without learning (the vector of weights and the trace are not updated).

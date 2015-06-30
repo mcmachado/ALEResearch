@@ -11,8 +11,8 @@
 #include <math.h>
 
 #include "OptionSarsaExtended.hpp"
-#include "../../../../src/common/Timer.hpp"
-#include "../../../../src/features/RAMFeatures.hpp"
+#include "../../../../../src/common/Timer.hpp"
+#include "../../../../../src/features/RAMFeatures.hpp"
 
 OptionSarsaExtended::OptionSarsaExtended(ALEInterface& ale, Features *features, Parameters *param) : RLLearner(ale, features, param) {
 	delta = 0.0;
@@ -25,13 +25,13 @@ OptionSarsaExtended::OptionSarsaExtended(ALEInterface& ale, Features *features, 
 	saveWeightsEveryXSteps = param->getFrequencySavingWeights();
 	pathWeightsFileToLoad = param->getPathToWeightsFiles();
 	
-	for(int i = 0; i < numActions; i++){
+	for(int i = 0; i < numTotalActions; i++){
 		//Initialize Q;
 		Q.push_back(0);
 		Qnext.push_back(0);
 		//Initialize e:
-		e.push_back(vector<double>(numFeatures, 0.0));
-		w.push_back(vector<double>(numFeatures, 0.0));
+		e.push_back(vector<float>(numFeatures, 0.0));
+		w.push_back(vector<float>(numFeatures, 0.0));
 		nonZeroElig.push_back(vector<int>());
 	}
 
@@ -48,9 +48,9 @@ OptionSarsaExtended::OptionSarsaExtended(ALEInterface& ale, Features *features, 
 
 OptionSarsaExtended::~OptionSarsaExtended(){}
 
-void OptionSarsaExtended::updateQValues(vector<int> &Features, vector<double> &QValues){
-	for(int a = 0; a < numActions; a++){
-		double sumW = 0;
+void OptionSarsaExtended::updateQValues(vector<int> &Features, vector<float> &QValues){
+	for(int a = 0; a < numTotalActions; a++){
+		float sumW = 0;
 		for(unsigned int i = 0; i < Features.size(); i++){
 			sumW += w[a][Features[i]];
 		}
@@ -123,7 +123,7 @@ void OptionSarsaExtended::updateAcumTrace(int action, vector<int> &Features){
 }
 
 void OptionSarsaExtended::sanityCheck(){
-	for(int i = 0; i < numActions; i++){
+	for(int i = 0; i < numTotalActions; i++){
 		if(fabs(Q[i]) > 10e7 || Q[i] != Q[i] /*NaN*/){
 			printf("It seems your algorithm diverged!\n");
 			exit(0);
@@ -153,12 +153,12 @@ void OptionSarsaExtended::loadWeights(){
 	string line;
 	int nActions, nFeatures;
 	int i, j;
-	double value;
+	float value;
 
 	std::ifstream weightsFile (pathWeightsFileToLoad.c_str());
 	
 	weightsFile >> nActions >> nFeatures;
-	assert(nActions == numActions);
+	assert(nActions == numBasicActions);
 	assert(nFeatures == numFeatures);
 
 	while(weightsFile >> i >> j >> value){
@@ -166,7 +166,7 @@ void OptionSarsaExtended::loadWeights(){
 	}
 }
 
-void OptionSarsaExtended::updateTransitionVector(vector<bool> F, vector<bool> Fnext, vector<double>& transitions){
+void OptionSarsaExtended::updateTransitionVector(vector<bool> F, vector<bool> Fnext, vector<float>& transitions){
 	int numTransitionFeatures = F.size();
 	
 	for(int i = 0; i < F.size(); i++){
@@ -185,19 +185,19 @@ void OptionSarsaExtended::updateTransitionVector(vector<bool> F, vector<bool> Fn
 	}
 }
 
-void OptionSarsaExtended::learnPolicy(ALEInterface& ale, Features *features){
-	
+void OptionSarsaExtended::learnPolicy(ALEInterface& ale, Features *features, vector<vector<vector<float> > > *learnedOptions){
 	struct timeval tvBegin, tvEnd, tvDiff;
-	vector<double> reward;
-	double elapsedTime;
-	double cumReward = 0, prevCumReward = 0;
-	double cumIntrReward = 0, prevCumIntrReward = 0;
+	vector<float> reward;
+	float elapsedTime;
+	float cumReward = 0, prevCumReward = 0;
+	float cumIntrReward = 0, prevCumIntrReward = 0;
 	unsigned int maxFeatVectorNorm = 1;
 	sawFirstReward = 0; firstReward = 1.0;
+
 	//For the use of options:
 	RAMFeatures ramFeatures;
 	vector<bool> FRam, FnextRam;
-	vector<double> transitions((ramFeatures.getNumberOfFeatures() - 1)*2, 0);
+	vector<float> transitions((ramFeatures.getNumberOfFeatures() - 1)*2, 0);
 
 	//Repeat (for each episode):
 	int episode, totalNumberFrames = 0;
@@ -270,11 +270,11 @@ void OptionSarsaExtended::learnPolicy(ALEInterface& ale, Features *features){
 		}
 		gettimeofday(&tvEnd, NULL);
 		timeval_subtract(&tvDiff, &tvEnd, &tvBegin);
-		elapsedTime = double(tvDiff.tv_sec) + double(tvDiff.tv_usec)/1000000.0;
+		elapsedTime = float(tvDiff.tv_sec) + float(tvDiff.tv_usec)/1000000.0;
 		
-		double fps = double(ale.getEpisodeFrameNumber())/elapsedTime;
+		float fps = float(ale.getEpisodeFrameNumber())/elapsedTime;
 		printf("episode: %d,\t%.0f points,\tavg. return: %.1f,\tnovelty reward: %.2f (%.2f),\t%d frames,\t%.0f fps\n",
-			episode + 1, cumReward - prevCumReward, (double)cumReward/(episode + 1.0),
+			episode + 1, cumReward - prevCumReward, (float)cumReward/(episode + 1.0),
 			cumIntrReward - prevCumIntrReward, cumIntrReward/(episode + 1.0), ale.getEpisodeFrameNumber(), fps);
 		totalNumberFrames += ale.getEpisodeFrameNumber();
 		prevCumReward = cumReward;
@@ -294,11 +294,11 @@ void OptionSarsaExtended::learnPolicy(ALEInterface& ale, Features *features){
 }
 
 void OptionSarsaExtended::evaluatePolicy(ALEInterface& ale, Features *features){
-	double reward = 0;
-	double cumReward = 0; 
-	double prevCumReward = 0;
+	float reward = 0;
+	float cumReward = 0; 
+	float prevCumReward = 0;
 	struct timeval tvBegin, tvEnd, tvDiff;
-	double elapsedTime;
+	float elapsedTime;
 
 	//Repeat (for each episode):
 	for(int episode = 0; episode < numEpisodesEval; episode++){
@@ -317,11 +317,11 @@ void OptionSarsaExtended::evaluatePolicy(ALEInterface& ale, Features *features){
 		}
 		gettimeofday(&tvEnd, NULL);
 		timeval_subtract(&tvDiff, &tvEnd, &tvBegin);
-		elapsedTime = double(tvDiff.tv_sec) + double(tvDiff.tv_usec)/1000000.0;
-		double fps = double(ale.getEpisodeFrameNumber())/elapsedTime;
+		elapsedTime = float(tvDiff.tv_sec) + float(tvDiff.tv_usec)/1000000.0;
+		float fps = float(ale.getEpisodeFrameNumber())/elapsedTime;
 
 		printf("episode: %d,\t%.0f points,\tavg. return: %.1f,\t%d frames,\t%.0f fps\n", 
-			episode + 1, (cumReward-prevCumReward), (double)cumReward/(episode + 1.0), ale.getEpisodeFrameNumber(), fps);
+			episode + 1, (cumReward-prevCumReward), (float)cumReward/(episode + 1.0), ale.getEpisodeFrameNumber(), fps);
 
 		ale.reset_game();
 		prevCumReward = cumReward;
