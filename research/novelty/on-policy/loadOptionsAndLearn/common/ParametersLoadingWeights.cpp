@@ -13,7 +13,7 @@
 
 #ifndef GRAPHICS_H
 #define GRAPHICS_H
-#include "../../../../src/common/Graphics.hpp"
+#include "../../../../../src/common/Graphics.hpp"
 #endif
 #ifndef PARAMETERS_H
 #define PARAMETERS_H
@@ -29,12 +29,13 @@
 #include <stdlib.h>
 
 void Parameters::printHelp(char** argv){
-	printf("Usage:    %s[OPTIONS]\n", argv[0]);
+	printf("Usage:    %s-s <SEED> -c <CONF_FILE> -r <ROM> -t <EIGEN_VECTOR> -i <EIGEN_VECTOR_STATS> -w <FREQ> -n 3 <EIG1> <EIG2> <EIG3>\n", argv[0]);
 	printf("   -s     %s[REQUIRED]%s seed to random number generator.\n", ANSI_COLOR_RED, ANSI_COLOR_RESET);
 	printf("   -c     %s[REQUIRED]%s path to file with configuration info.\n", ANSI_COLOR_RED, ANSI_COLOR_RESET);
 	printf("   -r     %s[REQUIRED]%s path to the rom to be played by the agent.\n", ANSI_COLOR_RED, ANSI_COLOR_RESET);
 	printf("   -t     %s[REQUIRED]%s path to file that contains the eigenvector description (for the reward).\n", ANSI_COLOR_RED, ANSI_COLOR_RESET);
 	printf("   -i     %s[REQUIRED]%s prefix path to files that contain mean and var. of the data (from SVD).\n", ANSI_COLOR_RED, ANSI_COLOR_RESET);
+	printf("   -n     %s[REQUIRED]%s The number of weights (representing options) have to be loaded. If 0, no weight file is loaded.\n", ANSI_COLOR_RED, ANSI_COLOR_RESET);
 	printf("   -w     If one wants to save intermediate weights, this is prefix to files that will store the agent's learned weights every FREQUENCY_SAVING episodes.\n");
 	printf("   -h     print this help and exit\n");
 	printf("\n");
@@ -61,6 +62,13 @@ Parameters::Parameters(int argc, char** argv){
 	if(this->getOptionRewardPath().compare("") == 0){
 		printHelp(argv);
 		exit(1);
+	}
+
+	if(this->getNumOptionsLoad() > 0){
+		for(int i = 0; i < this->getNumOptionsLoad(); i++){
+			int idx = argc - i - 1;
+			pathToOptionFiles.push_back(argv[idx]);
+		}
 	}
 }
 
@@ -91,7 +99,7 @@ std::vector<std::string> Parameters::parseLine(std::string line){
 
 void Parameters::readParameters(int argc, char* argv[]){
 	int option = 0;
-	while ((option = getopt(argc, argv, "c:r:s:t:w:i:h")) != -1)
+	while ((option = getopt(argc, argv, "c:r:s:t:w:i:n:h")) != -1)
 	{
 		if (option == -1){
 			break;
@@ -120,6 +128,9 @@ void Parameters::readParameters(int argc, char* argv[]){
 			case 'i':
 				this->setDataStatsPath(optarg);
 				break;
+			case 'n':
+				this->setNumOptionsLoad(atoi(optarg));
+				break;
 			case ':':
          	case '?':
          		fprintf(stderr, "Try `%s -h' for more information.\n", argv[0]);
@@ -133,7 +144,8 @@ void Parameters::readParameters(int argc, char* argv[]){
 	}
 	//Check if all parameters were properly set, otherwise interrupt	
 	if(this->getRomPath().compare("") == 0 || this->getConfigPath().compare("") == 0 || this->getSeed() == 0
-		|| (this->getToSaveWeightsAfterLearning() && this->getDataStatsPath().compare("") == 0)){
+		|| (this->getToSaveWeightsAfterLearning() && this->getDataStatsPath().compare("") == 0) 
+		|| (argc != 13 + this->getNumOptionsLoad() && argc != 15 + this->getNumOptionsLoad())){
 		printHelp(argv);
 		exit(-1);
 	}
@@ -231,35 +243,35 @@ void Parameters::setSeed(std::string name){
 	this->seed = atoi(name.c_str());
 }
 
-void Parameters::setAlpha(double a){
+void Parameters::setAlpha(float a){
 	this->alpha = a;
 }
 
-double Parameters::getAlpha(){
+float Parameters::getAlpha(){
 	return this->alpha;
 }
 
-void Parameters::setGamma(double a){
+void Parameters::setGamma(float a){
 	this->gamma = a;
 }
 
-double Parameters::getGamma(){
+float Parameters::getGamma(){
 	return this->gamma;
 }
 
-void Parameters::setEpsilon(double a){
+void Parameters::setEpsilon(float a){
 	this->epsilon = a;
 }
 
-double Parameters::getEpsilon(){
+float Parameters::getEpsilon(){
 	return this->epsilon;
 }
 
-void Parameters::setLambda(double a){
+void Parameters::setLambda(float a){
 	this->lambda = a;
 }
 
-double Parameters::getLambda(){
+float Parameters::getLambda(){
 	return this->lambda;
 }
 
@@ -335,11 +347,11 @@ int Parameters::isMinimalAction(){
 	return this->minimalAction;
 }
 
-double Parameters::getTraceThreshold(){
+float Parameters::getTraceThreshold(){
 	return this->traceThreshold;
 }
 
-void Parameters::setTraceThreshold(double a){
+void Parameters::setTraceThreshold(float a){
 	this->traceThreshold = a;
 }
 
@@ -421,4 +433,12 @@ void Parameters::setDataStatsPath(std::string name){
 
 std::string Parameters::getDataStatsPath(){
 	return this->pathToDataStatsPath;
+}
+
+void Parameters::setNumOptionsLoad(int a){
+	numOptionsLoad = a;
+}
+
+int Parameters::getNumOptionsLoad(){
+	return numOptionsLoad;
 }
