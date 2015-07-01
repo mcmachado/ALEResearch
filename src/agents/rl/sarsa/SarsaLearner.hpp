@@ -14,6 +14,8 @@
 #include "../RLLearner.hpp"
 #include <vector>
 #include <unordered_map>
+#include <cstdio>
+#include <cmath>
 
 class SarsaLearner : public RLLearner<bool>{
 	private:
@@ -23,12 +25,12 @@ class SarsaLearner : public RLLearner<bool>{
 
 		std::string nameWeightsFile, pathWeightsFileToLoad;
 
-		vector<int> F;					//Set of features active
-		vector<int> Fnext;              //Set of features active in next state
-		vector<double> Q;               //Q(a) entries
-		vector<double> Qnext;           //Q(a) entries for next action
-        vector<unordered_map<int,double> > e;      //Eligibility trace
-		vector<vector<double> > w;      //Theta, weights vector
+		std::vector<int> F;					//Set of features active
+		std::vector<int> Fnext;              //Set of features active in next state
+		std::vector<double> Q;               //Q(a) entries
+		std::vector<double> Qnext;           //Q(a) entries for next action
+                std::vector<std::unordered_map<int,double> > e;      //Eligibility trace
+		std::vector<std::vector<double> > w;      //Theta, weights vector
 
 		/**
  		* Constructor declared as private to force the user to instantiate SarsaLearner
@@ -46,23 +48,23 @@ class SarsaLearner : public RLLearner<bool>{
  		* It updates the vector<double> Q assuming that vector<int> F is filled, as it sums just the weights
  		* that are active in F.
  		*/
-		void updateQValues(vector<int> &Features, vector<double> &QValues);
+		void updateQValues(std::vector<int> &Features, T &QValues);
 		/**
  		* When using Replacing traces, all values not related to the current action are set to 0, while the
  		* values for the current action that their features are active are set to 1. The traces decay following
  		* the rule: e[action][i] = gamma * lambda * e[action][i]. It is possible to also define thresholding.
  		*/
-		void updateReplTrace(int action, vector<int> &Features);
+		void updateReplTrace(int action, std::vector<int> &Features);
 		/**
  		* When using Replacing traces, all values not related to the current action are set to 0, while the
  		* values for the current action that their features are active are added 1. The traces decay following
  		* the rule: e[action][i] = gamma * lambda * e[action][i]. It is possible to also define thresholding.
  		*/
-		void updateAcumTrace(int action, vector<int> &Features);
+		void updateAcumTrace(int action, std::vector<int> &Features);
 		/**
  		* Prints the weights in a file. Each line will contain a weight.
  		*/
-		void saveWeightsToFile(string suffix="");
+                void saveWeightsToFile(std::string suffix="");
 		/**
  		* Loads the weights saved in a file. Each line will contain a weight.
  		*/		

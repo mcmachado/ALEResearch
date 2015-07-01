@@ -28,7 +28,7 @@ TrueOnlineSarsaLearner<FeatureType>::TrueOnlineSarsaLearner(Environment<FeatureT
 		Q.push_back(0);
 		Qnext.push_back(0);
 		//Initialize e:
-		w.push_back(vector<double>(numFeatures, 0.0));
+		w.push_back(std::vector<double>(numFeatures, 0.0));
 	}
 
 	std::stringstream ss;
@@ -41,7 +41,7 @@ template<typename FeatureType>
 TrueOnlineSarsaLearner<FeatureType>::~TrueOnlineSarsaLearner(){}
 
 template<typename FeatureType>
-void TrueOnlineSarsaLearner<FeatureType>::updateQValues(vector<pair<int,FeatureType> > &Features, vector<double> &QValues){
+void TrueOnlineSarsaLearner<FeatureType>::updateQValues(std::vector<std::pair<int,FeatureType> > &Features, std::vector<double> &QValues){
 	for(int a = 0; a < this->numActions; a++){
 		double sumW = 0;
 		for(unsigned int i = 0; i < Features.size(); i++){
@@ -135,7 +135,7 @@ void TrueOnlineSarsaLearner<FeatureType>::dumpWeights(){
 
 template<typename FeatureType>
 void TrueOnlineSarsaLearner<FeatureType>::loadWeights(){
-	string line;
+    std::string line;
 	std::ifstream weightsFile (nameWeightsFile.c_str());
 	if(weightsFile.is_open()){
 		//TODO!!!!
@@ -150,7 +150,7 @@ template<typename FeatureType>
 void TrueOnlineSarsaLearner<FeatureType>::learnPolicy(Environment<FeatureType>& env){
 	
 	struct timeval tvBegin, tvEnd, tvDiff;
-	vector<double> reward;
+	std::vector<double> reward;
 	double elapsedTime;
 	double norm_a;
 	double q_old, delta_q;

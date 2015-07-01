@@ -31,7 +31,7 @@ SarsaLearner::SarsaLearner(Environment<bool>& env, Parameters *param) : RLLearne
 		Q.push_back(0);
 		Qnext.push_back(0);
 		//Initialize e:
-		w.push_back(vector<double>(numFeatures, 0.0));
+		w.push_back(std::vector<double>(numFeatures, 0.0));
 	}
 
 	if(toSaveWeightsAfterLearning){
@@ -47,7 +47,7 @@ SarsaLearner::SarsaLearner(Environment<bool>& env, Parameters *param) : RLLearne
 
 SarsaLearner::~SarsaLearner(){}
 
-void SarsaLearner::updateQValues(vector<int> &Features, vector<double> &QValues){
+void SarsaLearner::updateQValues(std::vector<int> &Features, std::vector<double> &QValues){
 	for(int a = 0; a < numActions; a++){
 		double sumW = 0;
 		for(unsigned int i = 0; i < Features.size(); i++){
@@ -57,7 +57,7 @@ void SarsaLearner::updateQValues(vector<int> &Features, vector<double> &QValues)
 	}
 }
 
-void SarsaLearner::updateReplTrace(int action, vector<int> &Features){
+void SarsaLearner::updateReplTrace(int action, std::vector<int> &Features){
 	//e <- gamma * lambda * e
     for(unsigned int a = 0; a < e.size(); a++){
         for (auto it = e[a].begin(); it != e[a].end() /* not hoisted */; /* no increment */)
@@ -83,7 +83,7 @@ void SarsaLearner::updateReplTrace(int action, vector<int> &Features){
 	}
 }
 
-void SarsaLearner::updateAcumTrace(int action, vector<int> &Features){
+void SarsaLearner::updateAcumTrace(int action, std::vector<int> &Features){
 	//e <- gamma * lambda * e
 	for(unsigned int a = 0; a < e.size(); a++){
         for (auto it = e[a].begin(); it != e[a].end() /* not hoisted */; /* no increment */)
@@ -119,7 +119,7 @@ void SarsaLearner::sanityCheck(){
 	}
 }
 
-void SarsaLearner::saveWeightsToFile(string suffix){
+void SarsaLearner::saveWeightsToFile(std::string suffix){
 	std::ofstream weightsFile ((nameWeightsFile + suffix).c_str());
 	if(weightsFile.is_open()){
 		weightsFile << w.size() << " " << w[0].size() << std::endl;

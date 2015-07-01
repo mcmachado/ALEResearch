@@ -19,7 +19,7 @@
 #define BITS_RAM     1024
 
 typedef unsigned char byte_t;
-
+using namespace std;
 RAMFeatures::RAMFeatures(){
 }
 

@@ -36,10 +36,10 @@ QLearner::QLearner(Environment<bool>& env, Parameters *param) : RLLearner<bool>(
 		Q.push_back(0);
 		Qnext.push_back(0);
 		//Initialize e:
-		e.push_back(vector<double>(numFeatures, 0.0));
-		w.push_back(vector<double>(numFeatures, 0.0));
+		e.push_back(std::vector<double>(numFeatures, 0.0));
+		w.push_back(std::vector<double>(numFeatures, 0.0));
 
-		nonZeroElig.push_back(vector<int>());
+		nonZeroElig.push_back(std::vector<int>());
 	}
 }
 
@@ -66,7 +66,7 @@ void QLearner::updateReplTrace(int action){
 	}
 }
 
-void QLearner::updateQValues(vector<int> &Features,vector<double> &QValues){
+void QLearner::updateQValues(std::vector<int> &Features,std::vector<double> &QValues){
 	for(int a = 0; a < numActions; a++){
 		double sumW = 0;
 		for(unsigned int i = 0; i < Features.size(); i++){
@@ -87,7 +87,7 @@ void QLearner::sanityCheck(){
 
 void QLearner::learnPolicy(Environment<bool>& env){
 	struct timeval tvBegin, tvEnd, tvDiff;
-	vector<double> reward;
+	std::vector<double> reward;
 	double elapsedTime;
 	double cumReward = 0, prevCumReward = 0;
 	unsigned int maxFeatVectorNorm = 1;

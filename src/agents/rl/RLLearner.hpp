@@ -40,7 +40,7 @@ class RLLearner : public Agent<FeatureType>{
  		* the reward to be used by the RL algorithm is returned; in the second position, the game score is
  		* returned.
  		*/
-    void act(Environment<FeatureType>& env, int action, vector<double> &reward);
+    void act(Environment<FeatureType>& env, int action, std::vector<double> &reward);
 
 		/**
  		* Implementation of an epsilon-greedy function. Epsilon is defined in the constructor,
@@ -48,7 +48,7 @@ class RLLearner : public Agent<FeatureType>{
  		*
  		* @return int action to be taken
  		*/
-		int epsilonGreedy(vector<double> &QValues);
+		int epsilonGreedy(std::vector<double> &QValues);
 
 		/**
 		* Constructor to be used by the RL classes to save the parameters that

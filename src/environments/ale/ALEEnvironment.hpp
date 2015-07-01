@@ -62,7 +62,7 @@ public:
     {
         std::vector<int> temp;
         getActiveFeaturesIndices(temp);
-        active_feat = std::vector<pair<int,bool> >(temp.size());
+        active_feat = std::vector<std::pair<int,bool> >(temp.size());
         for(unsigned i=0;i<temp.size();i++){
             active_feat[i] = {temp[i], true};
         }

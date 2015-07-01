@@ -17,7 +17,7 @@
 #endif
 
 #include "BasicFeatures.hpp"
-
+using namespace std;
 BASSFeatures::BASSFeatures(Parameters *param){
     this->param = param;
     numPureFeatures = this->param->getNumColumns() * this->param->getNumRows() * this->param->getNumColors();
@@ -26,7 +26,7 @@ BASSFeatures::BASSFeatures(Parameters *param){
 
 BASSFeatures::~BASSFeatures(){}
 
-void BASSFeatures::addPairwiseFeatures(vector<int>& features, int size){
+void BASSFeatures::addPairwiseFeatures(std::vector<int>& features, int size){
     assert(size > 0);
     int offset;
     
