@@ -14,6 +14,8 @@
 #include "svd/DimReduction.hpp"
 #include "control/ControlAgent.hpp"
 
+using namespace std;
+
 int main(int argc, char** argv){
 	Parameters param(argc, argv);
 
