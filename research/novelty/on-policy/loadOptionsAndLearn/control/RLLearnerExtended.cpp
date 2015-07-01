@@ -8,8 +8,6 @@
 #include "RLLearnerExtended.hpp"
 #endif
 
-#include "../../../../../src/features/RAMFeatures.hpp"
-
 #include <fstream>
 
 #define NUM_BITS 1024
@@ -25,6 +23,10 @@ RLLearner::RLLearner(ALEInterface& ale, Features *features, Parameters *param){
 	episodeLength       = param->getEpisodeLength();
 	numEpisodesEval     = param->getNumEpisodesEval();
 	totalNumberOfFramesToLearn = param->getLearningLength();
+
+	for(int i = 0; i < (ramFeatures.getNumberOfFeatures() - 1)*2; i++){
+		transitions.push_back(0);
+	}
 
 	//Get the number of effective actions:
 	if(param->isMinimalAction()){
@@ -108,6 +110,25 @@ int RLLearner::playOption(ALEInterface& ale, int option, Features *features,
 	return r_real;
 }
 
+void RLLearner::updateTransitionVector(vector<bool> F, vector<bool> Fnext, vector<float>& transitions){
+	int numTransitionFeatures = F.size();
+	
+	for(int i = 0; i < F.size(); i++){
+		if(!F[i] && Fnext[i]){ //0->1
+			transitions[i] = 1;
+		}
+		else{
+			transitions[i] = 0;	
+		}
+		if(F[i] && !Fnext[i]){ //1->0
+			transitions[i + numTransitionFeatures - 1] = 1;
+		}
+		else{
+			transitions[i + numTransitionFeatures - 1] = 0;	
+		}
+	}
+}
+
 /**
  * The first parameter is the one that is used by Sarsa. The second is used to
  * pass aditional information to the running algorithm (like 'real score' if one
@@ -116,76 +137,29 @@ int RLLearner::playOption(ALEInterface& ale, int option, Features *features,
 void RLLearner::act(ALEInterface& ale, int action, vector<float>& transitions, Features *features,
 	vector<float> &reward, vector<vector<vector<float> > > &learnedOptions){
 
-	if(action < numBasicActions){
-		float r_alg = 0.0, r_real = 0.0;
-		for(int i = 0; i < transitions.size(); i++){
-			transitions[i] = (transitions[i] - mean[i])/std[i];
-		}
-		r_real = ale.act(actions[action]);
-		if(toUseOnlyRewardSign){
-			if(r_real > 0){ 
-				r_alg = 1.0;
-			}
-			else if(r_real < 0){
-				r_alg = -1.0;
-			}
-		} else{
-			for(int i = 0; i < transitions.size(); i++){
-				//printf("%d: %d %d\n", i, option.size(), transitions.size());
-				//printf("%f %f\n", option[i], transitions[i]);
-				r_alg += option[i] * transitions[i];
-			}
-			if(toBeOptimistic){
-				r_alg = gamma - 1.0;
-			}
-		}
-		reward[0] = r_alg;
-		reward[1] = r_real;
+	float r_alg = 0.0, r_real = 0.0;
 
-		//If doing optimistic initialization, to avoid the agent
-		//to "die" soon to avoid -1 as reward at each step, when
-		//the agent dies we give him -1 for each time step remaining,
-		//this would be the worst case ever...
-		if(ale.game_over() && toBeOptimistic){
-			int missedSteps = episodeLength - ale.getEpisodeFrameNumber() + 1;
-			float penalty = pow(gamma, missedSteps) - 1;
-			reward[0] -= penalty;
-		}
-	}
+	FRam.clear();
+	ramFeatures.getCompleteFeatureVector(ale.getScreen(), ale.getRAM(), FRam);
+
+	if(action < numBasicActions){
+		r_real = ale.act(actions[action]);
+	} 
 	else{
 		int option_idx = action - numBasicActions;
-		float r_alg = 0.0, r_real = 0.0;
-		for(int i = 0; i < transitions.size(); i++){
-			transitions[i] = (transitions[i] - mean[i])/std[i];
-		}
 		r_real = playOption(ale, option_idx, features, learnedOptions);
-		if(toUseOnlyRewardSign){
-			if(r_real > 0){ 
-				r_alg = 1.0;
-			}
-			else if(r_real < 0){
-				r_alg = -1.0;
-			}
-		} else{
-			for(int i = 0; i < transitions.size(); i++){
-				r_alg += option[i] * transitions[i];
-			}
-			if(toBeOptimistic){
-				r_alg = gamma - 1.0;
-			}
-		}
-		reward[0] = r_alg;
-		reward[1] = r_real;
-
-		//If doing optimistic initialization, to avoid the agent
-		//to "die" soon to avoid -1 as reward at each step, when
-		//the agent dies we give him -1 for each time step remaining,
-		//this would be the worst case ever...
-		if(ale.game_over() && toBeOptimistic){
-			int missedSteps = episodeLength - ale.getEpisodeFrameNumber() + 1;
-			float penalty = pow(gamma, missedSteps) - 1;
-			reward[0] -= penalty;
-		}
 	}
+
+	FnextRam.clear();
+	ramFeatures.getCompleteFeatureVector(ale.getScreen(), ale.getRAM(), FnextRam);
+	updateTransitionVector(FRam, FnextRam, transitions);
+
+	for(int i = 0; i < transitions.size(); i++){
+		transitions[i] = (transitions[i] - mean[i])/std[i];
+		r_alg += option[i] * transitions[i];
+	}
+
+	reward[0] = r_alg;
+	reward[1] = r_real;
 }
 

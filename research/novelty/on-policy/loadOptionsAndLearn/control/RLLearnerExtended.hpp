@@ -11,8 +11,19 @@
 #include "AgentExtended.hpp"
 #endif
 
+#ifndef RAM_FEATURES_H
+#define RAM_FEATURES_H
+#include "../../../../../src/features/RAMFeatures.hpp"
+#endif
+
 class RLLearner : public Agent{
 	protected:
+
+		//For the use of options:
+		RAMFeatures ramFeatures;
+		vector<bool> FRam, FnextRam;
+		vector<float> transitions;
+
 		ActionVect actions;
 
 		vector<float> option;
@@ -67,6 +78,8 @@ class RLLearner : public Agent{
 		RLLearner(ALEInterface& ale, Features *features, Parameters *param);
 
 		int playOption(ALEInterface& ale, int option, Features *features, vector<vector<vector<float> > > &learnedOptions);
+
+		void updateTransitionVector(vector<bool> F, vector<bool> Fnext, vector<float>& transitions);
 
 	public:
 	   /**
