@@ -56,7 +56,7 @@ int main(int argc, char** argv){
     ALEEnvironment<BPROFeatures> env(&ale,&features);
 
 	//Instantiating the learning algorithm:
-	SarsaLearner sarsaLearner(env,&param);
+	TrueOnlineSarsaLearner<bool> sarsaLearner(env,&param);
     //Learn a policy:
     sarsaLearner.learnPolicy(env);
 
