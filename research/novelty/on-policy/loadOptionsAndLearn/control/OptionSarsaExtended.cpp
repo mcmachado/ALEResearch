@@ -12,7 +12,6 @@
 
 #include "OptionSarsaExtended.hpp"
 #include "../../../../../src/common/Timer.hpp"
-#include "../../../../../src/features/RAMFeatures.hpp"
 
 OptionSarsaExtended::OptionSarsaExtended(ALEInterface& ale, Features *features, Parameters *param) : RLLearner(ale, features, param) {
 	delta = 0.0;
@@ -166,25 +165,6 @@ void OptionSarsaExtended::loadWeights(){
 	}
 }
 
-void OptionSarsaExtended::updateTransitionVector(vector<bool> F, vector<bool> Fnext, vector<float>& transitions){
-	int numTransitionFeatures = F.size();
-	
-	for(int i = 0; i < F.size(); i++){
-		if(!F[i] && Fnext[i]){ //0->1
-			transitions[i] = 1;
-		}
-		else{
-			transitions[i] = 0;	
-		}
-		if(F[i] && !Fnext[i]){ //1->0
-			transitions[i + numTransitionFeatures - 1] = 1;
-		}
-		else{
-			transitions[i + numTransitionFeatures - 1] = 0;	
-		}
-	}
-}
-
 void OptionSarsaExtended::learnPolicy(ALEInterface& ale, Features *features, vector<vector<vector<float> > > &learnedOptions){
 	struct timeval tvBegin, tvEnd, tvDiff;
 	vector<float> reward;
@@ -193,11 +173,6 @@ void OptionSarsaExtended::learnPolicy(ALEInterface& ale, Features *features, vec
 	float cumIntrReward = 0, prevCumIntrReward = 0;
 	unsigned int maxFeatVectorNorm = 1;
 	sawFirstReward = 0; firstReward = 1.0;
-
-	//For the use of options:
-	RAMFeatures ramFeatures;
-	vector<bool> FRam, FnextRam;
-	vector<float> transitions((ramFeatures.getNumberOfFeatures() - 1)*2, 0);
 
 	//Repeat (for each episode):
 	int episode, totalNumberFrames = 0;
@@ -212,9 +187,7 @@ void OptionSarsaExtended::learnPolicy(ALEInterface& ale, Features *features, vec
 			nonZeroElig[a].clear();
 		}
 		F.clear();
-		FRam.clear();
 		features->getActiveFeaturesIndices(ale.getScreen(), ale.getRAM(), F);
-		ramFeatures.getCompleteFeatureVector(ale.getScreen(), ale.getRAM(), FRam);
 		updateQValues(F, Q);
 		currentAction = epsilonGreedy(Q);
 		//Repeat(for each step of episode) until game is over:
@@ -235,12 +208,9 @@ void OptionSarsaExtended::learnPolicy(ALEInterface& ale, Features *features, vec
 			if(!ale.game_over()){
 				//Obtain active features in the new state:
 				Fnext.clear();
-				FnextRam.clear();
 				features->getActiveFeaturesIndices(ale.getScreen(), ale.getRAM(), Fnext);
-				ramFeatures.getCompleteFeatureVector(ale.getScreen(), ale.getRAM(), FnextRam);
 				updateQValues(Fnext, Qnext);     //Update Q-values for the new active features
 				nextAction = epsilonGreedy(Qnext);
-				updateTransitionVector(FRam, FnextRam, transitions);
 			}
 			else{
 				nextAction = 0;
