@@ -26,9 +26,8 @@ class TrueOnlineSarsaLearner : public RLLearner<FeatureType>{
         vector<pair<int,FeatureType> > Fnext;              //Set of features active in next state
 		vector<double> Q;               //Q(a) entries
 		vector<double> Qnext;           //Q(a) entries for next action
-		vector<vector<double> > e;      //Eligibility trace
+        vector<unordered_map<int,double> > e;      //Eligibility trace
 		vector<vector<double> > w;      //Theta, weights vector
-		vector<vector<int> >nonZeroElig;//To optimize the implementation   
 
 		/**
  		* Constructor declared as private to force the user to instantiate TrueOnlineSarsaLearner
