@@ -24,12 +24,14 @@ class Parameters{
 		std::string pathToBackground;   //path to the file containing the game background
 		std::string modelPath;          //path to the file containing the model learned by the logistic regression
 		std::string fileWithWeights;    //path to the file that we will write the weights after we are done learning
+        std::string checkPointName;     //name to save the temporary local checkPoint
+        int toSaveCheckPoint;
 		std::string pathToWeightsFiles; //path to the file that we will load the weights from
-		double alpha;                   //learning rate
-		double gamma;                   //discount factor
-		double epsilon;                 //exploration probability
-		double lambda;                  //trace
-		double traceThreshold;          //threshold to make the trace zero, to avoid very small values
+		float alpha;                   //learning rate
+		float gamma;                   //discount factor
+		float epsilon;                 //exploration probability
+		float lambda;                  //trace
+		float traceThreshold;          //threshold to make the trace zero, to avoid very small values
 		int seed;                       //seed to be used by the random number generator
 		int display;                    //if it should display screen
 		int numEpisodesLearn;           //number of episodes to learn
@@ -123,23 +125,23 @@ class Parameters{
 		*/		
 		void setSeed(std::string name);
 		/**
- 		* @param double value that represents ALPHA in the config file
+ 		* @param float value that represents ALPHA in the config file
  		*/
-		void setAlpha(double a);
+		void setAlpha(float a);
 		/**
- 		* @param double value that represents GAMMA in the config file
+ 		* @param float value that represents GAMMA in the config file
  		*/
-		void setGamma(double a);
+		void setGamma(float a);
 		/**
- 		* @param double value that represents EPSILON in the config file
+ 		* @param float value that represents EPSILON in the config file
  		*/
-		void setEpsilon(double a);
+		void setEpsilon(float a);
 		/**
- 		* @param double value that represents LAMBDA in the config file
+ 		* @param float value that represents LAMBDA in the config file
  		*/
-		void setLambda(double a);
+		void setLambda(float a);
 		/**
- 		* @param int (representing double) value that represents DISPLAY in the config file.
+ 		* @param int (representing float) value that represents DISPLAY in the config file.
  		* If 1 the game will be shown, otherwise it is just run without graphical output.
  		*/
 		void setDisplay(int a);
@@ -177,15 +179,15 @@ class Parameters{
  		*/
 		void setIsMinimalAction(int a);
 		/**
- 		* @param double value that represents TRACE_THRESHOLD in the config file.
+ 		* @param float value that represents TRACE_THRESHOLD in the config file.
  		*/
-		void setTraceThreshold(double a);
+		void setTraceThreshold(float a);
 		/**
- 		* @param double value that represents USE_REWARD_SIGN in the config file.
+ 		* @param float value that represents USE_REWARD_SIGN in the config file.
  		*/
 		void setUseRewardSign(int a);
 		/**
- 		* @param double value that represents SUBTRACT_BACKGROUND in the config file.
+ 		* @param float value that represents SUBTRACT_BACKGROUND in the config file.
  		*/
 		void setSubtractBackground(int a);
 		/**
@@ -212,6 +214,8 @@ class Parameters{
 		* @param learningLength number of frames to be learned in total, e.g. 50,000,000 (DQN).
 		*/
 		void setLearningLength(int a);
+        void setToSaveCheckPoint(int a);
+        void setCheckPointName(std::string fileName);
 		
 	public:
 		/**
@@ -256,21 +260,21 @@ class Parameters{
 		*/
 		int getSeed();
 		/**
- 		* @return double value read for ALPHA parameter
+ 		* @return float value read for ALPHA parameter
  		*/
-		double getAlpha();
+		float getAlpha();
 		/**
- 		* @return double value read for GAMMA parameter
+ 		* @return float value read for GAMMA parameter
  		*/
-		double getGamma();
+		float getGamma();
 		/**
- 		* @return double value read for EPSILON parameter
+ 		* @return float value read for EPSILON parameter
  		*/
-		double getEpsilon();
+		float getEpsilon();
 		/**
- 		* @return double value read for LAMBDA parameter
+ 		* @return float value read for LAMBDA parameter
  		*/
-		double getLambda();
+		float getLambda();
 		/**
  		* @return int (representing bool) value read for DISPLAY parameter
  		* If 1 the game will be shown, otherwise it is just run without graphical output.
@@ -309,15 +313,15 @@ class Parameters{
  		*/
 		int isMinimalAction();
 		/**
-		* @return double value read for TRACE_THRESHOLD parameter
+		* @return float value read for TRACE_THRESHOLD parameter
 		*/ 
-		double getTraceThreshold();
+		float getTraceThreshold();
 		/**
-		* @return double value read for USE_REWARD_SIGN parameter
+		* @return float value read for USE_REWARD_SIGN parameter
 		*/ 
 		int getUseRewardSign();
 		/**
-		* @return double value read for SUBTRACT_BACKGROUND parameter
+		* @return float value read for SUBTRACT_BACKGROUND parameter
 		*/ 
 		int getSubtractBackground();
 		/**
@@ -344,4 +348,6 @@ class Parameters{
 		* @return int learningLength number of frames to be learned in total, e.g. 50,000,000 (DQN).
 		*/
 		int getLearningLength();
+        int getToSaveCheckPoint();
+        std::string getCheckPointName();
 };

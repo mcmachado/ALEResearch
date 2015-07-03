@@ -33,8 +33,8 @@ SarsaLearner::SarsaLearner(ALEInterface& ale, Features *features, Parameters *pa
 		Q.push_back(0);
 		Qnext.push_back(0);
 		//Initialize e:
-		e.push_back(vector<double>(numFeatures, 0.0));
-		w.push_back(vector<double>(numFeatures, 0.0));
+		e.push_back(vector<float>(numFeatures, 0.0));
+		w.push_back(vector<float>(numFeatures, 0.0));
 		nonZeroElig.push_back(vector<int>());
 	}
 
@@ -51,9 +51,9 @@ SarsaLearner::SarsaLearner(ALEInterface& ale, Features *features, Parameters *pa
 
 SarsaLearner::~SarsaLearner(){}
 
-void SarsaLearner::updateQValues(vector<int> &Features, vector<double> &QValues){
+void SarsaLearner::updateQValues(vector<int> &Features, vector<float> &QValues){
 	for(int a = 0; a < numActions; a++){
-		double sumW = 0;
+		float sumW = 0;
 		for(unsigned int i = 0; i < Features.size(); i++){
 			sumW += w[a][Features[i]];
 		}
@@ -156,7 +156,7 @@ void SarsaLearner::loadWeights(){
 	string line;
 	int nActions, nFeatures;
 	int i, j;
-	double value;
+	float value;
 
 	std::ifstream weightsFile (pathWeightsFileToLoad.c_str());
 	
@@ -172,9 +172,9 @@ void SarsaLearner::loadWeights(){
 void SarsaLearner::learnPolicy(ALEInterface& ale, Features *features){
 	
 	struct timeval tvBegin, tvEnd, tvDiff;
-	vector<double> reward;
-	double elapsedTime;
-	double cumReward = 0, prevCumReward = 0;
+	vector<float> reward;
+	float elapsedTime;
+	float cumReward = 0, prevCumReward = 0;
 	unsigned int maxFeatVectorNorm = 1;
 	sawFirstReward = 0; firstReward = 1.0;
 
@@ -242,11 +242,11 @@ void SarsaLearner::learnPolicy(ALEInterface& ale, Features *features){
 		}
 		gettimeofday(&tvEnd, NULL);
 		timeval_subtract(&tvDiff, &tvEnd, &tvBegin);
-		elapsedTime = double(tvDiff.tv_sec) + double(tvDiff.tv_usec)/1000000.0;
+		elapsedTime = float(tvDiff.tv_sec) + float(tvDiff.tv_usec)/1000000.0;
 		
-		double fps = double(ale.getEpisodeFrameNumber())/elapsedTime;
+		float fps = float(ale.getEpisodeFrameNumber())/elapsedTime;
 		printf("episode: %d,\t%.0f points,\tavg. return: %.1f,\t%d frames,\t%.0f fps\n",
-			episode + 1, cumReward - prevCumReward, (double)cumReward/(episode + 1.0),
+			episode + 1, cumReward - prevCumReward, (float)cumReward/(episode + 1.0),
 			ale.getEpisodeFrameNumber(), fps);
 		totalNumberFrames += ale.getEpisodeFrameNumber();
 		prevCumReward = cumReward;
@@ -265,11 +265,11 @@ void SarsaLearner::learnPolicy(ALEInterface& ale, Features *features){
 }
 
 void SarsaLearner::evaluatePolicy(ALEInterface& ale, Features *features){
-	double reward = 0;
-	double cumReward = 0; 
-	double prevCumReward = 0;
+	float reward = 0;
+	float cumReward = 0; 
+	float prevCumReward = 0;
 	struct timeval tvBegin, tvEnd, tvDiff;
-	double elapsedTime;
+	float elapsedTime;
 
 	//Repeat (for each episode):
 	for(int episode = 0; episode < numEpisodesEval; episode++){
@@ -286,11 +286,11 @@ void SarsaLearner::evaluatePolicy(ALEInterface& ale, Features *features){
 		}
 		gettimeofday(&tvEnd, NULL);
 		timeval_subtract(&tvDiff, &tvEnd, &tvBegin);
-		elapsedTime = double(tvDiff.tv_sec) + double(tvDiff.tv_usec)/1000000.0;
-		double fps = double(ale.getEpisodeFrameNumber())/elapsedTime;
+		elapsedTime = float(tvDiff.tv_sec) + float(tvDiff.tv_usec)/1000000.0;
+		float fps = float(ale.getEpisodeFrameNumber())/elapsedTime;
 
 		printf("episode: %d,\t%.0f points,\tavg. return: %.1f,\t%d frames,\t%.0f fps\n", 
-			episode + 1, (cumReward-prevCumReward), (double)cumReward/(episode + 1.0), ale.getEpisodeFrameNumber(), fps);
+			episode + 1, (cumReward-prevCumReward), (float)cumReward/(episode + 1.0), ale.getEpisodeFrameNumber(), fps);
 
 		ale.reset_game();
 		prevCumReward = cumReward;

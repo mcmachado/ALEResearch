@@ -15,8 +15,8 @@ class RLLearner : public Agent{
 	protected:
 		ActionVect actions;
 
-		double gamma, epsilon;
-		double firstReward;
+		float gamma, epsilon;
+		float firstReward;
 		bool   sawFirstReward;
 
 		int    toUseOnlyRewardSign, toBeOptimistic;
@@ -32,12 +32,12 @@ class RLLearner : public Agent{
  		*        actions, obtain simulator screen, RAM, etc.
  		* @param int action action to be taken
  		*
- 		* @param vector<double>& reward this vector is used to return, by reference, the reward observed
+ 		* @param vector<float>& reward this vector is used to return, by reference, the reward observed
  		* by executing the action defined as parameter. This vector has two positions: in the first position
  		* the reward to be used by the RL algorithm is returned; in the second position, the game score is
  		* returned.
  		*/
-		void act(ALEInterface& ale, int action, vector<double> &reward);
+		void act(ALEInterface& ale, int action, vector<float> &reward);
 
 		/**
  		* Implementation of an epsilon-greedy function. Epsilon is defined in the constructor,
@@ -45,7 +45,7 @@ class RLLearner : public Agent{
  		*
  		* @return int action to be taken
  		*/
-		int epsilonGreedy(vector<double> &QValues);
+		int epsilonGreedy(vector<float> &QValues);
 
 		/**
 		* Constructor to be used by the RL classes to save the parameters that

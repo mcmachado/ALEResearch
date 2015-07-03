@@ -30,7 +30,7 @@ RLLearner::RLLearner(ALEInterface& ale, Parameters *param){
 	numActions = actions.size();
 }
 
-int RLLearner::epsilonGreedy(vector<double> &QValues){
+int RLLearner::epsilonGreedy(vector<float> &QValues){
 	randomActionTaken = 0;
 
 	int action = Mathematics::argmax(QValues);
@@ -49,8 +49,8 @@ int RLLearner::epsilonGreedy(vector<double> &QValues){
  * pass aditional information to the running algorithm (like 'real score' if one
  * is using a surrogate reward function).
  */
-void RLLearner::act(ALEInterface& ale, int action, vector<double> &reward){
-	double r_alg = 0.0, r_real = 0.0;
+void RLLearner::act(ALEInterface& ale, int action, vector<float> &reward){
+	float r_alg = 0.0, r_real = 0.0;
 	
 	r_real = ale.act(actions[action]);
 	if(toUseOnlyRewardSign){
@@ -91,7 +91,7 @@ void RLLearner::act(ALEInterface& ale, int action, vector<double> &reward){
 	//this would be the worst case ever...
 	if(ale.game_over() && toBeOptimistic){
 		int missedSteps = episodeLength - ale.getEpisodeFrameNumber() + 1;
-		double penalty = pow(gamma, missedSteps) - 1;
+		float penalty = pow(gamma, missedSteps) - 1;
 		reward[0] -= penalty;
 	}
 }
