@@ -26,11 +26,11 @@ class Parameters{
 		std::string fileWithWeights;    //path to the file that we will write the weights after we are done learning
 		std::string pathToWeightsFiles; //path to the file that we will load the weights from
 		std::string pathToDataStatsPath;//path to the file with mean and variance of the dataset
-		float alpha;                   //learning rate
-		float gamma;                   //discount factor
-		float epsilon;                 //exploration probability
-		float lambda;                  //trace
-		float traceThreshold;          //threshold to make the trace zero, to avoid very small values
+		float alpha;                    //learning rate
+		float gamma;                    //discount factor
+		float epsilon;                  //exploration probability
+		float lambda;                   //trace
+		float traceThreshold;           //threshold to make the trace zero, to avoid very small values
 		int seed;                       //seed to be used by the random number generator
 		int display;                    //if it should display screen
 		int numEpisodesLearn;           //number of episodes to learn
