@@ -14,6 +14,7 @@ FLAGS := -O3 -I$(ALE)/src -I/opt/local/include -L$(ALE) -D_GNU_SOURCE=1 -D_REENT
 CXX := g++
 OUT_FILE1 := replay
 OUT_FILE2 := intrRewardOptionsFreq
+OUT_FILE3 := loadOptionsAndReplay
 
 # Search for library 'ale' and library 'z' when linking.
 LDFLAGS := -lale -lz -lm
@@ -23,13 +24,19 @@ ifeq ($(strip $(USE_SDL)), 1)
   LDFLAGS += -lSDL -lSDL_gfx -lSDL_image 
 endif
 
-all: replay intrRewardOptionsFreq
+all: replay intrRewardOptionsFreq loadOptionsAndReplay
 
 replay:                 main.o     BPROFeatures.o     Background.o
 	$(CXX) $(FLAGS) bin/main.o bin/BPROFeatures.o bin/Background.o $(LDFLAGS) -o $(OUT_FILE1) 
 
 intrRewardOptionsFreq:  intrRewardOptionsFreq.o     BPROFeatures.o     RAMFeatures.o     Background.o
 	$(CXX) $(FLAGS) bin/intrRewardOptionsFreq.o bin/BPROFeatures.o bin/RAMFeatures.o bin/Background.o $(LDFLAGS) -o $(OUT_FILE2) 
+
+loadOptionsAndReplay:   loadOptionsAndReplay.o     BPROFeatures.o     Background.o
+	$(CXX) $(FLAGS) bin/loadOptionsAndReplay.o bin/BPROFeatures.o bin/Background.o $(LDFLAGS) -o $(OUT_FILE3) 
+
+loadOptionsAndReplay.o: loadOptionsAndReplay.cpp
+	$(CXX) $(FLAGS) -c loadOptionsAndReplay.cpp -o bin/loadOptionsAndReplay.o
 
 intrRewardOptionsFreq.o: intrRewardOptionsFreq.cpp
 	$(CXX) $(FLAGS) -c intrRewardOptionsFreq.cpp -o bin/intrRewardOptionsFreq.o
