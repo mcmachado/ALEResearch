@@ -16,7 +16,7 @@ class GQLearner : public OffPolicyLearner
 {
 public:
     GQLearner(Parameters* param);
-    virtual void receiveSample(const std::vector<int>& features_current_state, float reward, const std::vector<int>& features_next_state) = 0;
+    virtual void receiveSample(const std::vector<int>& features_current_state, int action, float reward, const std::vector<int>& features_next_state, float proba_action_bpolicy);
 
 };
 
