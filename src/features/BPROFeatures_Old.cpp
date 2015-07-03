@@ -19,9 +19,7 @@
 
 #include <set>
 #include <assert.h>
-using namespace std;
-//#include <tuple>
-//#include <boost/tuple/tuple.hpp> //TODO: I have to remove this to not have to depend on boost
+#include <boost/tuple/tuple.hpp> //TODO: I have to remove this to not have to depend on boost
 
 BPROFeatures::BPROFeatures(Parameters *param){
     this->param = param;
@@ -37,26 +35,18 @@ BPROFeatures::BPROFeatures(Parameters *param){
 	//TODO: Fix this!
     numBasicFeatures = this->param->getNumColumns() * this->param->getNumRows() * this->param->getNumColors();
 	numRelativeFeatures = (2 * this->param->getNumColumns() - 1) * (2 * this->param->getNumRows() - 1) 
-							* (1+this->param->getNumColors()) * this->param->getNumColors()/2;
-    changed.clear();
-    bproExistence.resize(2*numRows-1);
-    for (int i=0;i<2*numRows-1;i++){
-        bproExistence[i].resize(2*numColumns-1);
-        for (int j=0;j<2*numColumns-1;j++){
-            bproExistence[i][j]=true;
-        }
-    }
+							* this->param->getNumColors() * this->param->getNumColors();
 }
 
 BPROFeatures::~BPROFeatures(){}
 
 int BPROFeatures::getBasicFeaturesIndices(const ALEScreen &screen, int blockWidth, int blockHeight, 
-                                          vector<vector<tuple<int,int> > > &whichColors, vector<int>& features){
+	vector<vector<vector<int> > > &whichColors, vector<int>& features){
 	int featureIndex = 0;
 	// For each pixel block
 	for (int by = 0; by < numRows; by++) {
 		for (int bx = 0; bx < numColumns; bx++) {
-			//vector<boost::tuple<int, int, int> > posAndColor;
+			vector<boost::tuple<int, int, int> > posAndColor;
 			
 			int xo = bx * blockWidth;
 			int yo = by * blockHeight;
@@ -76,15 +66,14 @@ int BPROFeatures::getBasicFeaturesIndices(const ALEScreen &screen, int blockWidt
 						}
 		  				
 		  				hasColor[pixel] = true;
-						//posAndColor.push_back(boost::make_tuple(x, y, pixel));
+						posAndColor.push_back(boost::make_tuple(x, y, pixel));
 					}
 				}
 			}
 
 			for(int c = 0; c < numColors; c++){
 				if(hasColor[c]){
-                    tuple<int,int> pos (by,bx);
-					whichColors[c].push_back(pos);
+					whichColors[bx][by].push_back(c);
 					features.push_back(featureIndex);
 				}
 				featureIndex++;
@@ -95,55 +84,85 @@ int BPROFeatures::getBasicFeaturesIndices(const ALEScreen &screen, int blockWidt
 }
 
 void BPROFeatures::addRelativeFeaturesIndices(const ALEScreen &screen, int featureIndex,
-	vector<vector<tuple<int,int> > > &whichColors, vector<int>& features){
+	vector<vector<vector<int> > > &whichColors, vector<int>& features){
 
 	int numRowOffsets = 2*numRows - 1;
 	int numColumnOffsets = 2*numColumns - 1;
 	int numOffsets = numRowOffsets*numColumnOffsets;
-	int numColorPairs = (1+numColors)*numColors/2;
-    
-    for (int c1=0;c1<numColors;c1++){
-        for (int k=0;k<whichColors[c1].size();k++){
-            for (int h=0;h<whichColors[c1].size();h++){
-                int rowDelta = get<0>(whichColors[c1][k])-get<0>(whichColors[c1][h]);
-                int columnDelta = get<1>(whichColors[c1][k])-get<1>(whichColors[c1][h]);
-                bool newBproFeature = false;
-                if (rowDelta>0){
-                    newBproFeature = true;
-                }else if (rowDelta==0 && columnDelta >=0){
-                    newBproFeature = true;
-                }
-                rowDelta+=numRows-1;
-                columnDelta+=numColumns-1;
-                if (newBproFeature && bproExistence[rowDelta][columnDelta]){
-                    tuple<int,int> pos (rowDelta,columnDelta);
-                    changed.push_back(pos);
-                    bproExistence[rowDelta][columnDelta]=false;
-                    features.push_back(numBasicFeatures+(numColors+numColors-c1+1)*c1/2*numRowOffsets*numColumnOffsets+rowDelta*numColumnOffsets+columnDelta);
-                    
-                }
-            }
-        }
-        resetBproExistence(bproExistence,changed);
+	int numColorPairs = numColors*numColors;
 
-        for (int c2=c1+1;c2<numColors;c2++){
-            if (whichColors[c1].size()>0 && whichColors[c2].size()>0){
-                for (vector<tuple<int,int> >::iterator it1=whichColors[c1].begin();it1!=whichColors[c1].end();it1++){
-                    for (vector<tuple<int,int> >::iterator it2=whichColors[c2].begin();it2!=whichColors[c2].end();it2++){
-                        int rowDelta = get<0>(*it1)-get<0>(*it2)+numRows-1;
-                        int columnDelta = get<1>(*it1)-get<1>(*it2)+numColumns-1;
-                        if (bproExistence[rowDelta][columnDelta]){
-                            tuple<int,int> pos(rowDelta,columnDelta);
-                            changed.push_back(pos);
-                            bproExistence[rowDelta][columnDelta]=false;
-                            features.push_back(numBasicFeatures+(numColors+numColors-c1+1)*c1/2*numRowOffsets*numColumnOffsets+(c2-c1)*numRowOffsets*numColumnOffsets+rowDelta*numColumnOffsets+columnDelta);
-                        }
-                    }
-                }
-            }
-            resetBproExistence(bproExistence,changed);
-        }
-    }    
+	vector<bool> colorPairSeen(numColorPairs, false);
+
+	vector<vector<bool> > colorOffsets(numOffsets, vector<bool>(numColorPairs, false));
+	vector<vector<bool> > rowOffsets(numRowOffsets, vector<bool>(numColorPairs, false));
+	vector<vector<bool> > columnOffsets(numColumnOffsets, vector<bool>(numColorPairs, false));
+	vector<vector<bool> > quadrantOffsets(8, vector<bool>(numColorPairs, false));
+	for(int bx = numColumns; bx--;){
+		for(int by = numRows; by--;){
+			for(int offX = numColumns; offX--;){
+				for(int offY = numRows; offY--;){
+					int xOff = offX - bx + numColumns - 1;
+					int yOff = offY - by + numRows - 1;
+					int offset = yOff*(2*numRows - 1) + xOff;
+
+					int numBColors = whichColors[bx][by].size();
+					int numOffColors = whichColors[offX][offY].size();
+					for(int c = numBColors; c--;){
+						int bColor = whichColors[bx][by][c];
+						for(int offC = numOffColors; offC--;){
+							int colorPair = bColor*numColors + whichColors[offX][offY][offC];
+							colorPairSeen[colorPair] = true;
+
+							colorOffsets[offset][colorPair] = true;
+							rowOffsets[yOff][colorPair] = true;
+							columnOffsets[xOff][colorPair] = true;
+							if(offX - bx > 0){
+								quadrantOffsets[0][colorPair] = true;
+								if(offY - by > 0){
+			     					quadrantOffsets[1][colorPair] = true;
+			   					}
+								else if(offY - by < 0){
+									quadrantOffsets[2][colorPair] = true;
+								}
+							}
+							else if(offX - bx < 0){
+								quadrantOffsets[3][colorPair] = true;
+								if(offY - by > 0){
+									quadrantOffsets[4][colorPair] = true;
+								}
+								else if(offY - by < 0){
+									quadrantOffsets[5][colorPair] = true;
+								}
+							}
+							if(offY - by > 0){
+								quadrantOffsets[6][colorPair] = true;
+							}
+							else if(offY - by < 0){
+								quadrantOffsets[7][colorPair] = true;
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	vector<int> seenColorPairs;
+	for(int i = 0; i < numColorPairs; i++){
+		if(colorPairSeen[i]){
+			seenColorPairs.push_back(i);
+		}
+	}
+
+	for(unsigned o = numOffsets; o--;){
+		for(unsigned i = 0; i < seenColorPairs.size(); i++){
+			int colorPair = seenColorPairs[i];
+			if(colorOffsets[o][colorPair]){
+				features.push_back(featureIndex + colorPair);
+			}
+		}
+		featureIndex += numColorPairs;
+	}
 }
 
 void BPROFeatures::getActiveFeaturesIndices(const ALEScreen &screen, const ALERAM &ram, vector<int>& features){
@@ -153,7 +172,7 @@ void BPROFeatures::getActiveFeaturesIndices(const ALEScreen &screen, const ALERA
 	int blockHeight = screenHeight / numRows;
 
 	assert(features.size() == 0); //If the vector is not empty this can be a mess
-    vector<vector<tuple<int,int> > > whichColors(numColors);
+	vector<vector<vector<int> > > whichColors(numColumns, vector<vector<int> >(numRows));
 
     //Before generating features we must check whether we can subtract the background:
     if(this->param->getSubtractBackground()){
@@ -167,16 +186,9 @@ void BPROFeatures::getActiveFeaturesIndices(const ALEScreen &screen, const ALERA
 	addRelativeFeaturesIndices(screen, featureIndex, whichColors, features);
 
 	//Bias
-	features.push_back(numBasicFeatures+numRelativeFeatures);
+	features.push_back(featureIndex);
 }
 
 int BPROFeatures::getNumberOfFeatures(){
     return numBasicFeatures + numRelativeFeatures + 1;
-}
-
-void BPROFeatures::resetBproExistence(vector<vector<bool> >& bproExistence, vector<tuple<int,int> >& changed){
-    for (vector<tuple<int,int> >::iterator it = changed.begin();it!=changed.end();it++){
-        bproExistence[get<0>(*it)][get<1>(*it)]=true;
-    }
-    changed.clear();
 }

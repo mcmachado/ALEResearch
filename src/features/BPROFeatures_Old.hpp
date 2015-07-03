@@ -17,10 +17,6 @@
 #include "Background.hpp"
 #endif
 
-#include<tuple>
-
-using namespace std;
-
 class BPROFeatures : public Features::Features{
 	private:
 		Parameters *param;
@@ -30,14 +26,10 @@ class BPROFeatures : public Features::Features{
     	int numRelativeFeatures;
     	int rowLess0Shift, row0Shift, rowMore0Shift;
         int numColumns, numRows, numColors;
-        vector<vector<bool> > bproExistence;
-        vector<tuple<int,int> > changed;
-    
-        int getBasicFeaturesIndices(const ALEScreen &screen, int blockWidth, int blockHeight,
-            vector<vector<tuple<int,int> > > &whichColors, vector<int>& features);
+        int getBasicFeaturesIndices(const ALEScreen &screen, int blockWidth, int blockHeight, 
+        							vector<vector<vector<int> > > &whichColors, vector<int>& features);
 		void addRelativeFeaturesIndices(const ALEScreen &screen, int featureIndex,
-            vector<vector<tuple<int,int> > > &whichColors, vector<int>& features);
-    void resetBproExistence(vector<vector<bool> >& bproExistence, vector<tuple<int,int> >& changed);
+									vector<vector<vector<int> > > &whichColors, vector<int>& features);
 	public:
 		/**
 		* Destructor, used to delete the background, which is allocated dynamically.
