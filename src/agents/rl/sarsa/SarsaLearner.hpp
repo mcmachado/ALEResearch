@@ -18,7 +18,7 @@
 #include <cmath>
 
 class SarsaLearner : public RLLearner<bool>{
-	private:
+private:
 		double alpha, delta, lambda, traceThreshold;
 		int numFeatures, currentAction, nextAction;
 		int toSaveWeightsAfterLearning, saveWeightsEveryXSteps;
@@ -48,7 +48,7 @@ class SarsaLearner : public RLLearner<bool>{
  		* It updates the vector<double> Q assuming that vector<int> F is filled, as it sums just the weights
  		* that are active in F.
  		*/
-		void updateQValues(std::vector<int> &Features, T &QValues);
+        void updateQValues(std::vector<int> &Features, std::vector<double> &QValues);
 		/**
  		* When using Replacing traces, all values not related to the current action are set to 0, while the
  		* values for the current action that their features are active are set to 1. The traces decay following

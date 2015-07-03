@@ -8,6 +8,7 @@
 #include <assert.h>
 #include <cstdlib>
 #include <vector>
+#include <numeric>
 namespace Mathematics
 {
 
@@ -35,6 +36,7 @@ int argmax(const T& array){
 	return indices[rand()%indices.size()];
 }
 
+#ifdef ARRAYFIRE
 template<>
 inline int argmax<af::array>(const af::array& in){
     af::array indices = af::where(in == af::max<float>(in));
@@ -44,23 +46,25 @@ inline int argmax<af::array>(const af::array& in){
     return ret[0];
 }
 
+
+template<>
+inline void fill<af::array>(af::array& array, float value){
+    array = af::constant(value,array.dims(),f32);
+}
+#endif
+    
 template<typename T>
 void fill(T& array, float value)
 {
     std::fill(array.begin(),array.end(),value);
 }
 
-template<>
-inline void fill<af::array>(af::array& array, float value){
-    array = af::constant(value,array.dims(),f32);
-}
-
 
 template<typename T>
-float weighted_sparse_dotprod(const T& vec,const vector<int>& mask, float weight)
+float weighted_sparse_dotprod(const T& vec,const std::vector<int>& mask, float weight)
 {
     return std::accumulate(mask.begin(),mask.end(), 0.0,
-                           [&weight](const float& elem, const int& id){
+                           [&weight,&vec](const float& elem, const int& id){
                                return elem + weight*vec[id];
                            });
 }

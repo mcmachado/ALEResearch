@@ -24,7 +24,7 @@ namespace Mathematics{
     void fill(T& array,float value);
 
     template<typename T>
-    float weighted_sparse_dotprod(const T& vec,const vector<int>& mask, float weight);
+    float weighted_sparse_dotprod(const T& vec,const std::vector<int>& mask, float weight);
 
 }
 #include "Mathematics.cpp"

@@ -31,6 +31,7 @@ class Parameters{
 		double epsilon;                 //exploration probability
 		double lambda;                  //trace
 		double traceThreshold;          //threshold to make the trace zero, to avoid very small values
+        double beta;                    //used for off - policy learning
 		int seed;                       //seed to be used by the random number generator
 		int display;                    //if it should display screen
 		int numEpisodesLearn;           //number of episodes to learn
@@ -345,6 +346,20 @@ class Parameters{
 		* @return int learningLength number of frames to be learned in total, e.g. 50,000,000 (DQN).
 		*/
 		int getLearningLength();
+
+        /** 
+        * @return the off-policy learning rate
+        */
+        double getBeta(){
+            return beta;
+        }
+        /** 
+        * set the off-policy learning rate
+        */
+        void setBeta(double b){
+            beta = b;
+        }
+    
 };
 
 

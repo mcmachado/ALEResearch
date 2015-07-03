@@ -138,7 +138,7 @@ void SarsaLearner::saveWeightsToFile(std::string suffix){
 }
 
 void SarsaLearner::loadWeights(){
-	string line;
+    std::string line;
 	int nActions, nFeatures;
 	int i, j;
 	double value;
@@ -157,7 +157,7 @@ void SarsaLearner::loadWeights(){
 void SarsaLearner::learnPolicy(Environment<bool>& env){
 	
 	struct timeval tvBegin, tvEnd, tvDiff;
-	vector<double> reward;
+    std::vector<double> reward;
 	double elapsedTime;
 	double cumReward = 0, prevCumReward = 0;
 	unsigned int maxFeatVectorNorm = 1;
@@ -234,13 +234,13 @@ void SarsaLearner::learnPolicy(Environment<bool>& env){
 		prevCumReward = cumReward;
 		env.reset();
 		if(toSaveWeightsAfterLearning && episode%saveWeightsEveryXSteps == 0 && episode > 0){
-			stringstream ss;
+            std::stringstream ss;
 			ss << episode;
 			saveWeightsToFile(ss.str());
 		}
 	}
 	if(toSaveWeightsAfterLearning){
-		stringstream ss;
+        std::stringstream ss;
 		ss << episode;
 		saveWeightsToFile(ss.str());
 	}

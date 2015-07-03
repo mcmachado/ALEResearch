@@ -10,14 +10,22 @@
 
 #ifndef GQLEARNER_H
 #define GQLEARNER_H
-
-
+#include <vector>
+#include <unordered_map>
+#include <numeric>
+#include "OffPolicyLearner.hpp"
+#include "../common/Parameters.hpp"
+#include "../common/Mathematics.hpp"
+#include <cassert>
 class GQLearner : public OffPolicyLearner
 {
 public:
-    GQLearner(Parameters* param);
-    virtual void receiveSample(const std::vector<int>& features_current_state, int action, float reward, const std::vector<int>& features_next_state, float proba_action_bpolicy);
+    GQLearner(unsigned numFeatures, unsigned numActions, Parameters* param);
+    virtual void receiveSample(const std::vector<int>& features_current_state, unsigned action, float reward, const std::vector<int>& features_next_state, float proba_action_bpolicy);
 
+protected:
+    std::vector<std::vector<float> > weights, aux_weights;
+    std::vector<std::unordered_map<unsigned,float> > e;
 };
 
 
