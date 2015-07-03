@@ -17,7 +17,7 @@
 #include <stdio.h>
 #include <math.h>
 
-TrueOnlineSarsaLearner::TrueOnlineSarsaLearner(ALEInterface& ale, Features *features, Parameters *param) : RLLearner(ale, param) {
+TrueOnlineSarsaLearner::TrueOnlineSarsaLearner(ALEInterface& ale, Features *features, Parameters *param, int seed) : RLLearner(ale, param, seed) {
 	delta = 0.0;
 	
 	alpha = param->getAlpha();

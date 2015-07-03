@@ -57,7 +57,7 @@ class QLearner : public RLLearner{
  		*/
 		void updateReplTrace(int action);
 	public:
-		QLearner(ALEInterface& ale, Features *features, Parameters *param);
+		QLearner(ALEInterface& ale, Features *features, Parameters *param, int seed);
 		/**
  		* Implementation of an agent controller. This implementation is Q(lambda).
  		*

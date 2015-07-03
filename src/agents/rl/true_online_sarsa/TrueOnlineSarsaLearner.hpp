@@ -66,7 +66,7 @@ class TrueOnlineSarsaLearner : public RLLearner{
  		*/		
 		void loadWeights();
 	public:
-		TrueOnlineSarsaLearner(ALEInterface& ale, Features *features, Parameters *param);
+		TrueOnlineSarsaLearner(ALEInterface& ale, Features *features, Parameters *param, int seed);
 		/**
  		* Implementation of an agent controller. This implementation is Sarsa(lambda).
  		*
