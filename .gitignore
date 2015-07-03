@@ -52,3 +52,4 @@ research/novelty/on-policy/loadAndLearn
 research/novelty/on-policy/run.sh
 research/novelty/on-policy/loadOptionsAndLearn/bin/
 research/novelty/on-policy/loadOptionsAndLearn/sarsaLoadWeightsProxyOption
+tools/replay/loadOptionsAndReplay
