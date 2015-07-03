@@ -78,7 +78,7 @@ class SarsaLearner : public RLLearner{
         void saveCheckPoint(int episode, int totalNumberFrames,  vector<float>& episodeResults, int& frequency, vector<int>& episodeFrames, vector<double>& episodeFps);
         void loadCheckPoint(ifstream& checkPointToLoad);
     public:
-		SarsaLearner(ALEInterface& ale, Features *features, Parameters *param,int seed);
+		SarsaLearner(ALEInterface& ale, Features *features, Parameters *param, int seed);
 		/**
  		* Implementation of an agent controller. This implementation is Sarsa(lambda).
  		*

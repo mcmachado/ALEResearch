@@ -36,7 +36,7 @@ void Parameters::printHelp(char** argv){
 	printf("   -t     %s[REQUIRED IF SAVE_TRAJECTORY = 1]%s path to file that will store the agent's trajectory.\n", ANSI_COLOR_RED, ANSI_COLOR_RESET);
 	printf("   -w     If one wants to save intermediate weights, this is prefix to files that will store the agent's learned weights every FREQUENCY_SAVING episodes.\n");
 	printf("   -l     If one wants to load an stored set of weights, this should contain the path to such file.\n");
-    printf("    -n    If oen wants to save temporary intermediate weights locally, and then let the server to grap check points from local hosts, then this is required. Please provide the name of the job.\n");
+    printf("    -n    If one wants to save temporary intermediate weights locally, and then let the server to grab check points from local hosts, then this is required. Please provide the name of the job.\n");
 	printf("   -h     Print this help and exit\n");
 	printf("\n");
 }
@@ -445,3 +445,4 @@ void Parameters::setToSaveCheckPoint(int a){
 int Parameters::getToSaveCheckPoint(){
     return this->toSaveCheckPoint;
 }
+
