@@ -21,7 +21,7 @@
 #include <stdio.h>
 #include <math.h>
 
-QLearner::QLearner(ALEInterface& ale, Features *features, Parameters *param) : RLLearner(ale, param) {
+QLearner::QLearner(ALEInterface& ale, Features *features, Parameters *param, int seed) : RLLearner(ale, param, seed) {
 	delta = 0.0;
 	traceThreshold = param->getTraceThreshold();
 	alpha = param->getAlpha();

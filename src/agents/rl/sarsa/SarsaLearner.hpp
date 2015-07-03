@@ -69,7 +69,7 @@ class SarsaLearner : public RLLearner{
  		*/		
 		void loadWeights();
 	public:
-		SarsaLearner(ALEInterface& ale, Features *features, Parameters *param);
+		SarsaLearner(ALEInterface& ale, Features *features, Parameters *param, int seed);
 		/**
  		* Implementation of an agent controller. This implementation is Sarsa(lambda).
  		*

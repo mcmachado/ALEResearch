@@ -6,9 +6,10 @@
 #ifndef RL_LEARNER_H
 #define RL_LEARNER_H
 #include "RLLearner.hpp"
+#include <random>
 #endif
 
-RLLearner::RLLearner(ALEInterface& ale, Parameters *param){
+RLLearner::RLLearner(ALEInterface& ale, Parameters *param, int seed){
 	randomActionTaken   = 0;
 
 	gamma               = param->getGamma();
@@ -28,6 +29,7 @@ RLLearner::RLLearner(ALEInterface& ale, Parameters *param){
 		actions = ale.getLegalActionSet();
 	}
 	numActions = actions.size();
+    agentRand.seed(seed);
 }
 
 int RLLearner::epsilonGreedy(vector<float> &QValues){
@@ -35,11 +37,11 @@ int RLLearner::epsilonGreedy(vector<float> &QValues){
 
 	int action = Mathematics::argmax(QValues);
 	//With probability epsilon: a <- random action in A(s)
-	int random = rand();
+	int random = agentRand();
 	if((random % int(nearbyint(1.0/epsilon))) == 0) {
-	//if((rand()%int(1.0/epsilon)) == 0){
+        //if((rand()%int(1.0/epsilon)) == 0){
 		randomActionTaken = 1;
-		action = rand() % numActions;
+		action = agentRand() % numActions;
 	}
 	return action;
 }
@@ -50,7 +52,7 @@ int RLLearner::epsilonGreedy(vector<float> &QValues){
  * is using a surrogate reward function).
  */
 void RLLearner::act(ALEInterface& ale, int action, vector<float> &reward){
-	float r_alg = 0.0, r_real = 0.0;
+	double r_alg = 0.0, r_real = 0.0;
 	
 	r_real = ale.act(actions[action]);
 	if(toUseOnlyRewardSign){
@@ -91,7 +93,7 @@ void RLLearner::act(ALEInterface& ale, int action, vector<float> &reward){
 	//this would be the worst case ever...
 	if(ale.game_over() && toBeOptimistic){
 		int missedSteps = episodeLength - ale.getEpisodeFrameNumber() + 1;
-		float penalty = pow(gamma, missedSteps) - 1;
+		double penalty = pow(gamma, missedSteps) - 1;
 		reward[0] -= penalty;
 	}
 }

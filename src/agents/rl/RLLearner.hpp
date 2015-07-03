@@ -10,6 +10,7 @@
 #define AGENT_H
 #include "../Agent.hpp"
 #endif
+#include <random>
 
 class RLLearner : public Agent{
 	protected:
@@ -23,6 +24,7 @@ class RLLearner : public Agent{
 		int    randomActionTaken, numActions;
 		int    episodeLength, numEpisodesEval;
 		int    totalNumberOfFramesToLearn;
+        mt19937 agentRand;
 
 		/**
  		* It acts in the environment and makes the proper operations in the reward signal (normalizing,
@@ -32,7 +34,7 @@ class RLLearner : public Agent{
  		*        actions, obtain simulator screen, RAM, etc.
  		* @param int action action to be taken
  		*
- 		* @param vector<float>& reward this vector is used to return, by reference, the reward observed
+ 		* @param vector<double>& reward this vector is used to return, by reference, the reward observed
  		* by executing the action defined as parameter. This vector has two positions: in the first position
  		* the reward to be used by the RL algorithm is returned; in the second position, the game score is
  		* returned.
@@ -57,7 +59,7 @@ class RLLearner : public Agent{
  		*        file and command line.
  		*
 		*/
-		RLLearner(ALEInterface& ale, Parameters *param);
+		RLLearner(ALEInterface& ale, Parameters *param, int seed);
 
 	public:
 	   /**
