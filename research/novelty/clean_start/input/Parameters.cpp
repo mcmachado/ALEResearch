@@ -15,7 +15,7 @@
 #include <stdlib.h>
 
 void Parameters::printHelp(char** argv){
-	printf("Usage:    %s-s <SEED> -c <CONF_FILE> -r <ROM>\n", argv[0]);
+	printf("Usage:    %s -s <SEED> -c <CONF_FILE> -r <ROM>\n", argv[0]);
 	printf("   -s     %s[REQUIRED]%s seed to random number generator.\n", ANSI_COLOR_RED, ANSI_COLOR_RESET);
 	printf("   -c     %s[REQUIRED]%s path to file with configuration info.\n", ANSI_COLOR_RED, ANSI_COLOR_RESET);
 	printf("   -r     %s[REQUIRED]%s path to the rom to be played by the agent.\n", ANSI_COLOR_RED, ANSI_COLOR_RESET);
@@ -113,6 +113,7 @@ void Parameters::parseParametersFromConfigFile(string cfgFileName){
 
 	//Execution parameters:
 	display                = atoi(parameters["DISPLAY"             ].c_str());
+	numIterations          = atoi(parameters["NUM_ITERATIONS"      ].c_str());
 	episodeLength          = atoi(parameters["EPISODE_LENGTH"      ].c_str());
 	learningLength         = atoi(parameters["TOTAL_FRAMES_LEARN"  ].c_str());
 	isMinimalAction        = atoi(parameters["USE_MIN_ACTIONS"     ].c_str());
