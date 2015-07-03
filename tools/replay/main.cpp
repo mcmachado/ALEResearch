@@ -142,18 +142,7 @@ int main(int argc, char** argv){
 	readParameters(argc, argv);
 	srand(seed);
 
-	//Initializing ALE:
-	ALEInterface ale(1);
-	ale.setFloat("frame_skip", NUM_STEPS_PER_ACTION);
-	ale.setFloat("stochasticity", STOCHASTICITY);
-	ale.setInt("random_seed", seed);
-	ale.setInt("max_num_frames_per_episode", MAX_LENGTH_EPISODE);
-	ale.loadROM(romPath.c_str());
-
-	//Initializing useful things to agent:
-	BPROFeatures features;
-	actions     = ale.getLegalActionSet();
-	numActions  = actions.size();
+	numActions = 18;
 	numFeatures = NUM_COLUMNS * NUM_ROWS * NUM_COLORS 
 					+ (2 * NUM_COLUMNS - 1) * (2 * NUM_ROWS - 1) * NUM_COLORS * NUM_COLORS + 1;
 
@@ -165,6 +154,36 @@ int main(int argc, char** argv){
 
 	loadWeights(wgtPath);
 	int reward = 0;
+
+	//Initializing ALE:
+	ALEInterface ale;
+
+	ale.setBool("display_screen", true);
+	ale.setBool("sound", true);
+	ale.setFloat("frame_skip", NUM_STEPS_PER_ACTION);
+	ale.setFloat("stochasticity", STOCHASTICITY);
+	ale.setInt("random_seed", seed);
+	ale.setInt("max_num_frames_per_episode", MAX_LENGTH_EPISODE);
+
+	std::string recordPath = "record";
+    std::cout << std::endl;
+
+    // Set record flags
+    ale.setString("record_screen_dir", recordPath.c_str());
+    ale.setString("record_sound_filename", (recordPath + "/sound.wav").c_str());
+    // We set fragsize to 64 to ensure proper sound sync 
+    ale.setInt("fragsize", 64);
+
+    // Not completely portable, but will work in most cases
+    std::string cmd = "mkdir ";
+    cmd += recordPath; 
+    system(cmd.c_str());
+
+    ale.loadROM(romPath.c_str());
+	//Initializing useful things to agent:
+	BPROFeatures features;
+	actions     = ale.getLegalActionSet();
+	numActions  = actions.size();
 
 	while(!ale.game_over()){
 		//Get state and features active on that state:		
