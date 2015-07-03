@@ -8,9 +8,9 @@
 ** Author: Marlos C. Machado
 ***************************************************************************************/
 
-#ifndef BPRO_FEATURES_H
-#define BPRO_FEATURES_H
-#include "BPROFeatures.hpp"
+#ifndef TIME_FEATURES_H
+#define TIME_FEATURES_H
+#include "TimeFeatures.hpp"
 #endif
 #ifndef BASIC_FEATURES_H
 #define BASIC_FEATURES_H
@@ -23,7 +23,7 @@ using namespace std;
 //#include <tuple>
 //#include <boost/tuple/tuple.hpp> //TODO: I have to remove this to not have to depend on boost
 
-BPROFeatures::BPROFeatures(Parameters *param){
+TimeFeatures::TimeFeatures(Parameters *param){
     this->param = param;
     numColumns  = param->getNumColumns();
 	numRows     = param->getNumRows();
@@ -38,6 +38,7 @@ BPROFeatures::BPROFeatures(Parameters *param){
     numBasicFeatures = this->param->getNumColumns() * this->param->getNumRows() * this->param->getNumColors();
 	numRelativeFeatures = (2 * this->param->getNumColumns() - 1) * (2 * this->param->getNumRows() - 1) 
 							* (1+this->param->getNumColors()) * this->param->getNumColors()/2;
+    numTimeDimensionalOffsets = this->param->getNumColumns() * this->param->getNumColors() *(2 * this->param->getNumColumns() - 1) * (2 * this->param->getNumRows() - 1) ;
     changed.clear();
     bproExistence.resize(2*numRows-1);
     for (int i=0;i<2*numRows-1;i++){
@@ -48,9 +49,9 @@ BPROFeatures::BPROFeatures(Parameters *param){
     }
 }
 
-BPROFeatures::~BPROFeatures(){}
+TimeFeatures::~TimeFeatures(){}
 
-int BPROFeatures::getBasicFeaturesIndices(const ALEScreen &screen, int blockWidth, int blockHeight, 
+int TimeFeatures::getBasicFeaturesIndices(const ALEScreen &screen, int blockWidth, int blockHeight,
                                           vector<vector<tuple<int,int> > > &whichColors, vector<int>& features){
 	int featureIndex = 0;
 	// For each pixel block
@@ -94,7 +95,7 @@ int BPROFeatures::getBasicFeaturesIndices(const ALEScreen &screen, int blockWidt
 	return featureIndex;
 }
 
-void BPROFeatures::addRelativeFeaturesIndices(const ALEScreen &screen, int featureIndex,
+void TimeFeatures::addRelativeFeaturesIndices(const ALEScreen &screen, int featureIndex,
 	vector<vector<tuple<int,int> > > &whichColors, vector<int>& features){
 
 	int numRowOffsets = 2*numRows - 1;
@@ -146,7 +147,32 @@ void BPROFeatures::addRelativeFeaturesIndices(const ALEScreen &screen, int featu
     }    
 }
 
-void BPROFeatures::getActiveFeaturesIndices(const ALEScreen &screen, const ALERAM &ram, vector<int>& features){
+void TimeFeatures::addTimeOffsetsIndices(vector<vector<tuple<int,int> > > &whichColors, vector<int>& features){
+    int numRowOffsets = 2*numRows - 1;
+    int numColumnOffsets = 2*numColumns - 1;
+    for (int c1=0;c1<numColors;c1++){
+        for (int c2=0;c2<numColors;c2++){
+            if (previousColors[c1].size()>0 && whichColors[c2].size()>0){
+                for (vector<tuple<int,int> >::iterator it1=previousColors[c1].begin();it1!=previousColors[c1].end();it1++){
+                    for (vector<tuple<int,int> >::iterator it2=whichColors[c2].begin();it2!=whichColors[c2].end();it2++){
+                        int rowDelta = get<0>(*it1)-get<0>(*it2)+numRows-1;
+                        int columnDelta = get<1>(*it1)-get<1>(*it2)+numColumns-1;
+                        if (bproExistence[rowDelta][columnDelta]){
+                            tuple<int,int> pos(rowDelta,columnDelta);
+                            changed.push_back(pos);
+                            bproExistence[rowDelta][columnDelta]=false;
+                            features.push_back(numBasicFeatures+numRelativeFeatures+c1*numColors*numRowOffsets*numColumnOffsets+c2*numRowOffsets*numColumnOffsets+rowDelta*numColumnOffsets+columnDelta);
+                        }
+                    }
+                }
+            }
+            resetBproExistence(bproExistence,changed);
+        }
+    }
+}
+
+
+void TimeFeatures::getActiveFeaturesIndices(const ALEScreen &screen, const ALERAM &ram, vector<int>& features){
 	int screenWidth = screen.width();
 	int screenHeight = screen.height();
 	int blockWidth = screenWidth / numColumns;
@@ -165,16 +191,19 @@ void BPROFeatures::getActiveFeaturesIndices(const ALEScreen &screen, const ALERA
     //We don't just use the Basic implementation because we need the whichColors information
 	int featureIndex = getBasicFeaturesIndices(screen, blockWidth, blockHeight, whichColors, features);
 	addRelativeFeaturesIndices(screen, featureIndex, whichColors, features);
+    if (previousColors.size()!=0){
+        addTimeOffsetsIndices(whichColors,features);
+    }
 
 	//Bias
-	features.push_back(numBasicFeatures+numRelativeFeatures);
+	features.push_back(numBasicFeatures+numRelativeFeatures+numTimeDimensionalOffsets);
 }
 
-int BPROFeatures::getNumberOfFeatures(){
+int TimeFeatures::getNumberOfFeatures(){
     return numBasicFeatures + numRelativeFeatures + 1;
 }
 
-void BPROFeatures::resetBproExistence(vector<vector<bool> >& bproExistence, vector<tuple<int,int> >& changed){
+void TimeFeatures::resetBproExistence(vector<vector<bool> >& bproExistence, vector<tuple<int,int> >& changed){
     for (vector<tuple<int,int> >::iterator it = changed.begin();it!=changed.end();it++){
         bproExistence[get<0>(*it)][get<1>(*it)]=true;
     }
