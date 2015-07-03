@@ -36,6 +36,7 @@ void Parameters::printHelp(char** argv){
 	printf("   -t     %s[REQUIRED IF SAVE_TRAJECTORY = 1]%s path to file that will store the agent's trajectory.\n", ANSI_COLOR_RED, ANSI_COLOR_RESET);
 	printf("   -w     If one wants to save intermediate weights, this is prefix to files that will store the agent's learned weights every FREQUENCY_SAVING episodes.\n");
 	printf("   -l     If one wants to load an stored set of weights, this should contain the path to such file.\n");
+    printf("    -n    If one wants to save temporary intermediate weights locally, and then let the server to grab check points from local hosts, then this is required. Please provide the name of the job.\n");
 	printf("   -h     Print this help and exit\n");
 	printf("\n");
 }
@@ -93,7 +94,8 @@ void Parameters::readParameters(int argc, char* argv[]){
 	int option = 0;
 	this->setToLoadWeights(0);
 	this->setToSaveWeightsAfterLearning(0);
-	while ((option = getopt(argc, argv, "c:r:s:t:w:l:h")) != -1)
+    this->setToSaveCheckPoint(0);
+	while ((option = getopt(argc, argv, "c:r:s:t:w:l:n:h")) != -1)
 	{
 		if (option == -1){
 			break;
@@ -123,6 +125,10 @@ void Parameters::readParameters(int argc, char* argv[]){
 				this->setPathToWeightsFiles(optarg);
 				this->setToLoadWeights(1);
 				break;
+            case 'n':
+                this->setCheckPointName(optarg);
+                this->setToSaveCheckPoint(1);
+                break;
 			case ':':
          	case '?':
          		fprintf(stderr, "Try `%s -h' for more information.\n", argv[0]);
@@ -232,35 +238,35 @@ void Parameters::setSeed(std::string name){
 	this->seed = atoi(name.c_str());
 }
 
-void Parameters::setAlpha(double a){
+void Parameters::setAlpha(float a){
 	this->alpha = a;
 }
 
-double Parameters::getAlpha(){
+float Parameters::getAlpha(){
 	return this->alpha;
 }
 
-void Parameters::setGamma(double a){
+void Parameters::setGamma(float a){
 	this->gamma = a;
 }
 
-double Parameters::getGamma(){
+float Parameters::getGamma(){
 	return this->gamma;
 }
 
-void Parameters::setEpsilon(double a){
+void Parameters::setEpsilon(float a){
 	this->epsilon = a;
 }
 
-double Parameters::getEpsilon(){
+float Parameters::getEpsilon(){
 	return this->epsilon;
 }
 
-void Parameters::setLambda(double a){
+void Parameters::setLambda(float a){
 	this->lambda = a;
 }
 
-double Parameters::getLambda(){
+float Parameters::getLambda(){
 	return this->lambda;
 }
 
@@ -336,11 +342,11 @@ int Parameters::isMinimalAction(){
 	return this->minimalAction;
 }
 
-double Parameters::getTraceThreshold(){
+float Parameters::getTraceThreshold(){
 	return this->traceThreshold;
 }
 
-void Parameters::setTraceThreshold(double a){
+void Parameters::setTraceThreshold(float a){
 	this->traceThreshold = a;
 }
 
@@ -423,3 +429,20 @@ int Parameters::getLearningLength(){
 void Parameters::setLearningLength(int a){
 	this->learningLength = a;
 }
+
+void Parameters::setCheckPointName(std::string fileName){
+    this->checkPointName = fileName;
+}
+
+std::string Parameters::getCheckPointName(){
+    return this->checkPointName;
+}
+
+void Parameters::setToSaveCheckPoint(int a){
+    this->toSaveCheckPoint = a;
+}
+
+int Parameters::getToSaveCheckPoint(){
+    return this->toSaveCheckPoint;
+}
+
