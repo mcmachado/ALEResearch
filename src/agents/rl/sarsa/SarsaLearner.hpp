@@ -19,9 +19,14 @@ class SarsaLearner : public RLLearner{
 	private:
 		float alpha, delta, lambda, traceThreshold;
 		int numFeatures, currentAction, nextAction;
-		int toSaveWeightsAfterLearning, saveWeightsEveryXSteps;
+		int toSaveWeightsAfterLearning, saveWeightsEveryXSteps, toSaveCheckPoint;
 
 		std::string nameWeightsFile, pathWeightsFileToLoad;
+		std::string checkPointName;
+        std::string nameForLearningCondition;
+        int episodePassed;
+        int totalNumberFrames;
+        unsigned int maxFeatVectorNorm;
 
 		vector<int> F;					//Set of features active
 		vector<int> Fnext;              //Set of features active in next state
@@ -30,6 +35,7 @@ class SarsaLearner : public RLLearner{
 		vector<vector<float> > e;      //Eligibility trace
 		vector<vector<float> > w;      //Theta, weights vector
 		vector<vector<int> >nonZeroElig;//To optimize the implementation
+		vector<vector<int> > featureSeen;
 
 		/**
  		* Constructor declared as private to force the user to instantiate SarsaLearner
@@ -68,6 +74,8 @@ class SarsaLearner : public RLLearner{
  		* Loads the weights saved in a file. Each line will contain a weight.
  		*/		
 		void loadWeights();
+		void saveCheckPoint(int episode, int totalNumberFrames,  vector<float>& episodeResults, int& frequency, vector<int>& episodeFrames, vector<double>& episodeFps);
+        void loadCheckPoint(ifstream& checkPointToLoad);
 	public:
 		SarsaLearner(ALEInterface& ale, Features *features, Parameters *param, int seed);
 		/**
