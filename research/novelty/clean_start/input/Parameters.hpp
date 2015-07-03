@@ -35,11 +35,12 @@ class Parameters{
 
 		int seed;                       //seed to be used by the random number generator
 		int display;                    //if it should display screen
+		int numIterations;              //number of times I am going to iterate over all steps in my algorithm
 		int episodeLength;              //length of a single episode
 		int learningLength;             //The number of frames to be learned, in total
 		int isMinimalAction;            //use only valid actions for the game or all the Atari legal actions
 		int numStepsPerAction;          //number of frames the agent perfoms similarly to speed-up the game
-		int frequencySavingWeights;     //If we are asked to save the weights, We need to know how many frames to wait until saving them again
+		int frequencySavingWeights;     //If we are asked to save the weights, we need to know how frequently (in frames)
 
 		int numRows;                    //number of rows for feature representation
 		int numColumns;                 //number of columns for feature representation

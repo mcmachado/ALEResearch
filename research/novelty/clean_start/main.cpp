@@ -10,20 +10,40 @@
 ** Author: Marlos C. Machado                                                           **
 *****************************************************************************************/
 
+#include <ale_interface.hpp>
+
 #include "input/Parameters.hpp"
 #include "svd/DimReduction.hpp"
 #include "control/ControlAgent.hpp"
 
 using namespace std;
 
-int main(int argc, char** argv){
-	Parameters param(argc, argv);
+void initializeALE(ALEInterface &ale, const Parameters param){
+	ale.setInt  ("random_seed"               , param.seed);
+	ale.setInt  ("max_num_frames_per_episode", param.episodeLength);
+	ale.setBool ("sound"                     , param.display);
+	ale.setBool ("display_screen"            , param.display);
+	ale.setFloat("frame_skip"                , param.numStepsPerAction);
+	ale.setFloat("stochasticity"             , 0.00);
+	
+	ale.loadROM(param.romPath.c_str());
+}
 
-	int maxNumIterations = 4;
+int main(int argc, char** argv){
+
+	Parameters param(argc, argv);
+	srand(param.seed);
+
+	int maxNumIterations = param.numIterations;
+	
+	ALEInterface ale;
+	initializeALE(ale, param);
 
 	for(int i = 0; i < maxNumIterations; i++){
 		gatherSamplesFromRandomTrajectories();
 		reduceDimensionalityOfEvents();
 		learnOptionsDerivedFromEigenEvents();
 	}
+
+	return 1;
 }
