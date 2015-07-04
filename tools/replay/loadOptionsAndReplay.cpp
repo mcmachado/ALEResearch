@@ -15,23 +15,20 @@
 #define PROB_TERMINATION     0.01
 #define MAX_LENGTH_EPISODE   18000
 #define NUM_STEPS_PER_ACTION 5
+#define EPSILON              0.05
 
 using namespace std;
+
+//Parameters:
+int    seed;
 string romPath;
 string wgtPath;
-int    seed;
+vector<string>         optionsPath;       //Paths for all files to be loaded
 
 ActionVect             actions;
-vector<int>            F;		          //Set of features active
-vector<float>          Q;                 //Q(a) entries
-vector<float>          Qoptions;          //Q(a) entries
-vector<string>         optionsPath;       //Paths for all files to be loaded
-vector<vector<float> > w;                 //Theta, weights vector
-vector<vector<vector<float> > > options;  //Theta, weights vector for options
 
 //Algorithm related:
 int currentAction;
-float epsilon = 0.05;
 //Environment related:
 int numTotalActions, numFeatures;
 int numBasicActions, numOptions;
@@ -88,12 +85,15 @@ void readParameters(int argc, char** argv){
 		exit(-1);
 	}
 
-	for(int i = 0; i < numOptions; i++){
-		optionsPath.push_back(argv[NUM_ARGS + i]);
+	if(numOptions > 0){
+		for(int i = 0; i < numOptions; i++){
+			int idx = argc - i - 1;
+			optionsPath.push_back(argv[idx]);
+		}
 	}
 }
 
-void loadWeights(){
+void loadWeights(vector<vector<float> > &w){
 	int nActions, nFeatures;
 	int i, j;
 	float value;
@@ -103,13 +103,17 @@ void loadWeights(){
 	weightsFile >> nActions >> nFeatures;
 	assert(nActions == numTotalActions);
 	assert(nFeatures == numFeatures);
-
 	while(weightsFile >> i >> j >> value){
 		w[i][j] = value;
 	}
 }
 
-void loadOptions(){
+void loadOptions(vector<vector<vector<float> > > &learnedOptions){
+	
+	for(int i = 0; i < numOptions; i++){
+		learnedOptions.push_back(vector< vector<float> >(numBasicActions, vector<float>(numFeatures, 0.0)));
+	}
+
 	for(int i = 0; i < numOptions; i++){
 		string line;
 		int nActions, nFeatures;
@@ -123,28 +127,18 @@ void loadOptions(){
 		assert(nFeatures == numFeatures);
 
 		while(weightsFile >> j >> k >> value){
-			options[i][j][k] = value;
+			learnedOptions[i][j][k] = value;
 		}
 	}
 }
 
-void updateQValues(){
-	for(int a = 0; a < numTotalActions; a++){
+void updateQValues(vector<int> &Features, vector<float> &QValues, vector<vector<float> > &w){
+	for(int a = 0; a < QValues.size(); a++){
 		float sumW = 0;
-		for(unsigned int i = 0; i < F.size(); i++){
-			sumW += w[a][F[i]];
+		for(unsigned int i = 0; i < Features.size(); i++){
+			sumW += w[a][Features[i]];
 		}
-		Q[a] = sumW;
-	}
-}
-
-void updateOptionQValues(int option){
-	for(int a = 0; a < numBasicActions; a++){
-		float sumW = 0;
-		for(unsigned int i = 0; i < F.size(); i++){
-			sumW += options[option][a][F[i]];
-		}
-		Qoptions[a] = sumW;
+		QValues[a] = sumW;
 	}
 }
 
@@ -170,48 +164,61 @@ int argmax(std::vector<float> array){
 	return indices[rand()%indices.size()];
 }
 
-int epsilonGreedy(){
-	int action = argmax(Q);
+int epsilonGreedy(vector<float> &QValues){
+	int action = argmax(QValues);
 	//With probability epsilon: a <- random action in A(s)
 	int random = rand();
-	if((random % int(nearbyint(1.0/epsilon))) == 0) {
-		action = rand() % numBasicActions;
+	if((random % int(nearbyint(1.0/EPSILON))) == 0) {
+		action = rand() % numTotalActions;
 	}
 	return action;
 }
 
-int epsilonGreedyOption(){
-	int action = argmax(Qoptions);
-	//With probability epsilon: a <- random action in A(s)
-	int random = rand();
-	if((random % int(nearbyint(1.0/epsilon))) == 0) {
-		action = rand() % numBasicActions;
+int playOption(ALEInterface& ale, BPROFeatures features, int option, 
+	vector<vector<vector<float> > > &learnedOptions){
+
+	vector<int> F;	//Set of features active
+	vector<float> QOptions(numBasicActions, 0.0);    //Q(a) entries
+	int cumReward = 0;
+
+	while(rand()%1000 > 1000 * PROB_TERMINATION && !ale.game_over()){
+		F.clear();
+		features.getActiveFeaturesIndices(ale.getScreen(), ale.getRAM(), F);
+
+		updateQValues(F, QOptions, learnedOptions[option]);
+		currentAction = argmax(QOptions);
+
+		//With probability epsilon: a <- random action in A(s)
+		int random = rand();
+		if((random % int(nearbyint(1.0/EPSILON))) == 0) {
+			currentAction = rand() % numBasicActions;
+		}
+
+		//Take action, observe reward and next state:
+		cumReward += ale.act(actions[currentAction]);
 	}
-	return action;
+	return cumReward;
 }
 
-int takeAction(ALEInterface& ale, BPROFeatures features, int actionToTake){
+int takeAction(ALEInterface& ale, BPROFeatures features, int actionToTake,
+	vector<vector<vector<float> > > &learnedOptions){
 	int totalReward = 0;
 	//If the selected action was one of the primitive actions
 	if(actionToTake < numBasicActions){
 		totalReward += ale.act(actions[actionToTake]);
 	} 
 	else{
-		int currentAction;
 		int option = actionToTake - numBasicActions;
-		while(rand()%1000 > 1000 * PROB_TERMINATION && !ale.game_over()){
-			F.clear();
-			features.getActiveFeaturesIndices(ale.getScreen(), ale.getRAM(), F);
-			updateOptionQValues(option);  //Update Q-values for each possible action of an option
-			currentAction = epsilonGreedyOption();
-			//Take action, observe reward and next state:
-			totalReward += ale.act(actions[currentAction]);
-		}
+		totalReward = playOption(ale, features, option, learnedOptions);
 	}
 	return totalReward;
 }
 
 int main(int argc, char** argv){
+
+	int reward = 0;
+	//Initializing useful things to agent:
+	BPROFeatures features;
 
 	readParameters(argc, argv);
 	srand(seed);
@@ -221,27 +228,16 @@ int main(int argc, char** argv){
 	numFeatures = NUM_COLUMNS * NUM_ROWS * NUM_COLORS 
 					+ (2 * NUM_COLUMNS - 1) * (2 * NUM_ROWS - 1) * NUM_COLORS * NUM_COLORS + 1;
 
-	for(int i = 0; i < numTotalActions; i++){
-		//Initialize Q;
-		Q.push_back(0);
-		w.push_back(vector<float>(numFeatures, 0.0));
-	}
+	vector<int> F;	//Set of features active
+	vector<float> Q(numTotalActions, 0); //Q(a) entries
+	vector<vector<float> > w(numTotalActions, vector<float>(numFeatures, 0.0)); //Theta, weights vector
+	vector<vector<vector<float> > > learnedOptions; //(numOptions, vector< vector<float> >(numBasicActions, vector<float>(numFeatures, 0.0)));  //Theta, weights vector for options
 
-	for(int i = 0; i < numOptions; i++){
-		options.push_back(vector< vector<float> >(numBasicActions, vector<float>(numFeatures, 0.0)));
-	}
-
-	for(int i = 0; i < numBasicActions; i++){
-		Qoptions.push_back(0);
-	}
-
-	loadWeights();
-	loadOptions();
-	int reward = 0;
+	loadWeights(w);
+	loadOptions(learnedOptions);
 
 	//Initializing ALE:
 	ALEInterface ale;
-
 	ale.setBool("display_screen", true);
 	ale.setBool("sound", false);
 	ale.setFloat("frame_skip", NUM_STEPS_PER_ACTION);
@@ -249,7 +245,6 @@ int main(int argc, char** argv){
 	ale.setInt("random_seed", seed);
 	ale.setInt("max_num_frames_per_episode", MAX_LENGTH_EPISODE);
 
-	/*
 	std::string recordPath = "record";
     std::cout << std::endl;
 
@@ -263,21 +258,18 @@ int main(int argc, char** argv){
     std::string cmd = "mkdir ";
     cmd += recordPath; 
     system(cmd.c_str());
-	*/
 
     ale.loadROM(romPath.c_str());
-	//Initializing useful things to agent:
-	BPROFeatures features;
-	actions     = ale.getLegalActionSet();
 
+	actions = ale.getLegalActionSet();
 	while(!ale.game_over()){
 		//Get state and features active on that state:		
 		F.clear();
 		features.getActiveFeaturesIndices(ale.getScreen(), ale.getRAM(), F);
-		updateQValues();       //Update Q-values for each possible action
-		currentAction = epsilonGreedy();
+		updateQValues(F, Q, w);       //Update Q-values for each possible action
+		currentAction = epsilonGreedy(Q);
 		//Take action, observe reward and next state:
-		reward += takeAction(ale, features, currentAction);
+		reward += takeAction(ale, features, currentAction, learnedOptions);
 	}
 
 	printf("Final score: %d\n", reward);
