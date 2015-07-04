@@ -57,10 +57,10 @@ BackgroundLocal.o: features/Background.cpp
 	$(CXX) $(FLAGS) -c features/Background.cpp -o bin/BackgroundLocal.o		
 	
 BPROFeatures.o: ../../../src/features/BPROFeatures.cpp
-	$(CXX) $(FLAGS) -c ../../../src/features/BPROFeatures.cpp -o bin/BPROFeatures.o	
+	$(CXX) $(FLAGS) -c ../../../src/features/BPROFeatures.cpp -o bin/BPROFeatures.o
 
 BPROFeaturesLocal.o: features/BPROFeatures.cpp
-	$(CXX) $(FLAGS) -c features/BPROFeatures.cpp -o bin/BPROFeaturesLocal.o	
+	$(CXX) $(FLAGS) -c features/BPROFeatures.cpp -o bin/BPROFeaturesLocal.o
 
 RAMFeatures.o: ../../../src/features/RAMFeatures.cpp
 	$(CXX) $(FLAGS) -c ../../../src/features/RAMFeatures.cpp -o bin/RAMFeatures.o		

@@ -10,7 +10,7 @@
 
 #ifndef BPRO_FEATURES_H
 #define BPRO_FEATURES_H
-#include "BPROFeatures.hpp"
+#include "BPROFeatures_Old.hpp"
 #endif
 #ifndef BASIC_FEATURES_H
 #define BASIC_FEATURES_H

@@ -14,7 +14,7 @@
 #define PARAMETERS_H
 #include "common/ParametersLoadingWeights.hpp"
 #endif
-#include "../../../../src/features/BPROFeatures.hpp"
+#include "../../../../src/features/BPROFeatures_Old.hpp"
 #include "control/OptionSarsaExtended.hpp"
 
 #define NUM_ACTIONS        18
@@ -81,8 +81,8 @@ int main(int argc, char** argv){
 	OptionSarsaExtended optionSarsa(ale, &features, &param);
     //Learn a policy:
     optionSarsa.learnPolicy(ale, &features , w);
-    printf("\n\n== Evaluation without Learning == \n\n");
-    optionSarsa.evaluatePolicy(ale, &features);
+    //printf("\n\n== Evaluation without Learning == \n\n");
+    //optionSarsa.evaluatePolicy(ale, &features);
 	
     return 0;
 }
