@@ -249,8 +249,10 @@ void TrueOnlineSarsaLearner<FeatureType>::evaluatePolicy(Environment<FeatureType
 			env.getActiveFeaturesIndices(F);
 			updateQValues(F, Q);       //Update Q-values for each possible action
 			currentAction = this->epsilonGreedy(Q);
-			//Take action, observe reward and next state:
-			reward = env.act(this->actions[currentAction]);
+            //compute proba of taking current action
+            double proba_action = this->epsilon/double(this->numActions) + (this->randomActionTaken ? 0 : 1.0 - this->epsilon);
+            //Take action, observe reward and next state:
+			reward = env.act(this->actions[currentAction],proba_action);
 			cumReward  += reward;
 		}
 		env.reset_game();

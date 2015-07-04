@@ -9,7 +9,7 @@
 #include "agents/human/HumanAgent.hpp"
 #include "environments/grid/GridEnvironment.hpp"
 #include "features/GridFeatures.hpp"
-
+#include "offPolicy/GQLearner.hpp"
 
 
 
@@ -32,19 +32,27 @@ int main(int argc, char** argv){
 	Parameters param(argc, argv);
 	srand(param.getSeed());
 	
-	VisualGridFeatures features;
+	BasicGridFeatures features;
 	//Reporting parameters read:
 	printBasicInfo(param);
 	
-    GridEnvironment<VisualGridFeatures> env(&features);
+    GridEnvironment<BasicGridFeatures> env(&features);
 
 	//Instantiating the learning algorithm:
-	TrueOnlineSarsaLearner<double> sarsaLearner(env,&param);
+	SarsaLearner sarsaLearner(env,&param);
     //Learn a policy:
     sarsaLearner.learnPolicy(env);
 
     printf("\n\n== Evaluation without Learning == \n\n");
+    std::vector<Action> act;
+    if(param.isMinimalAction()){
+        act = env.getMinimalActionSet();
+    }else{
+        act = env.getLegalActionSet();
+    }
+    std::shared_ptr<OffPolicyLearner> off(new GQLearner(env.getNumberOfFeatures(),act,&param));
+    env.setOffPolicyLearner(off);
     sarsaLearner.evaluatePolicy(env);
-	
+	off->showGreedyPol();
     return 0;
 }

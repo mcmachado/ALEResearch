@@ -12,13 +12,14 @@
 #define ENV_H
 
 #include <vector>
+#include "../offPolicy/OffPolicyLearner.hpp"
 
 template<typename FeatureType>
 class Environment{
 
 public:
 
-    Environment() {}
+    Environment() {m_offPolicyLearner = nullptr;}
 
     /**@brief This function puts back the environment in its original state
      */
@@ -41,11 +42,10 @@ public:
      * This function should not be overloaded by derived classes. Overload doAct instead.
      *
      * @param action an integer describing the action taken by the agent
+     * @param probaAction the probability that the agent took this action. The default, 1.0, corresponds to a deterministic agent
      * @return the reward obtained by triggering the action
      */
-    double act(Action action){
-        return doAct(action);
-    };
+    virtual double act(Action action, double probaAction = 1.0) = 0;
 
     /**  @brief This function is used to simulate one step in the environment
      * This is the one that must be overloaded in derived classes.
@@ -99,12 +99,32 @@ public:
      */
     virtual int getEpisodeFrameNumber() = 0;
 
+    void setOffPolicyLearner(std::shared_ptr<OffPolicyLearner> l){
+        m_offPolicyLearner = l;
+    }
+
+protected:
+    std::shared_ptr<OffPolicyLearner> m_offPolicyLearner;
+
 };
 
 template<typename FeatureComputer>
 class t_Environment : public Environment<typename FeatureComputer::FeatureType>{
 public:
     t_Environment(FeatureComputer* feat) : m_feat(feat) {}
+
+    virtual double act(Action action, double proba_action = 1.0) final
+    {
+        if(this->m_offPolicyLearner == nullptr){
+            return this->doAct(action);
+        }
+        std::vector<int> curState,nextState;
+        this->getActiveFeaturesIndices(curState);
+        double reward = this->doAct(action);
+        this->getActiveFeaturesIndices(nextState);
+        this->m_offPolicyLearner->receiveSample(curState,action,reward,nextState,proba_action);
+        return reward;
+    }
 protected:
     FeatureComputer* m_feat;
 

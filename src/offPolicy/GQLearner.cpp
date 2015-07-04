@@ -1,7 +1,7 @@
 #include "GQLearner.hpp"
 
 
-GQLearner::GQLearner(unsigned numFeatures, unsigned numActions, Parameters* param) : OffPolicyLearner(numFeatures, numActions, param)
+GQLearner::GQLearner(unsigned numFeatures, const std::vector<Action>& actions, Parameters* param) : OffPolicyLearner(numFeatures, actions, param)
 {
     weights.resize(numActions,std::vector<float>(numFeatures,0.0));
     aux_weights.resize(numActions,std::vector<float>(numFeatures,0.0));
@@ -11,8 +11,14 @@ GQLearner::GQLearner(unsigned numFeatures, unsigned numActions, Parameters* para
 
 
 
-void GQLearner::receiveSample(const std::vector<int>& features_current_state, unsigned action, float reward, const std::vector<int>& features_next_state, float proba_action_bpolicy)
+void GQLearner::receiveSample(const std::vector<int>& features_current_state, Action A, float reward, const std::vector<int>& features_next_state, float proba_action_bpolicy)
 {
+    unsigned action = -1;
+    for(unsigned i = 0;i<available_actions.size();i++){
+        if(available_actions[i] == A){
+            action = i; break;
+        }
+    }
     assert(action>=0 && action<numActions);
     //first, we compute the q values with respect to the current state and the next state, and we compute the argmax simultaneously
     std::vector<float> nextQValues(numActions),currentQValues(numActions);
@@ -93,5 +99,43 @@ void GQLearner::receiveSample(const std::vector<int>& features_current_state, un
     //w <- w - beta * (phi_t * w_t) * phi_t
     for(const auto& feat : features_current_state){
         aux_weights[action][feat] -= beta * phi_w_dotprod;
+    }
+}
+
+
+
+void GQLearner::showGreedyPol()
+{
+    for(int i=0;i<10;i++){
+        for(int j=0;j<10;j++){
+            int idx = j + i*10;
+            int act = 0;
+            //std::cout<<weights[0].size()<<std::endl;
+            for(unsigned a = 0; a<numActions; a++){
+                if(weights[a][idx] > weights[act][idx]){
+                    act = a;
+                }
+            }
+            switch(available_actions[act]){
+            case PLAYER_A_NOOP:
+                std::cout<<".\t";
+                break;
+            case PLAYER_A_LEFT:
+                std::cout<<"<\t";
+                break;
+            case PLAYER_A_RIGHT:
+                std::cout<<">\t";
+                break;
+            case PLAYER_A_UP:
+                std::cout<<"^\t";
+                break;
+            case PLAYER_A_DOWN:
+                std::cout<<"|\t";
+                break;
+            default:
+                std::cout<<act<<"\t";
+            }
+        }
+        std::cout<<std::endl;
     }
 }

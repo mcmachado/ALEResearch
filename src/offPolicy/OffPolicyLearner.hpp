@@ -11,11 +11,11 @@
 #define OFFLEARN_H
 #include <vector>
 #include "../common/Parameters.hpp"
-
+#include "ale_interface.hpp"
 class OffPolicyLearner
 {
 public:
-    OffPolicyLearner(unsigned numFeatures, unsigned numActions, Parameters *param);
+    OffPolicyLearner(unsigned numFeatures,const std::vector<Action>& actions, Parameters *param);
 
     /** 
      * 
@@ -26,10 +26,13 @@ public:
      * @param features_next_state indiced of active features in next state
      * @param proba_action_bpolicy pi_b(a_t | s_t) = proba of taking current action in current state (in the behavior policy. Set to one if the behavior policy is deterministic.
      */
-    virtual void receiveSample(const std::vector<int>& features_current_state, unsigned action, float reward, const std::vector<int>& features_next_state, float proba_action_bpolicy) = 0;
+    virtual void receiveSample(const std::vector<int>& features_current_state, Action action, float reward, const std::vector<int>& features_next_state, float proba_action_bpolicy) = 0;
+    virtual void showGreedyPol() = 0;
+
 protected:
     float gamma,epsilon,lambda, alpha, traceThreshold, beta;
     unsigned numActions, numFeatures;
+    std::vector<Action> available_actions;
 };
 
 

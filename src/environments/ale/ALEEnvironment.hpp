@@ -129,14 +129,13 @@ public:
     
     /** @brief This function is used to simulate one step in the environment 
      * 
-     * 
      * @param action an integer describing the action taken by the agent
-     * @param score a return parameter corresponding to the raw score obtained in the environment
-     * @param reward a return parameter which tells the corresponding reward.
      */
     virtual double doAct(Action action){
-        std::vector<double> r;
-        return this->m_ale->act(action);
+        auto curState = FeatureComputer->getActiveFeatures();
+        double reward = this->m_ale->act(action);
+        auto nextState = FeatureComputer->getActiveFeatures();
+        return reward;
     }
 
     
