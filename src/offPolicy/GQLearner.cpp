@@ -6,6 +6,9 @@ GQLearner::GQLearner(unsigned numFeatures, const std::vector<Action>& actions, P
     weights.resize(numActions,std::vector<float>(numFeatures,0.0));
     aux_weights.resize(numActions,std::vector<float>(numFeatures,0.0));
     e.resize(numActions);
+    for(auto & w : weights[2]){
+        w = 1;
+    }
 }
 
 
@@ -13,6 +16,9 @@ GQLearner::GQLearner(unsigned numFeatures, const std::vector<Action>& actions, P
 
 void GQLearner::receiveSample(const std::vector<int>& features_current_state, Action A, float reward, const std::vector<int>& features_next_state, float proba_action_bpolicy)
 {
+    //std::cout<<features_next_state[0]<<" "<<reward<<std::endl;
+    gamma = 0.5;
+    lambda = 0.5;
     unsigned action = -1;
     for(unsigned i = 0;i<available_actions.size();i++){
         if(available_actions[i] == A){
@@ -66,6 +72,9 @@ void GQLearner::receiveSample(const std::vector<int>& features_current_state, Ac
 
     //e <- e + phi
     for(const auto& feat : features_current_state){
+        if(e[action].count(feat) == 0){
+            e[action][feat] = 0;
+        }
         e[action][feat] += 1;
     }
 
@@ -81,7 +90,7 @@ void GQLearner::receiveSample(const std::vector<int>& features_current_state, Ac
     float c1 = alpha*delta, c2 = beta*delta;
     for(unsigned a = 0; a < numActions; a++){
         for(const auto& it : e[a]){
-            dotProd = it.second * aux_weights[a][it.first];
+            dotProd += it.second * aux_weights[a][it.first];
             weights[a][it.first] += c1 * it.second;
             aux_weights[a][it.first] += c2 * it.second;
         }
@@ -91,7 +100,7 @@ void GQLearner::receiveSample(const std::vector<int>& features_current_state, Ac
     float coeff = -1.0 * alpha * gamma * (1.0 - delta) * dotProd;
     for(unsigned a = 0; a < numActions; a++){
         float policy_coeff = epsilon/double(numActions) + ((a==argmax_nextQ) ? 1.0 - epsilon : 0);
-        for(const auto& feat : features_current_state){
+        for(const auto& feat : features_next_state){
             weights[a][feat] += coeff * policy_coeff; 
         }
     }
@@ -106,9 +115,9 @@ void GQLearner::receiveSample(const std::vector<int>& features_current_state, Ac
 
 void GQLearner::showGreedyPol()
 {
-    for(int i=0;i<10;i++){
-        for(int j=0;j<10;j++){
-            int idx = j + i*10;
+    for(int i=0;i<11;i++){
+        for(int j=0;j<11;j++){
+            int idx = j + i*11;
             int act = 0;
             //std::cout<<weights[0].size()<<std::endl;
             for(unsigned a = 0; a<numActions; a++){
@@ -116,6 +125,7 @@ void GQLearner::showGreedyPol()
                     act = a;
                 }
             }
+            std::cout<<act;
             switch(available_actions[act]){
             case PLAYER_A_NOOP:
                 std::cout<<".\t";
@@ -138,4 +148,12 @@ void GQLearner::showGreedyPol()
         }
         std::cout<<std::endl;
     }
+    for(unsigned a = 0; a<numActions; a++){
+        for(const auto& w : weights[a]){
+            std::cout<<w<<" ";
+        }
+        std::cout<<std::endl;
+    }
+    std::cout<<weights[0].size()<<std::endl;
+    std::cout<<weights[3][99]<<std::endl;
 }

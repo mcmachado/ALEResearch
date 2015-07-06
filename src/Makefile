@@ -13,7 +13,7 @@ USE_SDL     := 1
 # -D__USE_SDL Ensures we can use SDL to see the game screen
 # -D_GNU_SOURCE=1 means the compiler will use the GNU standard of compilation, the superset of all other standards under GNU C libraries.
 # -D_REENTRANT causes the compiler to use thread safe (i.e. re-entrant) versions of several functions in the C library.
-CFLAGS := -c -O3 -I$(ALE)/src -I/opt/local/include -D_GNU_SOURCE=1 -D_REENTRANT -std=c++11 -Wno-deprecated-declarations -Wall -g
+CFLAGS := -c -O0 -I$(ALE)/src -I/opt/local/include -D_GNU_SOURCE=1 -D_REENTRANT -std=c++11 -Wno-deprecated-declarations -Wall -g
 
 EXE := learner
 # Search for library 'ale' and library 'z' when linking.

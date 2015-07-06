@@ -75,26 +75,26 @@ public:
         default:
             throw std::runtime_error("illegal action taken by the agent");
         }
-        double reward = -1;
+        double reward = -0.05;
         if(m_posx<0){
             m_posx = 0;
-            reward -= 100;
+            reward = -1;
         }
         if(m_posy<0){
             m_posy = 0;
-            reward -= 100;
+            reward = -1;
         }
         if(m_posx>m_width){
             m_posx = m_width;
-            reward -= 100;
+            reward = -1;
         }
         if(m_posy>m_height){
             m_posy = m_height;
-            reward -= 100;
+            reward = -1;
         }
         if(m_posx==m_width&&m_posy==m_height){
             //reward = 10 + m_width + m_height;
-            reward = 0;
+            reward = 1;
         }
         m_frame++;
         return reward;

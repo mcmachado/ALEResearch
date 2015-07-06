@@ -39,7 +39,7 @@ public:
         auto size = env->getGridSize();
         auto pos = env->getPos();
         active.clear();
-        active.push_back({pos.second*size.first+pos.first,true});
+        active.push_back({pos.second*(size.first+1)+pos.first,true});
     }
 };
 
