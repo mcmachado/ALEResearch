@@ -23,9 +23,13 @@ def receiveSample(features_current_state, action, reward,features_next_state,pro
     global weights,e,aux_weights,alpha,beta,gamma,epsilon,numberOfFeatures,numberOfActions
     phi_t = makeFeaturesVec(features_current_state,action);
     phi_tnext = makeFeaturesVec(features_next_state, action);
-    Q = np.dot(weights,phi_t)
+    Q = np.zeros(numberOfActions)
+    QNext = np.zeros(numberOfActions)
+    for i in range(numberOfActions):
+        for j in range(numberOfFeatures):
+            Q[i]+=weights[i*numberOfFeatures + j]*phi_t[i*numberOfFeatures + j]
+            QNext[i]+=weights[i*numberOfFeatures + j]*phi_tnext[i*numberOfFeatures + j]
     bestCurrentAction = np.argmax(Q)
-    QNext = np.dot(weights, phi_tnext)
     bestNextAction = np.argmax(QNext)
     print("currA %d" % (bestCurrentAction))
     print("nextA %d" % (bestNextAction))
