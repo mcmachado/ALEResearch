@@ -6,9 +6,6 @@ GQLearner::GQLearner(unsigned numFeatures, const std::vector<Action>& actions, P
     weights.resize(numActions,std::vector<float>(numFeatures,0.0));
     aux_weights.resize(numActions,std::vector<float>(numFeatures,0.0));
     e.resize(numActions);
-    for(auto & w : weights[2]){
-        w = 1;
-    }
 }
 
 
@@ -16,15 +13,20 @@ GQLearner::GQLearner(unsigned numFeatures, const std::vector<Action>& actions, P
 
 void GQLearner::receiveSample(const std::vector<int>& features_current_state, Action A, float reward, const std::vector<int>& features_next_state, float proba_action_bpolicy)
 {
+    assert(features_current_state.size()==1);
+    assert(features_next_state.size()==1);
     //std::cout<<features_next_state[0]<<" "<<reward<<std::endl;
-    gamma = 0.5;
-    lambda = 0.5;
+    gamma = 0.9;
+    lambda = 0;
     unsigned action = -1;
     for(unsigned i = 0;i<available_actions.size();i++){
         if(available_actions[i] == A){
             action = i; break;
         }
     }
+    std::ofstream f("samples.txt",std::ios_base::app);
+    f<<features_current_state[0]<<" "<<action<<" "<<reward<<" "<<features_next_state[0]<<" "<<proba_action_bpolicy<<std::endl;
+    f.close();
     assert(action>=0 && action<numActions);
     //first, we compute the q values with respect to the current state and the next state, and we compute the argmax simultaneously
     std::vector<float> nextQValues(numActions),currentQValues(numActions);
@@ -41,6 +43,8 @@ void GQLearner::receiveSample(const std::vector<int>& features_current_state, Ac
             argmax_currentQ = a;
         }
     }
+    //std::cout<<"currA "<<argmax_currentQ<<std::endl;
+    //std::cout<<"nextA "<<argmax_nextQ<<std::endl;
 
     //now we compute the dot product theta*\bar{phi}_{t+1}
     float dotProd = 0.0;
@@ -48,14 +52,17 @@ void GQLearner::receiveSample(const std::vector<int>& features_current_state, Ac
         float coeff = epsilon/double(numActions) + ((a==argmax_nextQ) ? 1.0 - epsilon : 0);
         dotProd += Mathematics::weighted_sparse_dotprod(weights[a],features_next_state,coeff);
     }
-
+    //std::cout<<"theta * bar_phi "<<dotProd<<std::endl;
+    //std::cout<<"theta * phi "<<Mathematics::weighted_sparse_dotprod(weights[action],features_current_state, 1.0)<<std::endl;
     //compute delta_t
     float delta = reward + gamma*dotProd
         - Mathematics::weighted_sparse_dotprod(weights[action],features_current_state, 1.0);
 
+    //std::cout<<"delta "<<delta<<std::endl;
     //compute rho_t, the ratio of policies
     float rho = epsilon/double(numActions) + ((action == argmax_currentQ) ? 1.0 - epsilon : 0);
     rho /= proba_action_bpolicy;
+    //std::cout<<"rho "<<rho<<std::endl;
 
     //update eligibility traces
     //e <- rho * gamma * lambda * e
@@ -78,9 +85,17 @@ void GQLearner::receiveSample(const std::vector<int>& features_current_state, Ac
         e[action][feat] += 1;
     }
 
+    /*std::cout<<"e"<<std::endl;
+    for(unsigned i = 0; i<numActions; i++){
+        for(const auto& elem : e[i]){
+            std::cout<<"action "<<i<<" id "<<elem.first<<" value "<<elem.second<<std::endl;
+                }
+                }*/
+    
     //update weights
     //compute dot product (phi_t * w_t)
     float phi_w_dotprod = Mathematics::weighted_sparse_dotprod(aux_weights[action],features_current_state,1.0);
+    //std::cout<<"phi*w "<<phi_w_dotprod<<std::endl;
     
     //we do three computations at the same time :
     //theta <- theta + alpha * delta_t * e_t
@@ -95,9 +110,10 @@ void GQLearner::receiveSample(const std::vector<int>& features_current_state, Ac
             aux_weights[a][it.first] += c2 * it.second;
         }
     }
+    //std::cout<<"e*weights "<<dotProd<<std::endl;
 
-    //theta <- theta - alpha * gamma * (1 - delta) * (e_t * w_t) * \bar{phi}_{t+1}
-    float coeff = -1.0 * alpha * gamma * (1.0 - delta) * dotProd;
+    //theta <- theta - alpha * gamma * (1 - lambda) * (e_t * w_t) * \bar{phi}_{t+1}
+    float coeff = -1.0 * alpha * gamma * (1.0 - lambda) * dotProd;
     for(unsigned a = 0; a < numActions; a++){
         float policy_coeff = epsilon/double(numActions) + ((a==argmax_nextQ) ? 1.0 - epsilon : 0);
         for(const auto& feat : features_next_state){
@@ -109,6 +125,13 @@ void GQLearner::receiveSample(const std::vector<int>& features_current_state, Ac
     for(const auto& feat : features_current_state){
         aux_weights[action][feat] -= beta * phi_w_dotprod;
     }
+    /*std::cout<<"aux_weights"<<std::endl;
+    for(unsigned a = 0; a<numActions; a++){
+        for(const auto& w : aux_weights[a]){
+            std::cout<<w<<" ";
+        }
+        std::cout<<std::endl;
+        }*/
 }
 
 
