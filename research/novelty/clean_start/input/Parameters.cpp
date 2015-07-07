@@ -112,13 +112,14 @@ void Parameters::parseParametersFromConfigFile(string cfgFileName){
 	traceThreshold     = atof(parameters["TRACE_THRESHOLD"].c_str());
 
 	//Execution parameters:
-	display                = atoi(parameters["DISPLAY"             ].c_str());
-	numIterations          = atoi(parameters["NUM_ITERATIONS"      ].c_str());
-	episodeLength          = atoi(parameters["EPISODE_LENGTH"      ].c_str());
-	learningLength         = atoi(parameters["TOTAL_FRAMES_LEARN"  ].c_str());
-	isMinimalAction        = atoi(parameters["USE_MIN_ACTIONS"     ].c_str());
-	numStepsPerAction      = atoi(parameters["NUM_STEPS_PER_ACTION"].c_str());
-    frequencySavingWeights = atoi(parameters["FREQUENCY_SAVING"    ].c_str());
+	display                    = atoi(parameters["DISPLAY"                    ].c_str());
+	numIterations              = atoi(parameters["NUM_ITERATIONS"             ].c_str());
+	episodeLength              = atoi(parameters["EPISODE_LENGTH"             ].c_str());
+	learningLength             = atoi(parameters["TOTAL_FRAMES_LEARN"         ].c_str());
+	isMinimalAction            = atoi(parameters["USE_MIN_ACTIONS"            ].c_str());
+	numStepsPerAction          = atoi(parameters["NUM_STEPS_PER_ACTION"       ].c_str());
+    frequencySavingWeights     = atoi(parameters["FREQUENCY_SAVING"           ].c_str());
+    numGamesToSampleRareEvents = atoi(parameters["GAMES_TO_SAMPLE_RARE_EVENTS"].c_str());
 
 	//Feature set parameters:
 	numRows            = atoi(parameters["NUM_ROWS"           ].c_str());

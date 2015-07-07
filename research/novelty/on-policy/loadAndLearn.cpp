@@ -304,7 +304,6 @@ void loadWeights(BPROFeatures *features){
 	}
 }
 
-
 int main(int argc, char** argv){
 	int numGames = 300;
 	//Reading parameters from file defined as input in the run command:
