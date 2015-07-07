@@ -12,7 +12,8 @@
 
 #include <ale_interface.hpp>
 
-#include "input/Parameters.hpp"
+#include "control/Agent.hpp"
+#include "common/Parameters.hpp"
 #include "svd/DimReduction.hpp"
 #include "control/ControlAgent.hpp"
 
@@ -32,6 +33,7 @@ void initializeALE(ALEInterface &ale, const Parameters param){
 int main(int argc, char** argv){
 
 	Parameters param(argc, argv);
+	Agent agent; //TODO: Write constructor to this class
 	srand(param.seed);
 
 	int maxNumIterations = param.numIterations;
@@ -40,7 +42,7 @@ int main(int argc, char** argv){
 	initializeALE(ale, param);
 
 	for(int i = 0; i < maxNumIterations; i++){
-		gatherSamplesFromRandomTrajectories(ale, &param);
+		gatherSamplesFromRandomTrajectories(ale, &param, agent);
 		reduceDimensionalityOfEvents();
 		learnOptionsDerivedFromEigenEvents();
 	}
