@@ -1,5 +1,8 @@
 /* Author: Marlos C. Machado */
 
+#ifndef PARAMETERS_H
+#define PARAMETERS_H
+
 #include <string>
 #include <vector>
 
@@ -41,6 +44,7 @@ class Parameters{
 		int isMinimalAction;            //use only valid actions for the game or all the Atari legal actions
 		int numStepsPerAction;          //number of frames the agent perfoms similarly to speed-up the game
 		int frequencySavingWeights;     //If we are asked to save the weights, we need to know how frequently (in frames)
+		int numGamesToSampleRareEvents; //The number of games one has to play to generate the dataset of rare events
 
 		int numRows;                    //number of rows for feature representation
 		int numColumns;                 //number of columns for feature representation
@@ -58,3 +62,5 @@ class Parameters{
 		Parameters(int argc, char** argv);
 
 };
+
+#endif

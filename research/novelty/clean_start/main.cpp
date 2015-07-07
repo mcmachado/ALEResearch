@@ -40,7 +40,7 @@ int main(int argc, char** argv){
 	initializeALE(ale, param);
 
 	for(int i = 0; i < maxNumIterations; i++){
-		gatherSamplesFromRandomTrajectories();
+		gatherSamplesFromRandomTrajectories(ale, &param);
 		reduceDimensionalityOfEvents();
 		learnOptionsDerivedFromEigenEvents();
 	}
