@@ -38,8 +38,7 @@ int RLLearner::epsilonGreedy(vector<float> &QValues){
 	int action = Mathematics::argmax(QValues);
 	//With probability epsilon: a <- random action in A(s)
 	int random = agentRand();
-	if((random % int(nearbyint(1.0/epsilon))) == 0) {
-        //if((rand()%int(1.0/epsilon)) == 0){
+	if(float(rand()%1000 < epsilon*1000) == 0) {
 		randomActionTaken = 1;
 		action = agentRand() % numActions;
 	}
