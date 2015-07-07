@@ -17,7 +17,8 @@ void GQLearner::receiveSample(const std::vector<int>& features_current_state, Ac
     assert(features_next_state.size()==1);
     //std::cout<<features_next_state[0]<<" "<<reward<<std::endl;
     gamma = 0.9;
-    lambda = 0.1;
+    lambda = 0;
+    epsilon = 0;
     unsigned action = -1;
     for(unsigned i = 0;i<available_actions.size();i++){
         if(available_actions[i] == A){
