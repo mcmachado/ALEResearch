@@ -165,7 +165,7 @@ void GQLearner::showGreedyPol()
                     act = a;
                 }
             }
-            std::cout<<act;
+            // std::cout<<act;
             switch(available_actions[act]){
             case PLAYER_A_NOOP:
                 std::cout<<".\t";
