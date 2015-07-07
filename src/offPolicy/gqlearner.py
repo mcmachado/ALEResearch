@@ -27,23 +27,57 @@ def receiveSample(features_current_state, action, reward,features_next_state,pro
     bestCurrentAction = np.argmax(Q)
     QNext = np.dot(weights, phi_tnext)
     bestNextAction = np.argmax(QNext)
-
+    print("currA %d" % (bestCurrentAction))
+    print("nextA %d" % (bestNextAction))
     bar_phi_tnext = np.zeros(numberOfFeatures * numberOfActions);
     for a in range(numberOfActions):
         policy_coeff = epsilon/numberOfActions + (1.0 - epsilon if a==bestNextAction else 0);
         bar_phi_tnext += policy_coeff * makeFeaturesVec(features_next_state, a)
 
-
+    print("theta * bar_phi %f" % (np.dot(weights,bar_phi_tnext)))
+    print("theta * phi %f" % (np.dot(weights,phi_t)))
+    
     delta = reward + gamma*np.dot(weights,bar_phi_tnext) - np.dot(weights,phi_t)
 
+    print("delta %f" % (delta))
     policy_coeff = epsilon/numberOfActions + (1.0 - epsilon if action==bestCurrentAction else 0);
     rho = policy_coeff / proba_action_bpolicy
+    print("rho %f" % (rho))
     
     e = phi_t + rho*gamma*lambd*e
+    print("e :")
+    for i in range(numberOfActions):
+        for j in range(numberOfFeatures):
+            if e[i*numberOfFeatures + j]!=0:
+                print("action %d id %d value %f" % (i,j,e[i*numberOfFeatures +j]))
 
-    weights+= alpha*(delta*e - gamma*(1.0 - lambd)*(np.dot(e,weights))*bar_phi_tnext)
-    aux_weights+= beta*(delta*e - np.dot(phi_t, weights)*phi_t)
+    print("e*weights %f" % (np.dot(e,aux_weights)))
+
+    weights+= alpha*(delta*e - gamma*(1.0 - lambd)*(np.dot(e,aux_weights))*bar_phi_tnext)
+    print("phi*w %f" % (np.dot(phi_t, aux_weights)))
+    aux_weights+= beta*(delta*e - np.dot(phi_t, aux_weights)*phi_t)
+    print("aux_weights")
+    for i in range(numberOfActions):
+        for j in range(numberOfFeatures):
+            if aux_weights[i*numberOfFeatures + j]==0:
+                print("0 ", end='')
+            else:
+                print("%f " % (aux_weights[i*numberOfFeatures + j]), sep='' ,end='')
+        print("")
+
 
 
 receiveSample(np.array([4]),1,-2,np.array([5]), 0.9)
-print(weights)
+receiveSample(np.array([10]),2,-2,np.array([5]), 0.9)
+receiveSample(np.array([2]),3,-2,np.array([5]), 0.9)
+receiveSample(np.array([30]),0,-2,np.array([5]), 0.9)
+receiveSample(np.array([40]),1,-2,np.array([5]), 0.9)
+receiveSample(np.array([120]),2,-2,np.array([5]), 0.9)
+for i in range(numberOfActions):
+    for j in range(numberOfFeatures):
+        if weights[i*numberOfFeatures + j]==0:
+            print("0 ", end='')
+        else:
+            print("%f " % (weights[i*numberOfFeatures + j]), sep='' ,end='')
+    print("")
+    
