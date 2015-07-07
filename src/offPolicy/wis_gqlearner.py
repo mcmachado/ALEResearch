@@ -3,15 +3,15 @@ import sys
 beta = 0.009
 gamma = 0.9
 epsilon = 0.05
-lambd = 0
+lambd = 0.9
 numberOfFeatures=121
 numberOfActions = 4
-eta = 0.5
+eta = 0.0001
 
 weights = np.zeros(numberOfFeatures * numberOfActions,dtype=np.float64)
 aux_weights = np.zeros(numberOfFeatures * numberOfActions,dtype=np.float64)
 e = np.zeros(numberOfFeatures * numberOfActions,dtype=np.float64)
-u = np.zeros(numberOfFeatures * numberOfActions,dtype=np.float64)
+u = 100*np.ones(numberOfFeatures * numberOfActions,dtype=np.float64)
 v = np.zeros(numberOfFeatures * numberOfActions,dtype=np.float64)
 
 

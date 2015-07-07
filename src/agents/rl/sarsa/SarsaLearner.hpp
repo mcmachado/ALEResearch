@@ -90,6 +90,8 @@ private:
 		* Destructor, not necessary in this class.
 		*/
 		~SarsaLearner();
+
+    void showGreedyPol();
 };
 
 

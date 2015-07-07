@@ -280,3 +280,47 @@ void SarsaLearner::evaluatePolicy(Environment<bool>& env){
 		prevCumReward = cumReward;
 	}
 }
+
+
+void SarsaLearner::showGreedyPol()
+{
+    for(int i=0;i<11;i++){
+        for(int j=0;j<11;j++){
+            int idx = j + i*11;
+            int act = 0;
+            //std::cout<<w[0].size()<<std::endl;
+            for(unsigned a = 0; a<numActions; a++){
+                if(w[a][idx] > w[act][idx]){
+                    act = a;
+                }
+            }
+            // std::cout<<act;
+            switch(actions[act]){
+            case PLAYER_A_NOOP:
+                std::cout<<".\t";
+                break;
+            case PLAYER_A_LEFT:
+                std::cout<<"<\t";
+                break;
+            case PLAYER_A_RIGHT:
+                std::cout<<">\t";
+                break;
+            case PLAYER_A_UP:
+                std::cout<<"^\t";
+                break;
+            case PLAYER_A_DOWN:
+                std::cout<<"|\t";
+                break;
+            default:
+                std::cout<<act<<"\t";
+            }
+        }
+        std::cout<<std::endl;
+    }
+    for(unsigned a = 0; a<numActions; a++){
+        for(const auto& wi : w[a]){
+            std::cerr<<wi<<" ";
+        }
+        std::cerr<<std::endl;
+    }
+}
