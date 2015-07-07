@@ -19,14 +19,20 @@ endif
 
 all: pfd
 
-pfd:                bin/main.o bin/Parameters.o bin/ControlAgent.o bin/DimReduction.o bin/Background.o bin/RAMFeatures.o bin/BPROFeatures.o
-	$(CXX) $(FLAGS) -L$(ALE) bin/main.o bin/Parameters.o bin/ControlAgent.o bin/DimReduction.o bin/Background.o bin/RAMFeatures.o bin/BPROFeatures.o $(LDFLAGS) -o $(OUT_FILE) 
+pfd:                bin/main.o bin/Agent.o bin/Parameters.o bin/DimReduction.o bin/Mathematics.o bin/ControlAgent.o bin/Background.o bin/RAMFeatures.o bin/BPROFeatures.o
+	$(CXX) $(FLAGS) -L$(ALE) bin/main.o bin/Agent.o bin/Parameters.o bin/DimReduction.o bin/Mathematics.o bin/ControlAgent.o bin/Background.o bin/RAMFeatures.o bin/BPROFeatures.o $(LDFLAGS) -o $(OUT_FILE) 
 
 bin/main.o: main.cpp
 	$(CXX) $(FLAGS) -c main.cpp -o bin/main.o
 
-bin/Parameters.o:      input/Parameters.cpp
-	$(CXX) $(FLAGS) -c input/Parameters.cpp -o bin/Parameters.o
+bin/Agent.o:           control/Agent.cpp
+	$(CXX) $(FLAGS) -c control/Agent.cpp -o bin/Agent.o
+
+bin/Mathematics.o:     common/Mathematics.cpp
+	$(CXX) $(FLAGS) -c common/Mathematics.cpp -o bin/Mathematics.o
+
+bin/Parameters.o:      common/Parameters.cpp
+	$(CXX) $(FLAGS) -c common/Parameters.cpp -o bin/Parameters.o
 
 bin/Background.o:      observations/Background.cpp
 	$(CXX) $(FLAGS) -c observations/Background.cpp -o bin/Background.o

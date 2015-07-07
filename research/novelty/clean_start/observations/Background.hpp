@@ -8,7 +8,7 @@
 
 #ifndef BACKGROUND_H
 #define BACKGROUND_H
-#include "../input/Parameters.hpp"
+#include "../common/Parameters.hpp"
 
 class Background{
 	private:
