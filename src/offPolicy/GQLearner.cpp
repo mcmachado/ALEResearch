@@ -17,7 +17,7 @@ void GQLearner::receiveSample(const std::vector<int>& features_current_state, Ac
     assert(features_next_state.size()==1);
     //std::cout<<features_next_state[0]<<" "<<reward<<std::endl;
     gamma = 0.9;
-    lambda = 0;
+    lambda = 0.1;
     unsigned action = -1;
     for(unsigned i = 0;i<available_actions.size();i++){
         if(available_actions[i] == A){
@@ -43,6 +43,16 @@ void GQLearner::receiveSample(const std::vector<int>& features_current_state, Ac
             argmax_currentQ = a;
         }
     }
+    //std::cout<<"currQ :";
+    for(const auto & q : currentQValues){
+        //std::cout<<q<<" ";
+    }
+    //std::cout<<std::endl;
+    //std::cout<<"NextQ :";
+    for(const auto & q : nextQValues){
+        //std::cout<<q<<" ";
+    }
+    //std::cout<<std::endl;
     //std::cout<<"currA "<<argmax_currentQ<<std::endl;
     //std::cout<<"nextA "<<argmax_nextQ<<std::endl;
 
@@ -85,12 +95,12 @@ void GQLearner::receiveSample(const std::vector<int>& features_current_state, Ac
         e[action][feat] += 1;
     }
 
-    /*std::cout<<"e"<<std::endl;
+    //std::cout<<"e"<<std::endl;
     for(unsigned i = 0; i<numActions; i++){
         for(const auto& elem : e[i]){
-            std::cout<<"action "<<i<<" id "<<elem.first<<" value "<<elem.second<<std::endl;
-                }
-                }*/
+            //std::cout<<"action "<<i<<" id "<<elem.first<<" value "<<elem.second<<std::endl;
+        }
+    }
     
     //update weights
     //compute dot product (phi_t * w_t)
@@ -125,13 +135,20 @@ void GQLearner::receiveSample(const std::vector<int>& features_current_state, Ac
     for(const auto& feat : features_current_state){
         aux_weights[action][feat] -= beta * phi_w_dotprod;
     }
-    /*std::cout<<"aux_weights"<<std::endl;
+    //std::cout<<"aux_weights"<<std::endl;
     for(unsigned a = 0; a<numActions; a++){
         for(const auto& w : aux_weights[a]){
-            std::cout<<w<<" ";
+            //std::cout<<w<<" ";
         }
-        std::cout<<std::endl;
-        }*/
+        //std::cout<<std::endl;
+    }
+    //std::cout<<"weights"<<std::endl;
+    for(unsigned a = 0; a<numActions; a++){
+        for(const auto& w : weights[a]){
+            //std::cout<<w<<" ";
+        }
+        //std::cout<<std::endl;
+    }
 }
 
 
@@ -173,9 +190,9 @@ void GQLearner::showGreedyPol()
     }
     for(unsigned a = 0; a<numActions; a++){
         for(const auto& w : weights[a]){
-            std::cout<<w<<" ";
+            std::cerr<<w<<" ";
         }
-        std::cout<<std::endl;
+        std::cerr<<std::endl;
     }
     std::cout<<weights[0].size()<<std::endl;
     std::cout<<weights[3][99]<<std::endl;
