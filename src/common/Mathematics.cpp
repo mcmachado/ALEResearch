@@ -26,7 +26,7 @@ int Mathematics::argmax(std::vector<float> array){
 	//indices that hold the same max value:
 	std::vector<int> indices;
 	for(unsigned int i = 0; i < array.size(); i++){
-		if(fabs(array[i] - max) < 1e-10){
+		if(fabs(array[i] - max) < 1e-6){
 			indices.push_back(i);
 		}
 	}

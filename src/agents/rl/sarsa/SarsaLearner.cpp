@@ -97,7 +97,7 @@ void SarsaLearner::updateReplTrace(int action, vector<int> &Features){
 	}
 
 	//For all i in Fa:
-	for(unsigned int i = 0; i < F.size(); i++){
+	for(unsigned int i = 0; i < Features.size(); i++){
 		int idx = Features[i];
 		//If the trace is zero it is not in the vector
 		//of non-zeros, thus it needs to be added
@@ -129,7 +129,7 @@ void SarsaLearner::updateAcumTrace(int action, vector<int> &Features){
 	}
 
 	//For all i in Fa:
-	for(unsigned int i = 0; i < F.size(); i++){
+	for(unsigned int i = 0; i < Features.size(); i++){
 		int idx = Features[i];
 		//If the trace is zero it is not in the vector
 		//of non-zeros, thus it needs to be added
