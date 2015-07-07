@@ -31,7 +31,7 @@ SarsaLearner::SarsaLearner(Environment<bool>& env, Parameters *param) : RLLearne
 		Q.push_back(0);
 		Qnext.push_back(0);
 		//Initialize e:
-		w.push_back(std::vector<double>(numFeatures, 0.0));
+		w.push_back(std::vector<float>(numFeatures, 0.0));
 	}
 
 	if(toSaveWeightsAfterLearning){
@@ -47,9 +47,9 @@ SarsaLearner::SarsaLearner(Environment<bool>& env, Parameters *param) : RLLearne
 
 SarsaLearner::~SarsaLearner(){}
 
-void SarsaLearner::updateQValues(std::vector<int> &Features, std::vector<double> &QValues){
+void SarsaLearner::updateQValues(std::vector<int> &Features, std::vector<float> &QValues){
 	for(int a = 0; a < numActions; a++){
-		double sumW = 0;
+		float sumW = 0;
 		for(unsigned int i = 0; i < Features.size(); i++){
 			sumW += w[a][Features[i]];
 		}
@@ -138,10 +138,10 @@ void SarsaLearner::saveWeightsToFile(std::string suffix){
 }
 
 void SarsaLearner::loadWeights(){
-	string line;
+    std::string line;
 	int nActions, nFeatures;
 	int i, j;
-	double value;
+	float value;
 
 	std::ifstream weightsFile (pathWeightsFileToLoad.c_str());
 	
@@ -157,9 +157,9 @@ void SarsaLearner::loadWeights(){
 void SarsaLearner::learnPolicy(Environment<bool>& env){
 	
 	struct timeval tvBegin, tvEnd, tvDiff;
-	vector<double> reward;
+    std::vector<double> reward;
 	double elapsedTime;
-	double cumReward = 0, prevCumReward = 0;
+	float cumReward = 0, prevCumReward = 0;
 	unsigned int maxFeatVectorNorm = 1;
 	sawFirstReward = 0; firstReward = 1.0;
 
@@ -234,22 +234,22 @@ void SarsaLearner::learnPolicy(Environment<bool>& env){
 		prevCumReward = cumReward;
 		env.reset();
 		if(toSaveWeightsAfterLearning && episode%saveWeightsEveryXSteps == 0 && episode > 0){
-			stringstream ss;
+            std::stringstream ss;
 			ss << episode;
 			saveWeightsToFile(ss.str());
 		}
 	}
 	if(toSaveWeightsAfterLearning){
-		stringstream ss;
+        std::stringstream ss;
 		ss << episode;
 		saveWeightsToFile(ss.str());
 	}
 }
 
 void SarsaLearner::evaluatePolicy(Environment<bool>& env){
-	double reward = 0;
-	double cumReward = 0; 
-	double prevCumReward = 0;
+	float reward = 0;
+	float cumReward = 0; 
+	float prevCumReward = 0;
 	struct timeval tvBegin, tvEnd, tvDiff;
 	double elapsedTime;
 

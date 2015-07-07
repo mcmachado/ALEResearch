@@ -19,11 +19,11 @@ class Mathematics{
  		* be parametrized for any type. Definetely Templates should be used 
  		* here in the future.
  		*
- 		* @param std::vector<double> array vector one wants the argmax
+ 		* @param std::vector<float> array vector one wants the argmax
  		*
  		* @return indice of an element with highest value, ties are broke randomly.
  		*/
-		static int argmax(std::vector<double> array);
+		static int argmax(const std::vector<float>& array);
 };
 
 

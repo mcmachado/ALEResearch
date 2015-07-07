@@ -12,7 +12,7 @@
 #ifndef RAMFEATURES_H
 #define RAMFEATURES_H
 #include "Features.hpp"
-
+#include "../common/Parameters.hpp"
 class RAMFeatures : public Features::Features{
 	private:
 	public:
@@ -23,6 +23,7 @@ class RAMFeatures : public Features::Features{
  		* @return nothing, it is a constructor.
  		*/
 		RAMFeatures();
+		RAMFeatures(Parameters* param);
 		/**
  		* This method is the instantiation of the virtual method in the class Features (also check
  		* its documentation). It gets a the current RAM state and stores the indices that correspond

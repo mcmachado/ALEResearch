@@ -13,10 +13,10 @@
 #include <assert.h>
 #include <cstdlib>
 
-int Mathematics::argmax(std::vector<double> array){
+int Mathematics::argmax(const std::vector<float>& array){
 	assert(array.size() > 0);
 	//Discover max value of the array:
-	double max = array[0];
+	float max = array[0];
 	for (unsigned int i = 0; i < array.size(); i++){
 		if(max < array[i]){
 			max = array[i];

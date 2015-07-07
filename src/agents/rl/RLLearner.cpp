@@ -23,7 +23,7 @@ RLLearner<FeatureType>::RLLearner(Environment<FeatureType>& env, Parameters *par
 
 
 template<typename FeatureType>
-int RLLearner<FeatureType>::epsilonGreedy(std::vector<double> &QValues){
+int RLLearner<FeatureType>::epsilonGreedy(std::vector<float> &QValues){
 	randomActionTaken = 0;
 
 	int action;

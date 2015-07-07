@@ -22,6 +22,8 @@ typedef unsigned char byte_t;
 using namespace std;
 RAMFeatures::RAMFeatures(){
 }
+RAMFeatures::RAMFeatures(Parameters* param){
+}
 
 void RAMFeatures::getActiveFeaturesIndices(
 	const ALEScreen &screen, const ALERAM &ram, vector<int>& features){

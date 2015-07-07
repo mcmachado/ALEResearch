@@ -16,17 +16,17 @@
 
 class QLearner : public RLLearner<bool>{
 	private:
-		double alpha, delta, lambda, traceThreshold;
+		float alpha, delta, lambda, traceThreshold;
 		int numFeatures, currentAction, nextAction;
 
 		std::string nameWeightsFile;
 
 		std::vector<int> F;					//Set of features active
 		std::vector<int> Fnext;              //Set of features active in next state
-		std::vector<double> Q;               //Q(a) entries
-		std::vector<double> Qnext;           //Q(a) entries for next action
-		std::vector<std::vector<double> > e;      //Eligibility trace
-		std::vector<std::vector<double> > w;      //Theta, weights std::vector
+		std::vector<float> Q;               //Q(a) entries
+		std::vector<float> Qnext;           //Q(a) entries for next action
+		std::vector<std::vector<float> > e;      //Eligibility trace
+		std::vector<std::vector<float> > w;      //Theta, weights std::vector
 		std::vector<std::vector<int> >nonZeroElig;//To optimize the implementation
 		
 		/**
@@ -44,10 +44,10 @@ class QLearner : public RLLearner<bool>{
 		/**
  		* In Q-Learning the Q-values (one per action) are updated as the sum of weights for that given action.
  		* To avoid writing it more than once on the code, its update was extracted to a separate function.
- 		* It updates the vector<double> Q assuming that vector<int> F is filled, as it sums just the weights
+ 		* It updates the vector<float> Q assuming that vector<int> F is filled, as it sums just the weights
  		* that are active in F.
  		*/
-		void updateQValues(std::vector<int> &Features, std::vector<double> &QValues);
+		void updateQValues(std::vector<int> &Features, std::vector<float> &QValues);
 		
 		/**
  		* When using Replacing traces, all values not related to the current action are set to 0, while the

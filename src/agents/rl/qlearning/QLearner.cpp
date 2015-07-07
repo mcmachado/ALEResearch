@@ -36,8 +36,8 @@ QLearner::QLearner(Environment<bool>& env, Parameters *param) : RLLearner<bool>(
 		Q.push_back(0);
 		Qnext.push_back(0);
 		//Initialize e:
-		e.push_back(std::vector<double>(numFeatures, 0.0));
-		w.push_back(std::vector<double>(numFeatures, 0.0));
+		e.push_back(std::vector<float>(numFeatures, 0.0));
+		w.push_back(std::vector<float>(numFeatures, 0.0));
 
 		nonZeroElig.push_back(std::vector<int>());
 	}
@@ -66,9 +66,9 @@ void QLearner::updateReplTrace(int action){
 	}
 }
 
-void QLearner::updateQValues(std::vector<int> &Features,std::vector<double> &QValues){
+void QLearner::updateQValues(std::vector<int> &Features,std::vector<float> &QValues){
 	for(int a = 0; a < numActions; a++){
-		double sumW = 0;
+		float sumW = 0;
 		for(unsigned int i = 0; i < Features.size(); i++){
 			sumW += w[a][Features[i]];
 		}
@@ -196,9 +196,9 @@ void QLearner::learnPolicy(Environment<bool>& env){
 }
 
 void QLearner::evaluatePolicy(Environment<bool>& env){
-	double reward = 0;
-	double cumReward = 0; 
-	double prevCumReward = 0;
+	float reward = 0;
+	float cumReward = 0; 
+	float prevCumReward = 0;
 
 	//Repeat (for each episode):
 	for(int episode = 0; episode < numEpisodesEval; episode++){
@@ -216,7 +216,7 @@ void QLearner::evaluatePolicy(Environment<bool>& env){
 		env.reset_game();
 		sanityCheck();
 		
-		printf("%d, %f, %f\n", episode + 1, (double)cumReward/(episode + 1.0), cumReward-prevCumReward);
+		printf("%d, %f, %f\n", episode + 1, (float)cumReward/(episode + 1.0), cumReward-prevCumReward);
 		
 		prevCumReward = cumReward;
 	}

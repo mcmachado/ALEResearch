@@ -48,7 +48,7 @@ class RLLearner : public Agent<FeatureType>{
  		*
  		* @return int action to be taken
  		*/
-		int epsilonGreedy(std::vector<double> &QValues);
+		int epsilonGreedy(std::vector<float> &QValues);
 
 		/**
 		* Constructor to be used by the RL classes to save the parameters that
