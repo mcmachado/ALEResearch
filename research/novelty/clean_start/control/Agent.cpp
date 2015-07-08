@@ -4,7 +4,7 @@
 
 #define NUM_BITS 1024
 
-Agent::Agent(ALEInterface& ale, Parameters *param, long unsigned int numFeatures){
+Agent::Agent(ALEInterface& ale, Parameters *param) : bproFeatures(param) {
 	//Get the number of effective actions:
 	if(param->isMinimalAction){
 		actions = ale.getMinimalActionSet();
@@ -22,6 +22,6 @@ Agent::Agent(ALEInterface& ale, Parameters *param, long unsigned int numFeatures
 	}
 
 	for(int i = 0; i < numberOfOptions; i++){
-		w.push_back(vector< vector<float> >(numberOfPrimitiveActions, vector<float>(numFeatures, 0.0)));
+		w.push_back(vector< vector<float> >(numberOfPrimitiveActions, vector<float>(bproFeatures.getNumberOfFeatures(), 0.0)));
 	}
 }

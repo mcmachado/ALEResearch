@@ -13,8 +13,8 @@
 #include <ale_interface.hpp>
 
 #include "control/Agent.hpp"
-#include "common/Parameters.hpp"
 #include "svd/DimReduction.hpp"
+#include "common/Parameters.hpp"
 #include "control/ControlAgent.hpp"
 
 using namespace std;
@@ -42,8 +42,7 @@ int main(int argc, char** argv){
 
 	//TODO: decide if I am going to define the feature set here,
 	//in the agent, or in the control.
-	BPROFeatures bproFeatures(&param);
-	Agent agent(ale, &param, bproFeatures.getNumberOfFeatures());
+	Agent agent(ale, &param);
 
 	for(int iter = 0; iter < maxNumIterations; iter++){
 		gatherSamplesFromRandomTrajectories(ale, &param, agent, iter);
