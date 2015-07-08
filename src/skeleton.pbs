@@ -1,0 +1,19 @@
+#!/bin/bash
+#PBS -S /bin/bash
+# Script for running
+
+#PBS -l nodes=1
+#PBS -l mem=1200mb
+#PBS -l walltime=12:00:00
+#PBS -m aeb
+#PBS -M carion.nicolas@gmail.com
+
+module load boost64/1.55.0
+module load cmake
+module load gcc/4.8.2
+module load protobuf
+
+LD_LIBRARY_PATH=/home/alcinos/SVD/Arcade-Learning-Environment/:/home/alcinos/libs/lib/
+
+export LD_LIBRARY_PATH
+
