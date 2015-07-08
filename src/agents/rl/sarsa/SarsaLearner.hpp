@@ -61,6 +61,7 @@ class SarsaLearner : public RLLearner<bool>{
  		* the rule: e[action][i] = gamma * lambda * e[action][i]. It is possible to also define thresholding.
  		*/
 		void updateAcumTrace(int action, std::vector<int> &Features);
+	public:
 		/**
  		* Prints the weights in a file. Each line will contain a weight.
  		*/
@@ -69,7 +70,6 @@ class SarsaLearner : public RLLearner<bool>{
  		* Loads the weights saved in a file. Each line will contain a weight.
  		*/		
 		void loadWeights();
-	public:
     SarsaLearner(Environment<bool>& env, Parameters *param);
 		/**
  		* Implementation of an agent controller. This implementation is Sarsa(lambda).

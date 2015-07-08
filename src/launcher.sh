@@ -14,7 +14,8 @@ do
         echo "DIFFICULTY_LEVEL = ${diff}" >> run_d${diff}_m${mode}/conf.cfg
         echo "GAME_MODE = ${mode}" >> run_d${diff}_m${mode}/conf.cfg
         cp skeleton.pbs run_d${diff}_m${mode}/run_d${diff}_m${mode}.pbs
+        cp learner run_d${diff}_m${mode}
         echo "cd ${base_path}/run_d${diff}_m${mode}" >>  run_d${diff}_m${mode}/run_d${diff}_m${mode}.pbs
-        echo $cmd >> run_d${diff}_m${mode}/run_d${diff}_m${mode}.pbs
+        echo "${cmd} &> out_d${diff}_m${mode}.out" >> run_d${diff}_m${mode}/run_d${diff}_m${mode}.pbs
     done
 done

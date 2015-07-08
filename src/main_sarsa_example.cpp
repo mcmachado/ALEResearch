@@ -61,7 +61,7 @@ int main(int argc, char** argv){
 	SarsaLearner sarsaLearner(env,&param);
     //Learn a policy:
     sarsaLearner.learnPolicy(env);
-
+    sarsaLearner.saveWeightsToFile("weights_d"+std::to_string(param.getDifficultyLevel())+"_m"+std::to_string(param.getGameMode())+".w");
     printf("\n\n== Evaluation without Learning == \n\n");
     sarsaLearner.evaluatePolicy(env);
 	
