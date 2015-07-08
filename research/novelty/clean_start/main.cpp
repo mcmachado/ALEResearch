@@ -24,8 +24,13 @@ void initializeALE(ALEInterface &ale, const Parameters param){
 	ale.setInt  ("max_num_frames_per_episode", param.episodeLength);
 	ale.setBool ("sound"                     , param.display);
 	ale.setBool ("display_screen"            , param.display);
-	ale.setFloat("frame_skip"                , param.numStepsPerAction);
 	ale.setFloat("stochasticity"             , 0.00);
+	/*In a first moment I am not using this because I need to see the
+	  intermediate screens. If I use this I will just see every 5th
+	  screen, if a bit flips and unflips between these 5 frames I will
+	  not see it. I don't think it is a good idea. I may revisit this
+	  assumption later, testing it.*/
+	//ale.setFloat("frame_skip"                , param.numStepsPerAction);
 	
 	ale.loadROM(param.romPath.c_str());
 }

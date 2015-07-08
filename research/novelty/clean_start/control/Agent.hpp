@@ -21,8 +21,12 @@ class Agent{
 		int numberOfAvailActions, numberOfOptions, numberOfPrimitiveActions;
 
 		Agent(ALEInterface& ale, Parameters *param);
+		int playActionUpdatingAvg(ALEInterface& ale, Parameters *param, int &frame, int nextAction, int iter);
 	private:
 		Agent();
+		int epsilonGreedy(vector<float> &QValues, float epsilon);
+		void updateQValues(vector<int> &Features, vector<float> &QValues, int option);
+		void updateAverage(Parameters *param, vector<bool> Fprev, vector<bool> F, int frame, int iter);
 };
 
 #endif
