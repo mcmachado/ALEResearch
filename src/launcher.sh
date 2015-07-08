@@ -18,6 +18,7 @@ do
         echo "GAME_MODE = ${mode}" >> ${folder}/conf.cfg
         cp skeleton.pbs ${folder}/run_d${diff}_m${mode}.pbs
         cp learner ${folder}
+        cp mode_difficulty_getter ${folder}
         echo "cd ${base_path}/${folder}" >>  ${folder}/run_d${diff}_m${mode}.pbs
         echo "${cmd} &> out_${game}_d${diff}_m${mode}.out" >> ${folder}/run_d${diff}_m${mode}.pbs
         bqsub ${folder}/run_d${diff}_m${mode}.pbs
