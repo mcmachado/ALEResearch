@@ -53,6 +53,8 @@ int main(int argc, char** argv){
 	ale.setInt("max_num_frames_per_episode", param.getEpisodeLength());
 
 	ale.loadROM(param.getRomPath().c_str());
+    ale.setDifficulty(param.getDifficultyLevel());
+    ale.setMode(param.getGameMode());
     ALEEnvironment<RAMFeatures> env(&ale,&features);
 
 	//Instantiating the learning algorithm:
