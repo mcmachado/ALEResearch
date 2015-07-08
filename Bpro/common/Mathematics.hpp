@@ -8,6 +8,7 @@
 
 #include <vector>
 #include <math.h>
+#include <random>
 
 class Mathematics{
 	public:
@@ -23,4 +24,5 @@ class Mathematics{
  		* @return indice of an element with highest value, ties are broke randomly.
  		*/
 		static int argmax(std::vector<float> array);
+    static int argmax(std::vector<float>array,std::mt19937& randAgent);
 };

@@ -21,6 +21,7 @@ using namespace std;
 SarsaLearner::SarsaLearner(ALEInterface& ale, Features *features, Parameters *param,int seed) : RLLearner(ale, param,seed) {
     totalNumberFrames = 0.0;
     maxFeatVectorNorm = 1;
+    saveThreshold =0;
     
     delta = 0.0;
 	alpha = param->getAlpha();
@@ -28,18 +29,17 @@ SarsaLearner::SarsaLearner(ALEInterface& ale, Features *features, Parameters *pa
 	traceThreshold = param->getTraceThreshold();
 	numFeatures = features->getNumberOfFeatures();
     toSaveCheckPoint = param->getToSaveCheckPoint();
-    saveWeightsEveryXSteps = param->getFrequencySavingWeights();
+    saveWeightsEveryXFrames = param->getFrequencySavingWeights();
 	pathWeightsFileToLoad = param->getPathToWeightsFiles();
-    featureSeen.resize(numActions);
+    //featureSeen.resize(numActions);
 	
 	for(int i = 0; i < numActions; i++){
 		//Initialize Q;
 		Q.push_back(0);
 		Qnext.push_back(0);
 		//Initialize e:
-		e.push_back(vector<float>(numFeatures, 0.0));
-		w.push_back(vector<float>(numFeatures, 0.0));
-		nonZeroElig.push_back(vector<int>());
+		e.push_back(unordered_map<long long, float>());
+		w.push_back(unordered_map<long long,float>());
 	}
     
     episodePassed = 0;
@@ -53,10 +53,12 @@ SarsaLearner::SarsaLearner(ALEInterface& ale, Features *features, Parameters *pa
             loadCheckPoint(checkPointToLoad);
             remove(checkPointLoadName.c_str());
         }
+        saveThreshold = (totalNumberFrames/saveWeightsEveryXFrames)*saveWeightsEveryXFrames;
         ofstream learningConditionFile;
-        nameForLearningCondition = checkPointName+"-learningCondition-Episode"+to_string(episodePassed)+"-finished.txt";
+        nameForLearningCondition = checkPointName+"-learningCondition-Frames"+to_string(saveThreshold)+"-finished.txt";
         string previousNameForLearningCondition =checkPointName +"-learningCondition.txt";
         rename(previousNameForLearningCondition.c_str(), nameForLearningCondition.c_str());
+        saveThreshold+=saveWeightsEveryXFrames;
         learningConditionFile.open(nameForLearningCondition, ios_base::app);
         learningConditionFile.close();
 
@@ -65,77 +67,63 @@ SarsaLearner::SarsaLearner(ALEInterface& ale, Features *features, Parameters *pa
 
 SarsaLearner::~SarsaLearner(){}
 
-void SarsaLearner::updateQValues(vector<int> &Features, vector<float> &QValues){
+void SarsaLearner::updateQValues(vector<long long> &Features, vector<float> &QValues){
 	for(int a = 0; a < numActions; a++){
-		double sumW = 0;
-		for(unsigned int i = 0; i < Features.size(); i++){
-			sumW += w[a][Features[i]];
+		float sumW = 0;
+		for(unsigned long long i = 0; i < Features.size(); i++){
+            auto got = w[a].find(Features[i]);
+            if (got!=w[a].end()){
+                sumW += w[a][Features[i]];
+            }
 		}
 		QValues[a] = sumW;
 	}
 }
 
-void SarsaLearner::updateReplTrace(int action, vector<int> &Features){
+void SarsaLearner::updateReplTrace(int action, vector<long long> &Features){
 	//e <- gamma * lambda * e
-	for(unsigned int a = 0; a < nonZeroElig.size(); a++){
-		int numNonZero = 0;
-	 	for(unsigned int i = 0; i < nonZeroElig[a].size(); i++){
-	 		int idx = nonZeroElig[a][i];
-	 		//To keep the trace sparse, if it is
-	 		//less than a threshold it is zero-ed.
-			e[a][idx] = gamma * lambda * e[a][idx];
-			if(e[a][idx] < traceThreshold){
-				e[a][idx] = 0;
-			}
-			else{
-				nonZeroElig[a][numNonZero] = idx;
-		  		numNonZero++;
-			}
-		}
-		nonZeroElig[a].resize(numNonZero);
-	}
-
+	for(unsigned int a = 0; a < e.size(); a++){
+        for (auto it=e[a].begin();it!=e[a].end();){
+            it->second = it->second*gamma*lambda;
+            if (it->second<traceThreshold){
+                it = e[a].erase(it);
+            }else{
+                it++;
+            }
+        }
+    }
 	//For all i in Fa:
 	for(unsigned int i = 0; i < F.size(); i++){
-		int idx = Features[i];
+		long long idx = Features[i];
 		//If the trace is zero it is not in the vector
 		//of non-zeros, thus it needs to be added
-		if(e[action][idx] == 0){
-	       nonZeroElig[action].push_back(idx);
-	    }
 		e[action][idx] = 1;
 	}
 }
 
-void SarsaLearner::updateAcumTrace(int action, vector<int> &Features){
+void SarsaLearner::updateAcumTrace(int action, vector<long long> &Features){
 	//e <- gamma * lambda * e
-	for(unsigned int a = 0; a < nonZeroElig.size(); a++){
-		int numNonZero = 0;
-	 	for(unsigned int i = 0; i < nonZeroElig[a].size(); i++){
-	 		int idx = nonZeroElig[a][i];
-	 		//To keep the trace sparse, if it is
-	 		//less than a threshold it is zero-ed.
-			e[a][idx] = gamma * lambda * e[a][idx];
-			if(e[a][idx] < traceThreshold){
-				e[a][idx] = 0;
-			}
-			else{
-				nonZeroElig[a][numNonZero] = idx;
-		  		numNonZero++;
-			}
-		}
-		nonZeroElig[a].resize(numNonZero);
-	}
-
+    for(unsigned int a = 0; a < e.size(); a++){
+        for (auto it=e[a].begin();it!=e[a].end();){
+            it->second = gamma*lambda;
+            if (it->second<traceThreshold){
+                it = e[a].erase(it);
+            }else{
+                it++;
+            }
+        }
+    }
 	//For all i in Fa:
 	for(unsigned int i = 0; i < F.size(); i++){
-		int idx = Features[i];
+		long long idx = Features[i];
 		//If the trace is zero it is not in the vector
 		//of non-zeros, thus it needs to be added
-		if(e[action][idx] == 0){
-	       nonZeroElig[action].push_back(idx);
-	    }
-		e[action][idx] += 1;
+        auto got = e[action].find(idx);
+        if (got==e[action].end()){
+            e[action][idx]=1;
+        }else{
+            got->second+=1;
+        }
 	}
 }
 
@@ -151,7 +139,7 @@ void SarsaLearner::sanityCheck(){
 //To do: we do not want to save weights that are zero
 void SarsaLearner::saveCheckPoint(int episode, int totalNumberFrames, vector<float>& episodeResults,int& frequency,vector<int>& episodeFrames, vector<double>& episodeFps){
     ofstream learningConditionFile;
-    string newNameForLearningCondition = checkPointName+"-learningCondition-Episode"+to_string(episode)+"-writing.txt";
+    string newNameForLearningCondition = checkPointName+"-learningCondition-Frames"+to_string(saveThreshold)+"-writing.txt";
     int renameReturnCode = rename(nameForLearningCondition.c_str(),newNameForLearningCondition.c_str());
     if (renameReturnCode == 0){
         nameForLearningCondition = newNameForLearningCondition;
@@ -170,7 +158,7 @@ void SarsaLearner::saveCheckPoint(int episode, int totalNumberFrames, vector<flo
     }
     
     //write parameters checkPoint
-    string currentCheckPointName = checkPointName+"-checkPoint-Episode"+to_string(episode)+"-writing.txt";
+    string currentCheckPointName = checkPointName+"-checkPoint-Frames"+to_string(saveThreshold)+"-writing.txt";
     ofstream checkPointFile;
     checkPointFile.open(currentCheckPointName.c_str());
     checkPointFile<<agentRand<<endl;
@@ -178,14 +166,15 @@ void SarsaLearner::saveCheckPoint(int episode, int totalNumberFrames, vector<flo
     checkPointFile << episode<<endl;
     checkPointFile << firstReward<<endl;
     checkPointFile << maxFeatVectorNorm<<endl;
-    for (int a=0;a<featureSeen.size();a++){
-        for (int index=0; index<featureSeen[a].size();index++){
-            checkPointFile<<a<<" "<<featureSeen[a][index]<<" "<<w[a][featureSeen[a][index]]<<"\t";
+    for (int a=0;a<w.size();a++){
+        for (auto it=w[a].begin(); it!=w[a].end();it++){
+            checkPointFile<<a<<" "<<it->first<<" "<<it->second<<"\t";
         }
     }
+    
     checkPointFile << endl;
     checkPointFile.close();
-    string previousVersionCheckPoint = checkPointName+"-checkPoint-Episode"+to_string(episode-frequency)+"-finished.txt";
+    string previousVersionCheckPoint = checkPointName+"-checkPoint-Frames"+to_string(saveThreshold-saveWeightsEveryXFrames)+"-finished.txt";
     remove(previousVersionCheckPoint.c_str());
     string oldCheckPointName = currentCheckPointName;
     currentCheckPointName.replace(currentCheckPointName.end()-11,currentCheckPointName.end()-4,"finished");
@@ -220,15 +209,12 @@ void SarsaLearner::learnPolicy(ALEInterface& ale, Features *features){
 
 	//Repeat (for each episode):
 	//This is going to be interrupted by the ALE code since I set max_num_frames beforehand
-	for(int episode = episodePassed+1; totalNumberFrames < totalNumberOfFramesToLearn; episode++){
+    for(int episode = episodePassed+1; totalNumberFrames < totalNumberOfFramesToLearn; episode++){
 		//We have to clean the traces every episode:
-		for(unsigned int a = 0; a < nonZeroElig.size(); a++){
-			for(unsigned int i = 0; i < nonZeroElig[a].size(); i++){
-				int idx = nonZeroElig[a][i];
-				e[a][idx] = 0.0;
-			}
-			nonZeroElig[a].clear();
-		}
+		for(unsigned int a = 0; a < e.size(); a++){
+            e[a].clear();
+        }
+        
 		F.clear();
 		features->getActiveFeaturesIndices(ale.getScreen(), ale.getRAM(), F);
 		updateQValues(F, Q);
@@ -269,14 +255,18 @@ void SarsaLearner::learnPolicy(ALEInterface& ale, Features *features){
 
 			updateReplTrace(currentAction, F);
 			//Update weights vector:
-			for(unsigned int a = 0; a < nonZeroElig.size(); a++){
-				for(unsigned int i = 0; i < nonZeroElig[a].size(); i++){
-					int idx = nonZeroElig[a][i];
-                    if (w[a][idx]==0 && delta!=0){
-                        featureSeen[a].push_back(idx);
+			for(unsigned int a = 0; a < e.size(); a++){
+				for(auto it=e[a].begin();it!=e[a].end();it++){
+					long long idx = it->first;
+                    float changeAmount = (alpha/maxFeatVectorNorm)*delta*it->second;
+                    if (changeAmount!=0){
+                        auto got = w[a].find(idx);
+                        if (got==w[a].end()){
+                            w[a][idx]=changeAmount;
+                        }else{
+                            got->second+=changeAmount;
+                        }
                     }
-					w[a][idx] = w[a][idx] + (alpha/maxFeatVectorNorm) * delta * e[a][idx];
-                    
 				}
 			}
 			F = Fnext;
@@ -296,8 +286,9 @@ void SarsaLearner::learnPolicy(ALEInterface& ale, Features *features){
 		totalNumberFrames += ale.getEpisodeFrameNumber();
 		prevCumReward = cumReward;
 		ale.reset_game();
-		if(toSaveCheckPoint && episode%saveWeightsEveryXSteps == 0){
-            saveCheckPoint(episode,totalNumberFrames,episodeResults,saveWeightsEveryXSteps,episodeFrames,episodeFps);
+		if(toSaveCheckPoint && totalNumberFrames>saveThreshold){
+            saveCheckPoint(episode,totalNumberFrames,episodeResults,saveWeightsEveryXFrames,episodeFrames,episodeFps);
+            saveThreshold+=saveWeightsEveryXFrames;
         }
 	}
 }
@@ -339,7 +330,7 @@ void SarsaLearner::evaluatePolicy(ALEInterface& ale, Features *features){
 		ale.reset_game();
 		prevCumReward = cumReward;
 	}
-    resultFile<<"Average: "<<(double)cumReward/500<<std::endl;
+    resultFile<<"Average: "<<(double)cumReward/numEpisodesEval<<std::endl;
     resultFile.close();
     rename(oldName.c_str(),newName.c_str());
     

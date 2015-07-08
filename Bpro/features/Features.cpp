@@ -18,8 +18,8 @@
 void Features::getCompleteFeatureVector(const ALEScreen &screen, const ALERAM &ram, vector<bool>& features){	
 	assert(features.size() == 0); //If the vector is not empty this can be a mess
 	//Get vector with active features:
-	vector<int> temp;
-	vector<int>& t = temp;
+	vector<long long> temp;
+	vector<long long>& t = temp;
 	this->getActiveFeaturesIndices(screen, ram, t);
 	//Iterate over vector with all features storing the non-zero indices in the new vector:
 	features = vector<bool>(this->getNumberOfFeatures(), 0);

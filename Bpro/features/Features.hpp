@@ -42,7 +42,7 @@ class Features{
  		* 
  		* @return nothing since one will receive the requested data by the last parameter, by reference.
  		*/
-		virtual void getActiveFeaturesIndices(const ALEScreen &screen, const ALERAM &ram, vector<int>& features) = 0;
+		virtual void getActiveFeaturesIndices(const ALEScreen &screen, const ALERAM &ram, vector<long long>& features) = 0;
 		/**
  		* It 'returns' a binary vector containing 1's where the feature is active. Ideally this
  		* method will never be used as iterating over all features is far less efficient than
@@ -71,7 +71,7 @@ class Features{
  		* @param none
  		* @return integer representing the number of features of a given representation.
  		*/
-		virtual int getNumberOfFeatures() = 0;
+		virtual long long getNumberOfFeatures() = 0;
 		/**
 		* Destructor, not necessary in this class.
 		*/
