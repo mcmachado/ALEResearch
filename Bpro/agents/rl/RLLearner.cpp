@@ -35,7 +35,7 @@ RLLearner::RLLearner(ALEInterface& ale, Parameters *param, int seed){
 int RLLearner::epsilonGreedy(vector<float> &QValues){
 	randomActionTaken = 0;
 
-	int action = Mathematics::argmax(QValues);
+	int action = Mathematics::argmax(QValues,agentRand);
 	//With probability epsilon: a <- random action in A(s)
 	int random = agentRand();
 	if((random % int(nearbyint(1.0/epsilon))) == 0) {
@@ -43,7 +43,7 @@ int RLLearner::epsilonGreedy(vector<float> &QValues){
 		randomActionTaken = 1;
 		action = agentRand() % numActions;
 	}
-	return action;
+    return action;
 }
 
 /**
