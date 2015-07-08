@@ -33,13 +33,17 @@ void initializeALE(ALEInterface &ale, const Parameters param){
 int main(int argc, char** argv){
 
 	Parameters param(argc, argv);
-	Agent agent; //TODO: Write constructor to this class
 	srand(param.seed);
 
 	int maxNumIterations = param.numIterations;
 	
 	ALEInterface ale;
 	initializeALE(ale, param);
+
+	//TODO: decide if I am going to define the feature set here,
+	//in the agent, or in the control.
+	BPROFeatures bproFeatures(&param);
+	Agent agent(ale, &param, bproFeatures.getNumberOfFeatures());
 
 	for(int iter = 0; iter < maxNumIterations; iter++){
 		gatherSamplesFromRandomTrajectories(ale, &param, agent, iter);
