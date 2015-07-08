@@ -84,7 +84,6 @@ void Agent::updateAverage(Parameters *param, vector<bool> Fprev, vector<bool> F,
 }
 
 int Agent::playActionUpdatingAvg(ALEInterface& ale, Parameters *param, int &frame, int nextAction, int iter){
-
 	vector<bool> F(NUM_BITS, 0); //Set of active features
 	vector<bool> Fprev;
 	int reward = 0;
