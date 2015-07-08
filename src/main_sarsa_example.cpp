@@ -21,6 +21,7 @@
 #include "features/RAMFeatures.hpp"
 #include "environments/ale/ALEEnvironment.hpp"
 
+using namespace std;
 void printBasicInfo(Parameters param){
 	printf("Seed: %d\n", param.getSeed());
 	printf("\nCommand Line Arguments:\nPath to Config. File: %s\nPath to ROM File: %s\nPath to Backg. File: %s\n", 
@@ -53,6 +54,9 @@ int main(int argc, char** argv){
 	ale.setInt("max_num_frames_per_episode", param.getEpisodeLength());
 
 	ale.loadROM(param.getRomPath().c_str());
+    std::string gameName=param.getRomPath().substr(param.getRomPath().find_last_of('/')+1);
+    gameName = gameName.substr(0,gameName.find_last_of('.'));
+    //std::copy(param.getRomPath().begin()+1+ param.getRomPath().find_last_of('/'),param.getRomPath().end(),gameName.begin());
     ale.setDifficulty(param.getDifficultyLevel());
     ale.setMode(param.getGameMode());
     ALEEnvironment<RAMFeatures> env(&ale,&features);
@@ -61,7 +65,7 @@ int main(int argc, char** argv){
 	SarsaLearner sarsaLearner(env,&param);
     //Learn a policy:
     sarsaLearner.learnPolicy(env);
-    sarsaLearner.saveWeightsToFile("weights_d"+std::to_string(param.getDifficultyLevel())+"_m"+std::to_string(param.getGameMode())+".w");
+    sarsaLearner.saveWeightsToFile("weights_"+gameName+"_RAM_d"+std::to_string(param.getDifficultyLevel())+"_m"+std::to_string(param.getGameMode())+".w");
     printf("\n\n== Evaluation without Learning == \n\n");
     sarsaLearner.evaluatePolicy(env);
 	
