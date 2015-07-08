@@ -41,8 +41,8 @@ int main(int argc, char** argv){
 	ALEInterface ale;
 	initializeALE(ale, param);
 
-	for(int i = 0; i < maxNumIterations; i++){
-		gatherSamplesFromRandomTrajectories(ale, &param, agent);
+	for(int iter = 0; iter < maxNumIterations; iter++){
+		gatherSamplesFromRandomTrajectories(ale, &param, agent, iter);
 		reduceDimensionalityOfEvents();
 		learnOptionsDerivedFromEigenEvents();
 	}

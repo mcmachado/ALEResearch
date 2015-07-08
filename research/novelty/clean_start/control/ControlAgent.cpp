@@ -7,7 +7,61 @@
 
 #define NUM_BITS 1024
 
-void updateAverage(vector<bool> Fprev, vector<bool> F, int frame){}
+void updateAverage(Parameters *param, Agent &agent, vector<bool> Fprev, vector<bool> F, int frame, int iter){
+	assert (Fprev.size() == F.size());
+	assert (F.size() == NUM_BITS);
+	
+	bool toPrint = false;
+	/*This should be a parameter, but in fact I do not plan to use it as true, so I did not set it
+	  in the class Parameters. Eventually, if I ever want to use it, I have to change it here. */
+	bool toReportAll_param = false;
+	/*This is used to save intermediate processing steps, like the rare events. It is not defined
+	  in the Parameters class because I hope this is used only internally. */
+	std::stringstream sstm_fileName;
+	sstm_fileName << "frequencyRareEventsIter" << iter << ".out";
+	string outputPath_param = sstm_fileName.str();
+
+	vector<int> tempVector(2 * NUM_BITS, 0);
+
+	for(int i = 0; i < NUM_BITS; i++){
+		if(!Fprev[i] && F[i]){ // 0->1
+			agent.freqOfBitFlips[i] = (agent.freqOfBitFlips[i] * (frame - 1) + 1) / frame;
+			tempVector[i] = 1;
+			if(frame > param->framesToDefRarity && agent.freqOfBitFlips[i] < param->rarityFreqThreshold){
+				tempVector[i] = 2; //1 denotes flip, 2 denotes relevant flip
+				toPrint = true;
+			}
+		} else{
+			agent.freqOfBitFlips[i] = (agent.freqOfBitFlips[i] * (frame - 1) + 0) / frame;
+		}		
+		if(Fprev[i] && !F[i]){ // 1->0
+			agent.freqOfBitFlips[i + NUM_BITS] = (agent.freqOfBitFlips[i + NUM_BITS] * (frame - 1) + 1) / frame;
+			tempVector[i + NUM_BITS] = 1;
+			if(frame > param->framesToDefRarity && agent.freqOfBitFlips[i + NUM_BITS] < param->rarityFreqThreshold){
+				tempVector[i + NUM_BITS] = 2;
+				toPrint = true;
+			}
+		} else{
+			agent.freqOfBitFlips[i + NUM_BITS] = (agent.freqOfBitFlips[i + NUM_BITS] * (frame - 1) + 0) / frame;
+		}
+	}
+
+	ofstream myFileBits;
+	myFileBits.open (outputPath_param + "_bits.csv", ios::app);
+	vector<int> bytesToPrint;
+	if(toPrint){
+		for(int i = 0; i < tempVector.size(); i++){
+			if(toReportAll_param == 1 && tempVector[i] != 0){
+				myFileBits << i << ",";
+			}
+			if(toReportAll_param == 0 && tempVector[i] == 2){
+				myFileBits << i << ",";
+			}			
+		}
+		myFileBits << endl;
+	}
+	myFileBits.close();	
+}
 
 void updateQValues(Agent &agent, 
 	vector<int> &Features, vector<float> &QValues, int option){
@@ -34,7 +88,7 @@ int epsilonGreedy(Agent &agent, vector<float> &QValues, float epsilon){
 }
 
 int playActionUpdatingAvg(ALEInterface& ale, Parameters *param, Agent &agent,
-	RAMFeatures *ramFeatures, BPROFeatures *bproFeatures, int &frame, int nextAction){
+	RAMFeatures *ramFeatures, BPROFeatures *bproFeatures, int &frame, int nextAction, int iter){
 
 	vector<bool> F(NUM_BITS, 0); //Set of active features
 	vector<bool> Fprev;
@@ -49,7 +103,7 @@ int playActionUpdatingAvg(ALEInterface& ale, Parameters *param, Agent &agent,
 			F.clear();
 			ramFeatures->getCompleteFeatureVector(ale.getRAM(), F);
 			F.pop_back();
-			updateAverage(Fprev, F, frame);
+			updateAverage(param, agent, Fprev, F, frame, iter);
 		}
 	}
 	//If the selected action was one of the options
@@ -72,13 +126,14 @@ int playActionUpdatingAvg(ALEInterface& ale, Parameters *param, Agent &agent,
 			F.clear();
 			ramFeatures->getCompleteFeatureVector(ale.getRAM(), F);
 			F.pop_back();
-			updateAverage(Fprev, F, frame);
+			updateAverage(param, agent, Fprev, F, frame, iter);
 		}
 	}
 	return reward;
 }
 
-int playGame(ALEInterface& ale, Parameters *param, Agent &agent, RAMFeatures *ramFeatures, BPROFeatures *bproFeatures){
+int playGame(ALEInterface& ale, Parameters *param, Agent &agent, 
+	RAMFeatures *ramFeatures, BPROFeatures *bproFeatures, int iter){
 	int score = 0;
 	int frame = 0;
 	int totalNumActions = agent.numberOfAvailActions;
@@ -86,18 +141,18 @@ int playGame(ALEInterface& ale, Parameters *param, Agent &agent, RAMFeatures *ra
 	ale.reset_game();
 	while(!ale.game_over()){
 		int nextAction = rand() % totalNumActions;
-		score += playActionUpdatingAvg(ale, param, agent, ramFeatures, bproFeatures, frame, nextAction);
+		score += playActionUpdatingAvg(ale, param, agent, ramFeatures, bproFeatures, frame, nextAction, iter);
 	}
 
 	return score;
 }
 
-void gatherSamplesFromRandomTrajectories(ALEInterface& ale, Parameters *param, Agent &agent){
+void gatherSamplesFromRandomTrajectories(ALEInterface& ale, Parameters *param, Agent &agent, int iter){
 	cout << "Generating Samples to Identify Rare Events\n";
 	RAMFeatures ramFeatures;
 	BPROFeatures bproFeatures(param);
 	for(int i = 1; i < param->numGamesToSampleRareEvents + 1; i++){
-		int finalScore = playGame(ale, param, agent, &ramFeatures, &bproFeatures);
+		int finalScore = playGame(ale, param, agent, &ramFeatures, &bproFeatures, iter);
 		cout << i << ": Final score: " << finalScore << endl;
 	}
 }
