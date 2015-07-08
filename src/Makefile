@@ -13,9 +13,10 @@ USE_SDL     := 1
 # -D__USE_SDL Ensures we can use SDL to see the game screen
 # -D_GNU_SOURCE=1 means the compiler will use the GNU standard of compilation, the superset of all other standards under GNU C libraries.
 # -D_REENTRANT causes the compiler to use thread safe (i.e. re-entrant) versions of several functions in the C library.
-CFLAGS := -c -O3 -I$(ALE)/src -I/opt/local/include -D_GNU_SOURCE=1 -D_REENTRANT -std=c++11 -Wno-deprecated-declarations -Wall
+CFLAGS := -O3 -I$(ALE)/src -I/opt/local/include -D_GNU_SOURCE=1 -D_REENTRANT -std=c++11 -Wno-deprecated-declarations -Wall
 
 EXE := learner
+GETTER := mode_difficulty_getter
 # Search for library 'ale' and library 'z' when linking.
 LDFLAGS := -L$(ALE) -lale -lz -lm
 
@@ -30,13 +31,16 @@ VPATH = common:features:agents/rl/sarsa:agents/rl/qlearning:agents/baseline:agen
 SRCS = main_sarsa_example.cpp Mathematics.cpp Parameters.cpp Timer.cpp Features.cpp Background.cpp BasicFeatures.cpp BASSFeatures.cpp BPROFeatures.cpp RAMFeatures.cpp SarsaLearner.cpp QLearner.cpp ConstantAgent.cpp PerturbAgent.cpp  RandomAgent.cpp  HumanAgent.cpp #TRSarsaLearner.cpp
 OBJS = $(subst .cpp,.o, $(addprefix bin/,$(SRCS)))
 
-all: $(EXE)
+all: $(EXE) $(GETTER)
 
 $(EXE): $(OBJS)
 	$(CXX) $(LDFLAGS) $(OBJS) -o $(EXE)
 
+$(GETTER):
+	$(CXX) $(LDFLAGS) $(CFLAGS) mode_difficulty_getter.cpp -o $(GETTER)
+
 bin/%.o: %.cpp
-	$(CC) -o $@ -c $< $(CFLAGS)
+	$(CXX) -o $@ -c $< $(CFLAGS)
 
 clean:
 	rm -rf $(OBJS)
