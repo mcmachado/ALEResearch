@@ -2,8 +2,6 @@
 
 #include "ControlAgent.hpp"
 #include "../common/Mathematics.hpp"
-#include "../observations/RAMFeatures.hpp"
-#include "../observations/BPROFeatures.hpp"
 
 #define NUM_BITS 1024
 
@@ -18,7 +16,7 @@ void updateAverage(Parameters *param, Agent &agent, vector<bool> Fprev, vector<b
 	/*This is used to save intermediate processing steps, like the rare events. It is not defined
 	  in the Parameters class because I hope this is used only internally. */
 	std::stringstream sstm_fileName;
-	sstm_fileName << "frequencyRareEventsIter" << iter << ".out";
+	sstm_fileName << "frequencyRareEventsIter" << iter + 1 << "_bits.csv";
 	string outputPath_param = sstm_fileName.str();
 
 	vector<int> tempVector(2 * NUM_BITS, 0);
@@ -47,7 +45,7 @@ void updateAverage(Parameters *param, Agent &agent, vector<bool> Fprev, vector<b
 	}
 
 	ofstream myFileBits;
-	myFileBits.open (outputPath_param + "_bits.csv", ios::app);
+	myFileBits.open (outputPath_param, ios::app);
 	vector<int> bytesToPrint;
 	if(toPrint){
 		for(int i = 0; i < tempVector.size(); i++){
@@ -88,7 +86,7 @@ int epsilonGreedy(Agent &agent, vector<float> &QValues, float epsilon){
 }
 
 int playActionUpdatingAvg(ALEInterface& ale, Parameters *param, Agent &agent,
-	RAMFeatures *ramFeatures, BPROFeatures *bproFeatures, int &frame, int nextAction, int iter){
+	int &frame, int nextAction, int iter){
 
 	vector<bool> F(NUM_BITS, 0); //Set of active features
 	vector<bool> Fprev;
@@ -101,7 +99,7 @@ int playActionUpdatingAvg(ALEInterface& ale, Parameters *param, Agent &agent,
 			frame++;
 			Fprev.swap(F);
 			F.clear();
-			ramFeatures->getCompleteFeatureVector(ale.getRAM(), F);
+			agent.ramFeatures.getCompleteFeatureVector(ale.getRAM(), F);
 			F.pop_back();
 			updateAverage(param, agent, Fprev, F, frame, iter);
 		}
@@ -116,7 +114,7 @@ int playActionUpdatingAvg(ALEInterface& ale, Parameters *param, Agent &agent,
 		while(rand()%1000 > 1000 * param->optionTerminationProb && !ale.game_over()){
 			//Get state and features active on that state:		
 			Fbpro.clear();
-			bproFeatures->getActiveFeaturesIndices(ale.getScreen(), Fbpro);
+			agent.bproFeatures.getActiveFeaturesIndices(ale.getScreen(), Fbpro);
 			updateQValues(agent, Fbpro, Q, option); //Update Q-values for each possible action
 			currentAction = epsilonGreedy(agent, Q, param->epsilon);
 			//Take action, observe reward and next state:
@@ -124,7 +122,7 @@ int playActionUpdatingAvg(ALEInterface& ale, Parameters *param, Agent &agent,
 			frame++;
 			Fprev.swap(F);
 			F.clear();
-			ramFeatures->getCompleteFeatureVector(ale.getRAM(), F);
+			agent.ramFeatures.getCompleteFeatureVector(ale.getRAM(), F);
 			F.pop_back();
 			updateAverage(param, agent, Fprev, F, frame, iter);
 		}
@@ -132,8 +130,7 @@ int playActionUpdatingAvg(ALEInterface& ale, Parameters *param, Agent &agent,
 	return reward;
 }
 
-int playGame(ALEInterface& ale, Parameters *param, Agent &agent, 
-	RAMFeatures *ramFeatures, BPROFeatures *bproFeatures, int iter){
+int playGame(ALEInterface& ale, Parameters *param, Agent &agent, int iter){
 	int score = 0;
 	int frame = 0;
 	int totalNumActions = agent.numberOfAvailActions;
@@ -141,7 +138,7 @@ int playGame(ALEInterface& ale, Parameters *param, Agent &agent,
 	ale.reset_game();
 	while(!ale.game_over()){
 		int nextAction = rand() % totalNumActions;
-		score += playActionUpdatingAvg(ale, param, agent, ramFeatures, bproFeatures, frame, nextAction, iter);
+		score += playActionUpdatingAvg(ale, param, agent, frame, nextAction, iter);
 	}
 
 	return score;
@@ -149,10 +146,8 @@ int playGame(ALEInterface& ale, Parameters *param, Agent &agent,
 
 void gatherSamplesFromRandomTrajectories(ALEInterface& ale, Parameters *param, Agent &agent, int iter){
 	cout << "Generating Samples to Identify Rare Events\n";
-	RAMFeatures ramFeatures;
-	BPROFeatures bproFeatures(param);
 	for(int i = 1; i < param->numGamesToSampleRareEvents + 1; i++){
-		int finalScore = playGame(ale, param, agent, &ramFeatures, &bproFeatures, iter);
+		int finalScore = playGame(ale, param, agent, iter);
 		cout << i << ": Final score: " << finalScore << endl;
 	}
 }

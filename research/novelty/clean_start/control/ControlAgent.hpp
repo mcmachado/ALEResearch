@@ -3,8 +3,6 @@
 
 #include "../control/Agent.hpp"
 #include "../common/Parameters.hpp"
-#include "../observations/RAMFeatures.hpp"
-#include "../observations/BPROFeatures.hpp"
 
 void learnOptionsDerivedFromEigenEvents();
 
@@ -16,7 +14,6 @@ void updateQValues(Agent &agent, vector<int> &Features, vector<float> &QValues, 
 
 void gatherSamplesFromRandomTrajectories(ALEInterface& ale, Parameters *param, Agent &agent, int iter);
 
-int playGame(ALEInterface& ale, Parameters *param, RAMFeatures *ramFeatures, BPROFeatures *bproFeatures, int iter);
+int playGame(ALEInterface& ale, Parameters *param, int iter);
 
-int playActionUpdatingAvg(ALEInterface& ale, Parameters *param, RAMFeatures *ramFeatures, 
-	BPROFeatures *bproFeatures, int &frame, int nextAction, int iter);
+int playActionUpdatingAvg(ALEInterface& ale, Parameters *param, int &frame, int nextAction, int iter);
