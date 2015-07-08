@@ -115,7 +115,7 @@ void Parameters::parseParametersFromConfigFile(string cfgFileName){
 
 	//Execution parameters:
 	display                    = atoi(parameters["DISPLAY"                    ].c_str());
-	numIterations              = atoi(parameters["NUM_ITERATIONS"             ].c_str());
+	maxNumIterations           = atoi(parameters["NUM_ITERATIONS"             ].c_str());
 	episodeLength              = atoi(parameters["EPISODE_LENGTH"             ].c_str());
 	learningLength             = atoi(parameters["TOTAL_FRAMES_LEARN"         ].c_str());
 	isMinimalAction            = atoi(parameters["USE_MIN_ACTIONS"            ].c_str());

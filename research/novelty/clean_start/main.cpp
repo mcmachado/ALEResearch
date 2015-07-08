@@ -39,8 +39,6 @@ int main(int argc, char** argv){
 
 	Parameters param(argc, argv);
 	srand(param.seed);
-
-	int maxNumIterations = param.numIterations;
 	
 	ALEInterface ale;
 	initializeALE(ale, param);
@@ -48,8 +46,7 @@ int main(int argc, char** argv){
 	//TODO: decide if I am going to define the feature set here,
 	//in the agent, or in the control.
 	Agent agent(ale, &param);
-
-	for(int iter = 0; iter < maxNumIterations; iter++){
+	for(int iter = 0; iter < param.maxNumIterations; iter++){
 		gatherSamplesFromRandomTrajectories(ale, &param, agent, iter);
 		reduceDimensionalityOfEvents();
 		learnOptionsDerivedFromEigenEvents();
