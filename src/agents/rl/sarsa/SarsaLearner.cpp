@@ -265,8 +265,10 @@ double SarsaLearner::evaluatePolicy(Environment<bool>& env){
 			env.getActiveFeaturesIndices(F);
 			updateQValues(F, Q);       //Update Q-values for each possible action
 			currentAction = epsilonGreedy(Q);
+            //compute proba of taking current action
+            double proba_action = epsilon/double(numActions) + (randomActionTaken ? 0 : 1.0 - epsilon);
 			//Take action, observe reward and next state:
-			reward = env.act(actions[currentAction]);
+			reward = env.act(actions[currentAction],proba_action);
 			cumReward  += reward;
 		}
 		gettimeofday(&tvEnd, NULL);

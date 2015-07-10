@@ -47,8 +47,11 @@ int RLLearner<FeatureType>::epsilonGreedy(std::vector<float> &QValues){
 template<typename FeatureType>
 void RLLearner<FeatureType>::act(Environment<FeatureType>& env, int action, std::vector<double> &reward){
 	double r_alg = 0.0, r_real = 0.0;
-	
-	r_real = env.act(actions[action]);
+
+    //compute proba of taking current action
+    double proba_action = epsilon/double(numActions) + (randomActionTaken ? 0 : 1.0 - epsilon);
+
+	r_real = env.act(actions[action],proba_action);
 	if(toUseOnlyRewardSign){
 		if(r_real > 0){ 
 			r_alg = 1.0;
