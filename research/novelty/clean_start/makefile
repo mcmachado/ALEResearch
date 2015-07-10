@@ -1,12 +1,13 @@
 # Author: Marlos C. Machado
 
 ALE := ../../../../MyALE/
-
+EIGEN := lib/eigen
 # Set this to 1 to enable SDL and display_screen
 USE_SDL     := 0
 
 # -O3 Optimize code (urns on all optimizations specified by -O2 and also turns on the -finline-functions, -funswitch-loops, -fpredictive-commoning, -fgcse-after-reload, -ftree-loop-vectorize, -ftree-slp-vectorize, -fvect-cost-model, -ftree-partial-pre and -fipa-cp-clone options).
-FLAGS := -O3 -I$(ALE)/src
+FLAGS := -O3 -I$(ALE)/src -I$(EIGEN) 
+
 CXX := g++ -std=c++11
 OUT_FILE := pfd
 # Search for library 'ale' and library 'z' when linking.
