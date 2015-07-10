@@ -17,6 +17,7 @@ CFLAGS := -O3 -I$(ALE)/src -I/opt/local/include -D_GNU_SOURCE=1 -D_REENTRANT -st
 
 EXE := learner
 GETTER := mode_difficulty_getter
+VALUE_TRANSFER := value_transfer
 # Search for library 'ale' and library 'z' when linking.
 LDFLAGS := -L$(ALE) -lale -lz -lm
 
@@ -28,22 +29,25 @@ endif
 #This variable contains the paths in which there are files to compile (separated by a : )
 VPATH = common:features:agents/rl/sarsa:agents/rl/qlearning:agents/baseline:agents/human
 
-SRCS = main_sarsa_example.cpp Mathematics.cpp Parameters.cpp Timer.cpp Features.cpp Background.cpp BasicFeatures.cpp BASSFeatures.cpp BPROFeatures.cpp RAMFeatures.cpp SarsaLearner.cpp QLearner.cpp ConstantAgent.cpp PerturbAgent.cpp  RandomAgent.cpp  HumanAgent.cpp #TRSarsaLearner.cpp
+SRCS = Mathematics.cpp Parameters.cpp Timer.cpp Features.cpp Background.cpp BasicFeatures.cpp BASSFeatures.cpp BPROFeatures.cpp RAMFeatures.cpp SarsaLearner.cpp QLearner.cpp ConstantAgent.cpp PerturbAgent.cpp  RandomAgent.cpp  HumanAgent.cpp #TRSarsaLearner.cpp
 OBJS = $(subst .cpp,.o, $(addprefix bin/,$(SRCS)))
 
-all: $(EXE) $(GETTER)
+all: $(EXE) $(GETTER) $(VALUE_TRANSFER)
 
-$(EXE): $(OBJS)
-	$(CXX) $(LDFLAGS) $(OBJS) -o $(EXE)
+$(EXE): $(OBJS) bin/main_sarsa_example.o
+	$(CXX) $(LDFLAGS) $(OBJS) bin/main_sarsa_example.o -o $(EXE)
 
 $(GETTER):
 	$(CXX) $(LDFLAGS) $(CFLAGS) mode_difficulty_getter.cpp -o $(GETTER)
+
+$(VALUE_TRANSFER): $(OBJS) bin/value_transfer.o
+	$(CXX) $(LDFLAGS) $(CFLAGS) $(OBJS) bin/value_transfer.o -o $(VALUE_TRANSFER)
 
 bin/%.o: %.cpp
 	$(CXX) -o $@ -c $< $(CFLAGS)
 
 clean:
-	rm -rf $(OBJS)
+	rm -rf $(OBJS) $(EXE) $(VALUE_TRANSFER) $(GETTER)
 
 #This command needs to be executed in a osX before running the code:
 #export DYLD_LIBRARY_PATH="${DYLD_LIBRARY_PATH}:../lib/ale_0_4"

@@ -75,7 +75,7 @@ class QLearner : public RLLearner<bool>{
  		*        actions, obtain simulator's screen, RAM, etc.
  		* @param Features *features object that defines what feature function that will be used.
  		*/
-		void evaluatePolicy(Environment<bool>& env);
+		double evaluatePolicy(Environment<bool>& env);
 		/**
 		* Destructor, not necessary in this class.
 		*/

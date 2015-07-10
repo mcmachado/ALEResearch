@@ -82,7 +82,7 @@ class TrueOnlineSarsaLearner : public RLLearner<FeatureType>{
  		* @param Environment<FeatureType>& env Arcade Learning Environment interface: object used to define agents'
  		*        actions, obtain simulator's screen, RAM, etc.
  		*/
-		void evaluatePolicy(Environment<FeatureType>& env);
+		double evaluatePolicy(Environment<FeatureType>& env);
 		/**
 		* Destructor, not necessary in this class.
 		*/

@@ -49,9 +49,10 @@ void ConstantAgent::learnPolicy(Environment<bool>& env){
 	bestAction = best;
 }
 
-void ConstantAgent::evaluatePolicy(Environment<bool>& env){
+double ConstantAgent::evaluatePolicy(Environment<bool>& env){
 	int reward = 0;
 	int cumulativeReward = 0;
+    double totReward = 0;
 	//It makes no sense to try ilegal actions:
 	ActionVect actions;
 	actions = env.getMinimalActionSet();
@@ -66,9 +67,11 @@ void ConstantAgent::evaluatePolicy(Environment<bool>& env){
 			step++;
 		}
 		printf("Episode %d, Best Cumulative Reward: %d\n", episode + 1, cumulativeReward);
+        totReward+=cumulativeReward;
 		cumulativeReward = 0;
 		env.reset_game(); //Start the game again when the episode is over
 	}
+    return totReward/double(numEpisodesToEval);
 }
 
 ConstantAgent::~ConstantAgent(){}

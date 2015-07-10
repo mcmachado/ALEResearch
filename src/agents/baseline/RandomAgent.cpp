@@ -19,10 +19,11 @@ RandomAgent::RandomAgent(Parameters *param){
 void RandomAgent::learnPolicy(Environment<bool>& env){
 }
 
-void RandomAgent::evaluatePolicy(Environment<bool>& env){
+double RandomAgent::evaluatePolicy(Environment<bool>& env){
 	int reward = 0;
 	int cumulativeReward = 0;
 	int numActions;
+    double totReward=0;
 	ActionVect actions;
 	//Check if one wants to sample from all possible actions or only the valid ones:
 	if(useMinActions){
@@ -42,9 +43,11 @@ void RandomAgent::evaluatePolicy(Environment<bool>& env){
 			step++;
 		}
 		printf("Episode %d, Cumulative Reward: %d\n", episode + 1, cumulativeReward);
+        totReward+=cumulativeReward;
 		cumulativeReward = 0;
 		env.reset_game(); //Start the game again when the episode is over
 	}
+    return totReward/double(numEpisodesToEval);
 }
 
 RandomAgent::~RandomAgent(){}

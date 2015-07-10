@@ -235,7 +235,7 @@ void TrueOnlineSarsaLearner<FeatureType>::learnPolicy(Environment<FeatureType>& 
 }
 
 template<typename FeatureType>
-void TrueOnlineSarsaLearner<FeatureType>::evaluatePolicy(Environment<FeatureType>& env){
+double TrueOnlineSarsaLearner<FeatureType>::evaluatePolicy(Environment<FeatureType>& env){
 	double reward = 0;
 	double cumReward = 0; 
 	double prevCumReward = 0;
@@ -260,4 +260,6 @@ void TrueOnlineSarsaLearner<FeatureType>::evaluatePolicy(Environment<FeatureType
 		
 		prevCumReward = cumReward;
 	}
+    return cumReward/double(this->numEpisodesEval);
+
 }

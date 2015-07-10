@@ -70,6 +70,7 @@ class SarsaLearner : public RLLearner<bool>{
  		* Loads the weights saved in a file. Each line will contain a weight.
  		*/		
 		void loadWeights();
+        void loadWeights(std::string fname);
     SarsaLearner(Environment<bool>& env, Parameters *param);
 		/**
  		* Implementation of an agent controller. This implementation is Sarsa(lambda).
@@ -85,7 +86,7 @@ class SarsaLearner : public RLLearner<bool>{
  		* @param Environment& env Arcade Learning Environment interface: object used to define agents'
  		*        actions, obtain simulator's screen, RAM, etc.
  		*/
-		void evaluatePolicy(Environment<bool>& env);
+		double evaluatePolicy(Environment<bool>& env);
 		/**
 		* Destructor, not necessary in this class.
 		*/

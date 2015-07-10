@@ -39,7 +39,7 @@ class Agent{
  		* @param ALEInterface& ale Arcade Learning Environment interface: object used to define agents'
  		*        actions, obtain simulator screen, RAM, etc.
  		*/
-    virtual void evaluatePolicy(Environment<FeatureType>& env) = 0;
+    virtual double evaluatePolicy(Environment<FeatureType>& env) = 0;
 		/**
 		* Destructor, not necessary in this class.
 		*/

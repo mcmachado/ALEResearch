@@ -137,13 +137,13 @@ void SarsaLearner::saveWeightsToFile(std::string suffix){
 	}
 }
 
-void SarsaLearner::loadWeights(){
-    std::string line;
+void SarsaLearner::loadWeights(std::string fname){
+   std::string line;
 	int nActions, nFeatures;
 	int i, j;
 	float value;
 
-	std::ifstream weightsFile (pathWeightsFileToLoad.c_str());
+	std::ifstream weightsFile (fname.c_str());
 	
 	weightsFile >> nActions >> nFeatures;
 	assert(nActions == numActions);
@@ -152,6 +152,9 @@ void SarsaLearner::loadWeights(){
 	while(weightsFile >> i >> j >> value){
 		w[i][j] = value;
 	}
+}
+void SarsaLearner::loadWeights(){
+    loadWeights(pathWeightsFileToLoad.c_str());
 }
 
 void SarsaLearner::learnPolicy(Environment<bool>& env){
@@ -246,7 +249,7 @@ void SarsaLearner::learnPolicy(Environment<bool>& env){
 	}
 }
 
-void SarsaLearner::evaluatePolicy(Environment<bool>& env){
+double SarsaLearner::evaluatePolicy(Environment<bool>& env){
 	float reward = 0;
 	float cumReward = 0; 
 	float prevCumReward = 0;
@@ -277,4 +280,5 @@ void SarsaLearner::evaluatePolicy(Environment<bool>& env){
 		env.reset();
 		prevCumReward = cumReward;
 	}
+    return cumReward/(double)(numEpisodesEval);
 }

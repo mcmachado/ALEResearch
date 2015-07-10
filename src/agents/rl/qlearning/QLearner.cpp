@@ -195,7 +195,7 @@ void QLearner::learnPolicy(Environment<bool>& env){
 	}
 }
 
-void QLearner::evaluatePolicy(Environment<bool>& env){
+double QLearner::evaluatePolicy(Environment<bool>& env){
 	float reward = 0;
 	float cumReward = 0; 
 	float prevCumReward = 0;
@@ -220,4 +220,6 @@ void QLearner::evaluatePolicy(Environment<bool>& env){
 		
 		prevCumReward = cumReward;
 	}
+
+    return cumReward/double(numEpisodesEval);
 }
