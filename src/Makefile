@@ -18,6 +18,7 @@ CFLAGS := -O3 -I$(ALE)/src -I/opt/local/include -D_GNU_SOURCE=1 -D_REENTRANT -st
 EXE := learner
 GETTER := mode_difficulty_getter
 VALUE_TRANSFER := value_transfer
+VALUE_TRANSFER_RELEARN := value_transfer_relearn
 # Search for library 'ale' and library 'z' when linking.
 LDFLAGS := -L$(ALE) -lale -lz -lm
 
@@ -32,7 +33,7 @@ VPATH = common:features:agents/rl/sarsa:agents/rl/qlearning:agents/baseline:agen
 SRCS = Mathematics.cpp Parameters.cpp Timer.cpp Features.cpp Background.cpp BasicFeatures.cpp BASSFeatures.cpp BPROFeatures.cpp RAMFeatures.cpp SarsaLearner.cpp QLearner.cpp ConstantAgent.cpp PerturbAgent.cpp  RandomAgent.cpp  HumanAgent.cpp #TRSarsaLearner.cpp
 OBJS = $(subst .cpp,.o, $(addprefix bin/,$(SRCS)))
 
-all: $(EXE) $(GETTER) $(VALUE_TRANSFER)
+all: $(EXE) $(GETTER) $(VALUE_TRANSFER) $(VALUE_TRANSFER_RELEARN)
 
 $(EXE): $(OBJS) bin/main_sarsa_example.o
 	$(CXX) $(LDFLAGS) $(OBJS) bin/main_sarsa_example.o -o $(EXE)
@@ -42,6 +43,9 @@ $(GETTER):
 
 $(VALUE_TRANSFER): $(OBJS) bin/value_transfer.o
 	$(CXX) $(LDFLAGS) $(CFLAGS) $(OBJS) bin/value_transfer.o -o $(VALUE_TRANSFER)
+
+$(VALUE_TRANSFER_RELEARN): $(OBJS) bin/value_transfer_relearn.o
+	$(CXX) $(LDFLAGS) $(CFLAGS) $(OBJS) bin/value_transfer_relearn.o -o $(VALUE_TRANSFER_RELEARN)
 
 bin/%.o: %.cpp
 	$(CXX) -o $@ -c $< $(CFLAGS)
