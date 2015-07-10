@@ -48,7 +48,7 @@ int main(int argc, char** argv){
 	Agent agent(ale, &param);
 	for(int iter = 0; iter < param.maxNumIterations; iter++){
 		gatherSamplesFromRandomTrajectories(ale, &param, agent, iter);
-		reduceDimensionalityOfEvents();
+		//reduceDimensionalityOfEvents(MatrixXi dataset, vector<float> &centeringVector, vector<vector<float> > &eigenVectors, int k);
 		learnOptionsDerivedFromEigenEvents();
 	}
 
