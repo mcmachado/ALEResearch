@@ -46,6 +46,7 @@ class Parameters{
 		int maxNumIterations;           //number of times I am going to iterate over all steps in my algorithm
 		int framesToDefRarity;          //number of frames to use to calculate the first average that will be used to define rarity
 		int numStepsPerAction;          //number of frames the agent perfoms similarly to speed-up the game
+		int numNewOptionsPerIter;       //number of options to be learned at each new iteration
 		int frequencySavingWeights;     //If we are asked to save the weights, we need to know how frequently (in frames)
 		int numGamesToSampleRareEvents; //The number of games one has to play to generate the dataset of rare events
 

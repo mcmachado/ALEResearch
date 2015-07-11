@@ -121,6 +121,7 @@ void Parameters::parseParametersFromConfigFile(string cfgFileName){
 	isMinimalAction            = atoi(parameters["USE_MIN_ACTIONS"            ].c_str());
 	framesToDefRarity          = atoi(parameters["NUM_FRAMES_DEF_RARITY"      ].c_str());
 	numStepsPerAction          = atoi(parameters["NUM_STEPS_PER_ACTION"       ].c_str());
+	numNewOptionsPerIter       = atoi(parameters["NUM_OPTIONS_PER_ITER"       ].c_str());
     frequencySavingWeights     = atoi(parameters["FREQUENCY_SAVING"           ].c_str());
     numGamesToSampleRareEvents = atoi(parameters["GAMES_TO_SAMPLE_RARE_EVENTS"].c_str());
 
