@@ -64,3 +64,5 @@ tools/replay/playBow.sh
 tools/replay/playFree.sh
 tools/replay/playPE.sh
 tools/replay/playPitfall.sh
+research/novelty/on-policy/loadOptionsAndLearn/sarsa.cfg
+research/novelty/tools/runGenSamples.sh
