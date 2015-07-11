@@ -42,7 +42,7 @@ int main(int argc, char** argv){
 	SarsaLearner sarsaLearner(env,&param);
     //Learn a policy:
     sarsaLearner.learnPolicy(env);
-    sarsaLearner.showGreedyPol();
+    //sarsaLearner.showGreedyPol();
     printf("\n\n== Evaluation without Learning == \n\n");
     std::vector<Action> act;
     if(param.isMinimalAction()){
@@ -52,7 +52,7 @@ int main(int argc, char** argv){
     }
     std::shared_ptr<OffPolicyLearner> off(new GQLearner(env.getNumberOfFeatures(),act,&param));
     env.setOffPolicyLearner(off);
-    //sarsaLearner.evaluatePolicy(env);
-	//off->showGreedyPol();
+    sarsaLearner.evaluatePolicy(env);
+    off->showGreedyPol();
     return 0;
 }

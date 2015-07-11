@@ -132,9 +132,7 @@ public:
      * @param action an integer describing the action taken by the agent
      */
     virtual double doAct(Action action){
-        auto curState = FeatureComputer->getActiveFeatures();
         double reward = this->m_ale->act(action);
-        auto nextState = FeatureComputer->getActiveFeatures();
         return reward;
     }
 

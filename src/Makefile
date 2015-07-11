@@ -19,6 +19,7 @@ EXE := learner
 GETTER := mode_difficulty_getter
 VALUE_TRANSFER := value_transfer
 VALUE_TRANSFER_RELEARN := value_transfer_relearn
+OFFPOLICY_LEARN := offpolicy_learn
 # Search for library 'ale' and library 'z' when linking.
 LDFLAGS := -L$(ALE) -lale -lz -lm
 
@@ -33,10 +34,10 @@ VPATH = common:features:agents/rl/sarsa:agents/rl/qlearning:agents/baseline:agen
 SRCS = Mathematics.cpp Parameters.cpp Timer.cpp Features.cpp Background.cpp BasicFeatures.cpp BASSFeatures.cpp BPROFeatures.cpp RAMFeatures.cpp SarsaLearner.cpp QLearner.cpp ConstantAgent.cpp PerturbAgent.cpp  RandomAgent.cpp  HumanAgent.cpp GQLearner.cpp OffPolicyLearner.cpp #TRSarsaLearner.cpp
 OBJS = $(subst .cpp,.o, $(addprefix bin/,$(SRCS)))
 
-all: $(EXE) $(GETTER) $(VALUE_TRANSFER) $(VALUE_TRANSFER_RELEARN)
+all: $(EXE) $(GETTER) $(VALUE_TRANSFER) $(VALUE_TRANSFER_RELEARN) $(OFFPOLICY_LEARN)
 
-$(EXE): $(OBJS) bin/main_sarsa_example.o
-	$(CXX) $(LDFLAGS) $(OBJS) bin/main_sarsa_example.o -o $(EXE)
+$(EXE): $(OBJS) bin/main_grid_example.o
+	$(CXX) $(LDFLAGS) $(OBJS) bin/main_grid_example.o -o $(EXE)
 
 $(GETTER):
 	$(CXX) $(LDFLAGS) $(CFLAGS) mode_difficulty_getter.cpp -o $(GETTER)
@@ -47,6 +48,8 @@ $(VALUE_TRANSFER): $(OBJS) bin/value_transfer.o
 $(VALUE_TRANSFER_RELEARN): $(OBJS) bin/value_transfer_relearn.o
 	$(CXX) $(LDFLAGS) $(CFLAGS) $(OBJS) bin/value_transfer_relearn.o -o $(VALUE_TRANSFER_RELEARN)
 
+$(OFFPOLICY_LEARN): $(OBJS) bin/main_offpolicy.o
+	$(CXX) $(LDFLAGS) $(CFLAGS) $(OBJS) bin/main_offpolicy.o -o $(OFFPOLICY_LEARN)
 bin/%.o: %.cpp
 	$(CXX) -o $@ -c $< $(CFLAGS)
 

@@ -10,15 +10,13 @@ GQLearner::GQLearner(unsigned numFeatures, const std::vector<Action>& actions, P
 
 
 
-
 void GQLearner::receiveSample(const std::vector<int>& features_current_state, Action A, float reward, const std::vector<int>& features_next_state, float proba_action_bpolicy)
 {
-    assert(features_current_state.size()==1);
-    assert(features_next_state.size()==1);
-    //std::cout<<features_next_state[0]<<" "<<reward<<std::endl;
-    gamma = 0.9;
-    lambda = 0;
-    epsilon = 0;
+    alpha = 0.05;
+    beta = 0;
+    gamma = 0.99;
+    lambda = 0.6;
+    epsilon = 0.05;
     unsigned action = -1;
     for(unsigned i = 0;i<available_actions.size();i++){
         if(available_actions[i] == A){

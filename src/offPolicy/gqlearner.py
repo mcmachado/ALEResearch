@@ -1,10 +1,10 @@
 import numpy as np
 import sys
-alpha = 0.01
-beta = 0.009
-gamma = 0.9
+alpha = 0.05
+beta = 0
+gamma = 0.99
 epsilon = 0.05
-lambd = 0.1
+lambd = 0.5
 numberOfFeatures=121
 numberOfActions = 4
 
@@ -96,9 +96,13 @@ def receiveSample(features_current_state, action, reward,features_next_state,pro
 #receiveSample(np.array([120]),2,-2,np.array([5]), 0.9)
 
 file = open("samples.txt","r")
+it = 0
 for line in file:
     data = line.split()
+    if it>30000:
+        break
     receiveSample(np.array([int(data[0])]), int(data[1]), float(data[2]), np.array([int(data[3])]), float(data[4]))
+    it += 1
 
 
 print("")

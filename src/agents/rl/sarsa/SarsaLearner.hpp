@@ -18,7 +18,7 @@
 #include <cmath>
 
 class SarsaLearner : public RLLearner<bool>{
-	private:
+	public:
 		float alpha, delta, lambda, traceThreshold;
 		int numFeatures, currentAction, nextAction;
 		int toSaveWeightsAfterLearning, saveWeightsEveryXSteps;
