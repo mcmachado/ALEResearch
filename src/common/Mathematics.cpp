@@ -9,6 +9,7 @@
 #include <cstdlib>
 #include <vector>
 #include <numeric>
+#include <iostream>
 namespace Mathematics
 {
 
@@ -21,7 +22,7 @@ int argmax(const T& array){
 	std::vector<int> indices;
     auto cur_max = array[0];
 	for(unsigned int i = 0; i < array.size(); i++){
-        if(abs(array[i]- cur_max)<1e-10){
+        if(fabs(array[i]- cur_max)<1e-10){
             indices.push_back(i);            
         }else{
             if(array[i] > cur_max){

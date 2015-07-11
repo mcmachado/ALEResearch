@@ -36,7 +36,7 @@ HumanAgent::HumanAgent(Parameters *param){
 #ifdef __USE_SDL
 
 void HumanAgent::saveTrajectory(int takenAction){
-    ofstream myfile (this->trajectoryFile, ios::app);
+    std::ofstream myfile (this->trajectoryFile, std::ios::app);
     
     if (myfile.is_open()){
         //Print action taken in the time step:

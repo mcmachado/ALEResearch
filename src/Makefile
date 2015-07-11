@@ -7,7 +7,7 @@ CXX := g++
 ALE := ../../Arcade-Learning-Environment
 
 # Set this to 1 to enable SDL and display_screen
-USE_SDL     := 1
+USE_SDL     := 0
 
 # -O3 Optimize code (turns on all optimizations specified by -O2 and also turns on the -finline-functions, -funswitch-loops, -fpredictive-commoning, -fgcse-after-reload, -ftree-loop-vectorize, -ftree-slp-vectorize, -fvect-cost-model, -ftree-partial-pre and -fipa-cp-clone options).
 # -D__USE_SDL Ensures we can use SDL to see the game screen
@@ -24,7 +24,7 @@ OFFPOLICY_LEARN := offpolicy_learn
 LDFLAGS := -L$(ALE) -lale -lz -lm
 
 ifeq ($(strip $(USE_SDL)), 1)
-  FLAGS +=  -D__USE_SDL `sdl-config --cflags --libs`
+  CFLAGS +=  -D__USE_SDL `sdl-config --cflags --libs`
   LDFLAGS += -lSDL
 endif
 
