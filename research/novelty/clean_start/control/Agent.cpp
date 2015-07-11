@@ -27,11 +27,13 @@ Agent::Agent(ALEInterface& ale, Parameters *param) : bproFeatures(param) {
 	}
 }
 
-void Agent::updateAverage(Parameters *param, vector<bool> Fprev, vector<bool> F, int frame, int iter){
+void Agent::updateAverage(Parameters *param, vector<bool> Fprev, vector<bool> F, 
+	int frame, int iter, vector<vector<bool> > &dataset){
+
 	assert (Fprev.size() == F.size());
 	assert (F.size() == NUM_BITS);
 	
-	bool toPrint = false;
+	bool toStore = false;
 	/*This should be a parameter, but in fact I do not plan to use it as true, so I did not set it
 	  in the class Parameters. Eventually, if I ever want to use it, I have to change it here. */
 	bool toReportAll_param = false;
@@ -49,7 +51,7 @@ void Agent::updateAverage(Parameters *param, vector<bool> Fprev, vector<bool> F,
 			tempVector[i] = 1;
 			if(frame > param->framesToDefRarity && freqOfBitFlips[i] < param->rarityFreqThreshold){
 				tempVector[i] = 2; //1 denotes flip, 2 denotes relevant flip
-				toPrint = true;
+				toStore = true;
 			}
 		} else{
 			freqOfBitFlips[i] = (freqOfBitFlips[i] * (frame - 1) + 0) / frame;
@@ -59,7 +61,7 @@ void Agent::updateAverage(Parameters *param, vector<bool> Fprev, vector<bool> F,
 			tempVector[i + NUM_BITS] = 1;
 			if(frame > param->framesToDefRarity && freqOfBitFlips[i + NUM_BITS] < param->rarityFreqThreshold){
 				tempVector[i + NUM_BITS] = 2;
-				toPrint = true;
+				toStore = true;
 			}
 		} else{
 			freqOfBitFlips[i + NUM_BITS] = (freqOfBitFlips[i + NUM_BITS] * (frame - 1) + 0) / frame;
@@ -69,21 +71,44 @@ void Agent::updateAverage(Parameters *param, vector<bool> Fprev, vector<bool> F,
 	ofstream myFileBits;
 	myFileBits.open (outputPath_param, ios::app);
 	vector<int> bytesToPrint;
-	if(toPrint){
+	if(toStore){
 		for(int i = 0; i < tempVector.size(); i++){
+			if(toReportAll_param == 1){
+				if(tempVector[i] != 0){
+					myFileBits << i << ",";
+					dataset[i].push_back(true);
+				}
+				else{
+					dataset[i].push_back(false);
+				}
+			}
+			else{
+				if(tempVector[i] == 2){
+					myFileBits << i << ",";
+					dataset[i].push_back(true);
+				}
+				else{
+					dataset[i].push_back(false);
+				}
+			}
+			/* I USED THIS CODE BEFORE FILLING dataset:
 			if(toReportAll_param == 1 && tempVector[i] != 0){
 				myFileBits << i << ",";
+
 			}
 			if(toReportAll_param == 0 && tempVector[i] == 2){
 				myFileBits << i << ",";
-			}			
+			}
+			*/			
 		}
 		myFileBits << endl;
 	}
 	myFileBits.close();	
 }
 
-int Agent::playActionUpdatingAvg(ALEInterface& ale, Parameters *param, int &frame, int nextAction, int iter){
+int Agent::playActionUpdatingAvg(ALEInterface& ale, Parameters *param, int &frame, 
+	int nextAction, int iter, vector<vector<bool> > &dataset){
+
 	vector<bool> F(NUM_BITS, 0); //Set of active features
 	vector<bool> Fprev;
 	int reward = 0;
@@ -100,7 +125,7 @@ int Agent::playActionUpdatingAvg(ALEInterface& ale, Parameters *param, int &fram
 			F.clear();
 			ramFeatures.getCompleteFeatureVector(ale.getRAM(), F);
 			F.pop_back();
-			updateAverage(param, Fprev, F, frame, iter);
+			updateAverage(param, Fprev, F, frame, iter, dataset);
 		}
 	}
 	//If the selected action was one of the options
@@ -126,7 +151,7 @@ int Agent::playActionUpdatingAvg(ALEInterface& ale, Parameters *param, int &fram
 			F.clear();
 			ramFeatures.getCompleteFeatureVector(ale.getRAM(), F);
 			F.pop_back();
-			updateAverage(param, Fprev, F, frame, iter);
+			updateAverage(param, Fprev, F, frame, iter, dataset);
 		}
 	}
 	return reward;
