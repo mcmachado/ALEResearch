@@ -53,3 +53,14 @@ research/novelty/on-policy/run.sh
 research/novelty/on-policy/loadOptionsAndLearn/bin/
 research/novelty/on-policy/loadOptionsAndLearn/sarsaLoadWeightsProxyOption
 tools/replay/loadOptionsAndReplay
+research/novelty/clean_start/lib/eigen/CMakeCache.txt
+research/novelty/clean_start/lib/eigen/CMakeFiles/
+research/novelty/clean_start/pfd
+research/novelty/data/iter2/weights_iter2.tgz
+Bpro/bin/
+Bpro/learnerBpro
+research/novelty/clean_start/bin/
+tools/replay/playBow.sh
+tools/replay/playFree.sh
+tools/replay/playPE.sh
+tools/replay/playPitfall.sh
