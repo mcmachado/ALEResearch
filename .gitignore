@@ -66,3 +66,4 @@ tools/replay/playPE.sh
 tools/replay/playPitfall.sh
 research/novelty/on-policy/loadOptionsAndLearn/sarsa.cfg
 research/novelty/tools/runGenSamples.sh
+research/novelty/data/iter1/weights/weights_newGames.tgz
