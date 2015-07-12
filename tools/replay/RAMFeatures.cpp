@@ -20,21 +20,21 @@ typedef unsigned char byte_t;
 RAMFeatures::RAMFeatures(){
 }
 
-void RAMFeatures::getCompleteFeatureVector(const ALEScreen &screen, const ALERAM &ram, vector<bool>& features){	
+void RAMFeatures::getCompleteFeatureVector(const ALEScreen &screen, const ALERAM &ram, std::vector<bool>& features){	
 	assert(features.size() == 0); //If the vector is not empty this can be a mess
 	//Get vector with active features:
 	std::vector<int> temp;
 	std::vector<int>& t = temp;
 	this->getActiveFeaturesIndices(screen, ram, t);
 	//Iterate over vector with all features storing the non-zero indices in the new vector:
-	features = vector<bool>(this->getNumberOfFeatures(), 0);
+	features = std::vector<bool>(this->getNumberOfFeatures(), 0);
 	for(unsigned int i = 0; i < t.size(); i++){
 		features[t[i]] = 1;
 	}
 }
 
 void RAMFeatures::getActiveFeaturesIndices(
-	const ALEScreen &screen, const ALERAM &ram, vector<int>& features){
+	const ALEScreen &screen, const ALERAM &ram, std::vector<int>& features){
 	assert(features.size() == 0); //If the vector is not empty this can be a mess
 	byte_t byte;
 	char output[BITS_IN_BYTE];
