@@ -13,7 +13,7 @@ USE_SDL     := 0
 # -D__USE_SDL Ensures we can use SDL to see the game screen
 # -D_GNU_SOURCE=1 means the compiler will use the GNU standard of compilation, the superset of all other standards under GNU C libraries.
 # -D_REENTRANT causes the compiler to use thread safe (i.e. re-entrant) versions of several functions in the C library.
-CFLAGS := -O3 -I$(ALE)/src -I/opt/local/include -D_GNU_SOURCE=1 -D_REENTRANT -std=c++11 -Wno-deprecated-declarations -Wall -g
+CFLAGS := -O3 -I$(ALE)/src -I/opt/local/include -D_GNU_SOURCE=1 -D_REENTRANT -std=c++11 -Wno-deprecated-declarations -Wall -g -MMD
 
 EXE := learner
 GETTER := mode_difficulty_getter
@@ -33,8 +33,9 @@ VPATH = common:features:agents/rl/sarsa:agents/rl/qlearning:agents/baseline:agen
 
 SRCS = Mathematics.cpp Parameters.cpp Timer.cpp Features.cpp Background.cpp BasicFeatures.cpp BASSFeatures.cpp BPROFeatures.cpp RAMFeatures.cpp SarsaLearner.cpp QLearner.cpp ConstantAgent.cpp PerturbAgent.cpp  RandomAgent.cpp  HumanAgent.cpp GQLearner.cpp OffPolicyLearner.cpp #TRSarsaLearner.cpp
 OBJS = $(subst .cpp,.o, $(addprefix bin/,$(SRCS)))
+DEPS = $(subst .cpp,.d, $(addprefix bin/,$(SRCS))) bin/main_grid_example.d
 
-all: $(EXE) $(GETTER) $(VALUE_TRANSFER) $(VALUE_TRANSFER_RELEARN) $(OFFPOLICY_LEARN)
+all: $(EXE) $(GETTER) $(VALUE_TRANSFER) $(VALUE_TRANSFER_RELEARN) $(OFFPOLICY_LEARN) 
 
 $(EXE): $(OBJS) bin/main_grid_example.o
 	$(CXX) $(LDFLAGS) $(OBJS) bin/main_grid_example.o -o $(EXE)
@@ -54,7 +55,10 @@ bin/%.o: %.cpp
 	$(CXX) -o $@ -c $< $(CFLAGS)
 
 clean:
-	rm -rf $(OBJS) $(EXE) $(VALUE_TRANSFER) $(GETTER)
+	rm -rf $(OBJS) $(EXE) $(DEPS) $(VALUE_TRANSFER) $(GETTER) bin/main_grid_example.o
+
+-include $(OBJS:%.o=%.d) #for handling dependencies between files
+
 
 #This command needs to be executed in a osX before running the code:
 #export DYLD_LIBRARY_PATH="${DYLD_LIBRARY_PATH}:../lib/ale_0_4"
