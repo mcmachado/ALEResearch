@@ -52,7 +52,15 @@ int main(int argc, char** argv){
     }
     std::shared_ptr<OffPolicyLearner> off(new GQLearner(env.getNumberOfFeatures(),act,&param));
     env.setOffPolicyLearner(off);
-    sarsaLearner.evaluatePolicy(env);
+    sarsaLearner.evaluatePolicy(env,1500);
     off->showGreedyPol();
+    //copy weights
+    sarsaLearner.w=std::dynamic_pointer_cast<GQLearner>(off)->weights;
+    //disable offpolicy
+    env.setOffPolicyLearner(nullptr);
+    //sarsaLearner.learnPolicy(env);
+    sarsaLearner.evaluatePolicy(env,50);
+
+    
     return 0;
 }
