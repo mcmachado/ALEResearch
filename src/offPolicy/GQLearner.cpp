@@ -12,7 +12,7 @@ GQLearner::GQLearner(unsigned numFeatures, const std::vector<Action>& actions, P
 
 void GQLearner::receiveSample(const std::vector<int>& features_current_state, Action A, float reward, const std::vector<int>& features_next_state, float proba_action_bpolicy)
 {
-    alpha = 0.005;
+    alpha = 0.01;
     beta = 0;
     gamma = 0.99;
     lambda = 0.4;
@@ -145,6 +145,7 @@ void GQLearner::receiveSample(const std::vector<int>& features_current_state, Ac
     for(unsigned a = 0; a<numActions; a++){
         for(const auto& w : weights[a]){
             //std::cout<<w<<" ";
+            assert(w==w);
         }
         //std::cout<<std::endl;
     }

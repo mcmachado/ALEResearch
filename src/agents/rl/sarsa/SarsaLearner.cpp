@@ -250,6 +250,9 @@ void SarsaLearner::learnPolicy(Environment<bool>& env){
 }
 
 double SarsaLearner::evaluatePolicy(Environment<bool>& env){
+    return evaluatePolicy(env,numEpisodesEval);
+}
+double SarsaLearner::evaluatePolicy(Environment<bool>& env,unsigned numSteps){
 	float reward = 0;
 	float cumReward = 0; 
 	float prevCumReward = 0;
@@ -257,7 +260,7 @@ double SarsaLearner::evaluatePolicy(Environment<bool>& env){
 	double elapsedTime;
 
 	//Repeat (for each episode):
-	for(int episode = 0; episode < numEpisodesEval; episode++){
+	for(int episode = 0; episode < numSteps; episode++){
 		//Repeat(for each step of episode) until game is over:
 		for(int step = 0; !env.isTerminal() && step < episodeLength; step++){
 			//Get state and features active on that state:		
@@ -282,5 +285,5 @@ double SarsaLearner::evaluatePolicy(Environment<bool>& env){
 		env.reset();
 		prevCumReward = cumReward;
 	}
-    return cumReward/(double)(numEpisodesEval);
+    return cumReward/(double)(numSteps);
 }

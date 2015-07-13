@@ -87,6 +87,7 @@ class SarsaLearner : public RLLearner<bool>{
  		*        actions, obtain simulator's screen, RAM, etc.
  		*/
 		double evaluatePolicy(Environment<bool>& env);
+    double evaluatePolicy(Environment<bool>& env,unsigned numSteps);
 		/**
 		* Destructor, not necessary in this class.
 		*/

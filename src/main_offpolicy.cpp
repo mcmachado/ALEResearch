@@ -60,17 +60,18 @@ int main(int argc, char** argv){
     ALEEnvironment<BasicFeatures> env(&ale,&features);
     auto modes = ale.getAvailableModes();
     auto diff = ale.getAvailableDifficulties();
-    ale.setDifficulty(diff[0]);
-    ale.setMode(modes[0]);
+    // ale.setDifficulty(diff[0]);
+    // ale.setMode(modes[0]);
+    ale.setDifficulty(0);
+    ale.setMode(5);
 
 	//Instantiating the learning algorithm:
 	SarsaLearner sarsaLearner(env,&param);
     //Learn a policy:
     cout<<diff[0]<<" "<<modes[0]<<endl;
     cout<<"results/weights/weights_"+gameName+"_BASIC_d"+std::to_string(diff[0])+"_m"+std::to_string(modes[0])+".w"<<endl;
-    //sarsaLearner.loadWeights("results/weights/weights_"+gameName+"_BASIC_d"+std::to_string(diff[0])+"_m"+std::to_string(modes[0])+".w");
-    sarsaLearner.loadWeights("results_VTR/VTR_freeway_BASIC_d0_m0/relearnt_weights_freeway_BASIC_d0_m0.w");
-    sarsaLearner.saveWeightsToFile("test.w");
+    sarsaLearner.loadWeights("results/weights/weights_"+gameName+"_BASIC_d"+std::to_string(diff[0])+"_m"+std::to_string(modes[0])+".w");
+    //sarsaLearner.loadWeights("results_VTR/VTR_freeway_BASIC_d0_m0/relearnt_weights_freeway_BASIC_d0_m0.w");
     std::vector<Action> act;
     if(param.isMinimalAction()){
         act = env.getMinimalActionSet();
@@ -80,9 +81,17 @@ int main(int argc, char** argv){
     std::shared_ptr<OffPolicyLearner> off(new GQLearner(env.getNumberOfFeatures(),act,&param));
     env.setOffPolicyLearner(off);
     //printf("\n\n== Evaluation reference == \n\n");
-    double ref = sarsaLearner.evaluatePolicy(env);
+    double ref = sarsaLearner.evaluatePolicy(env,10);
     cerr<<"Reference score is "<<ref<<endl;
+    //copy weights
     sarsaLearner.w=std::dynamic_pointer_cast<GQLearner>(off)->weights;
+    //disable offpolicy
+    env.setOffPolicyLearner(nullptr);
+    
+    //ReLearn a policy:
+    sarsaLearner.learnPolicy(env);
+    sarsaLearner.saveWeightsToFile("weights_"+gameName+"_BASIC_d"+std::to_string(param.getDifficultyLevel())+"_m"+std::to_string(param.getGameMode())+".w");
+    printf("\n\n== Evaluation without Learning == \n\n");
     ref = sarsaLearner.evaluatePolicy(env);
     cerr<<"Obtained score is "<<ref<<endl;
 
