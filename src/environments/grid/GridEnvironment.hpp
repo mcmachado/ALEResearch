@@ -15,6 +15,7 @@
 #include "../Environment.hpp"
 #include<vector>
 #include <stdexcept>
+#include <iostream>
 
 template<typename FeatureComputer>
 class GridEnvironment : public t_Environment<FeatureComputer>
@@ -23,9 +24,10 @@ public:
     typedef typename FeatureComputer::FeatureType FeatureType;
     GridEnvironment(FeatureComputer* feat) : t_Environment<FeatureComputer>(feat),m_width(10),m_height(10),m_frame(0) {reset();}
 
-    void reset(){
+    virtual void reset() final{
         m_posx=0;
         m_posy=0;
+        m_frame=0;
     }
     std::vector<Action> getLegalActionSet()
     {
