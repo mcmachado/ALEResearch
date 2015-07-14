@@ -1,5 +1,6 @@
 /* Author: Marlos C. Machado */
 
+#include <fstream>
 #include <iostream>
 
 #include "DimReduction.hpp"
@@ -28,7 +29,6 @@ void obtainStatistics(MatrixXi dataset, vector<float> &datasetMeans,
 		}
 		else{
 			datasetStds.push_back(sqrt(sumSquaredErrors));
-
 		}
 	}	
 }
@@ -61,9 +61,26 @@ void fillWithTopEigenVectors(int k, JacobiSVD<MatrixXf> svdResult,
 	}
 }	
 
-void reduceDimensionalityOfEvents(MatrixXi dataset, vector<float> &datasetMeans, 
-	vector<float> &datasetStds, vector<vector<float> > &eigenVectors, int k){
+void saveDecompositionInFile(vector<vector<float> > &eigenVectors,
+	vector<float> &datasetMeans, vector<float> &datasetStds, int iter){
 
+	string baseName = "svdRareEventsIter";
+	stringstream sstm_fileName;
+	sstm_fileName << baseName << iter + 1 << "_mean.out";
+	string outputPathMean_param = sstm_fileName.str();
+
+
+	ofstream outputMean;
+	outputMean.open(outputPathMean_param, ios::app);
+	for(int i = 0; i < datasetMeans.size(); i++){
+		outputMean << datasetMeans[i] << endl;
+	}
+}
+
+void reduceDimensionalityOfEvents(MatrixXi dataset, vector<float> &datasetMeans, 
+	vector<float> &datasetStds, vector<vector<float> > &eigenVectors, int k, int iter){
+
+	cout << "Running the Singular Value Decomposition in the Eigen-events\n";
 	/* To run the SVD, the first thing one needs to do is to center the matrix
 	 (we subtract each element by its column mean and then we divide the result
 	 by its column standard deviation). Because we are going to use the eigenvectors
@@ -77,4 +94,7 @@ void reduceDimensionalityOfEvents(MatrixXi dataset, vector<float> &datasetMeans,
 	with the whole decomposition). Here I fill the matrix eigenVectors to be
 	later used in the learning part of my algorithm.*/
 	fillWithTopEigenVectors(k, svd, eigenVectors);
+	/* We also save the obtained decomposition, in case we have to restart the
+	  execution. These files should summarize everything done in this step. */
+	saveDecompositionInFile(eigenVectors, datasetMeans, datasetStds, iter);
 }
