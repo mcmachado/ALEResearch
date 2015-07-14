@@ -67,7 +67,8 @@ int main(int argc, char** argv){
 	vector<vector<bool> > dataset(NUM_FEATURES_NOVELTY * 2, vector<bool>());
 	/* This vector will contain the information required to center each of the vectors I will receive while
 	   learning. I will also use it to center my matrix before running the SVD, and in fact it is filled in there.*/
-	vector<float> centeringVector (NUM_FEATURES_NOVELTY * 2, 0);
+	vector<float> meansVector;
+	vector<float> stdsVector;
 	/* This matrix contains the K (defined as a parameter) eigen-vectors that are obtained after running the SVD.
 	    Each row contains an eigen-vector, and each eigen-vector will originate an option.*/
 	vector<vector<float> > eigenVectors (param.numNewOptionsPerIter, vector<float>(NUM_FEATURES_NOVELTY * 2, 0));
@@ -85,12 +86,17 @@ int main(int argc, char** argv){
 		/* Now we can run SVD on my dataset, to obtain the top K eigen-vectors (this is defined by the eigen-values).
 		 Each of these eigen-vectors, assisted by the centering vector, will be responsible to define the reward
 		 function that will be used to learn one option. */
-		reduceDimensionalityOfEvents(datasetOfEigenEvents, centeringVector, eigenVectors, param.numNewOptionsPerIter);
+		reduceDimensionalityOfEvents(datasetOfEigenEvents, meansVector, stdsVector, 
+			eigenVectors, param.numNewOptionsPerIter);
 		/* Finally, we can now learn the options using the obtained eigen-vectors and the centering vector. This is
 		done param.numNewOptionsPerIter times (it can be done in parallel or sequentially). Memory may be an issue
 		if one decides to learn each option in a thread, depending on the size of the feature set. TODO: To allow
 		this to be done, 5 ALE's need to be instantiated. Maybe we cannot use the ALE we instantiated above. */
 		learnOptionsDerivedFromEigenEvents();
+		/* Now we have to clean everything for a second iteration. Everything that is useful for replication should
+		have been properly saved in the adequate methods. */
+		stdsVector.clear();
+		meansVector.clear();
 	}
 	return 1;
 }
