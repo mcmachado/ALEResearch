@@ -23,9 +23,6 @@ void GQLearner::receiveSample(const std::vector<int>& features_current_state, Ac
             action = i; break;
         }
     }
-    std::ofstream f("samples.txt",std::ios_base::app);
-    f<<features_current_state[0]<<" "<<action<<" "<<reward<<" "<<features_next_state[0]<<" "<<proba_action_bpolicy<<std::endl;
-    f.close();
     assert(action>=0 && action<numActions);
     //first, we compute the q values with respect to the current state and the next state, and we compute the argmax simultaneously
     std::vector<float> nextQValues(numActions),currentQValues(numActions);
