@@ -96,7 +96,7 @@ public:
         }
         if(m_posx==m_width&&m_posy==m_height){
             //reward = 10 + m_width + m_height;
-            reward = 1;
+            reward = 1000;
         }
         m_frame++;
         return reward;

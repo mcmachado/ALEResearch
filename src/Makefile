@@ -33,7 +33,7 @@ VPATH = common:features:agents/rl/sarsa:agents/rl/qlearning:agents/baseline:agen
 
 SRCS = Mathematics.cpp Parameters.cpp Timer.cpp Features.cpp Background.cpp BasicFeatures.cpp BASSFeatures.cpp BPROFeatures.cpp RAMFeatures.cpp SarsaLearner.cpp QLearner.cpp ConstantAgent.cpp PerturbAgent.cpp  RandomAgent.cpp  HumanAgent.cpp GQLearner.cpp OffPolicyLearner.cpp #TRSarsaLearner.cpp
 OBJS = $(subst .cpp,.o, $(addprefix bin/,$(SRCS)))
-DEPS = $(subst .cpp,.d, $(addprefix bin/,$(SRCS))) bin/main_grid_example.d
+DEPS = $(subst .cpp,.d, $(addprefix bin/,$(SRCS))) bin/main_grid_example.d bin/main_offpolicy.d
 
 all: $(EXE) $(GETTER) $(VALUE_TRANSFER) $(VALUE_TRANSFER_RELEARN) $(OFFPOLICY_LEARN) 
 
@@ -55,7 +55,7 @@ bin/%.o: %.cpp
 	$(CXX) -o $@ -c $< $(CFLAGS)
 
 clean:
-	rm -rf $(OBJS) $(EXE) $(DEPS) $(VALUE_TRANSFER) $(GETTER) bin/main_grid_example.o
+	rm -rf $(OBJS) $(EXE) $(DEPS) $(VALUE_TRANSFER) $(GETTER) bin/*
 
 -include $(OBJS:%.o=%.d) #for handling dependencies between files
 

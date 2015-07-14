@@ -58,7 +58,7 @@ int main(int argc, char** argv){
     sarsaLearner.w=std::dynamic_pointer_cast<GQLearner>(off)->weights;
     //disable offpolicy
     env.setOffPolicyLearner(nullptr);
-    //sarsaLearner.learnPolicy(env);
+    sarsaLearner.learnPolicy(env);
     sarsaLearner.evaluatePolicy(env,50);
 
     

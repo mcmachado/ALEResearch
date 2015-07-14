@@ -15,7 +15,7 @@ void GQLearner::receiveSample(const std::vector<int>& features_current_state, Ac
     alpha = 0.001;
     beta = 0;
     gamma = 0.99;
-    lambda = 0.4;
+    lambda = 0.1;
     epsilon = 0.05;
     unsigned action = -1;
     for(unsigned i = 0;i<available_actions.size();i++){
