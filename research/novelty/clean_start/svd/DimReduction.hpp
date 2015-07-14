@@ -4,11 +4,16 @@
 #include <Eigen/SVD>
 #include <Eigen/Dense>
 
-void centerMatrix(Eigen::MatrixXi dataset, Eigen::MatrixXf &centeredDataset);
+/* To center a matrix we obtain the mean mu and the standard deviation sig of each of its
+  columns. Then we iterate over each entry A[i,j] subtracting mu and then dividing by sig*/
+void centerMatrix(Eigen::MatrixXi dataset, std::vector<float> &datasetMeans, 
+	std::vector<float> &datasetStds, Eigen::MatrixXf &centeredDataset);
 
-void fillWithTopEigenVectors(int k, std::vector<std::vector<float> > &eigenVectors);
+void fillWithTopEigenVectors(int k, Eigen::JacobiSVD<Eigen::MatrixXf> svdResult, 
+	std::vector<std::vector<float> > &eigenVectors);
 
-void fillCenteringVector(std::vector<float> &centeringVector);
+void obtainStatistics(Eigen::MatrixXi dataset, std::vector<float> &datasetMeans, 
+	std::vector<float> &datasetStds);
 
-Eigen::JacobiSVD<Eigen::MatrixXf> reduceDimensionalityOfEvents(Eigen::MatrixXi dataset, 
-	std::vector<float> &centeringVector, std::vector<std::vector<float> > &eigenVectors, int k);
+void reduceDimensionalityOfEvents(Eigen::MatrixXi dataset, std::vector<float> &datasetMeans, 
+	std::vector<float> &datasetStds,  std::vector<std::vector<float> > &eigenVectors, int k);
