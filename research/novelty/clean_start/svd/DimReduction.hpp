@@ -15,5 +15,8 @@ void fillWithTopEigenVectors(int k, Eigen::JacobiSVD<Eigen::MatrixXf> svdResult,
 void obtainStatistics(Eigen::MatrixXi dataset, std::vector<float> &datasetMeans, 
 	std::vector<float> &datasetStds);
 
+void saveDecompositionInFile(std::vector<std::vector<float> > &eigenVectors,
+	std::vector<float> &datasetMeans, std::vector<float> &datasetStds, int iter);
+
 void reduceDimensionalityOfEvents(Eigen::MatrixXi dataset, std::vector<float> &datasetMeans, 
-	std::vector<float> &datasetStds,  std::vector<std::vector<float> > &eigenVectors, int k);
+	std::vector<float> &datasetStds,  std::vector<std::vector<float> > &eigenVectors, int k, int iter);

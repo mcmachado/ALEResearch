@@ -10,6 +10,8 @@
 ** Author: Marlos C. Machado                                                           **
 *****************************************************************************************/
 
+#include <iterator>     // ostream_operator
+
 #include <ale_interface.hpp>
 
 #include "control/Agent.hpp"
@@ -50,6 +52,37 @@ void copyDataToEigenStructure(vector<vector<bool> > &vectorData, MatrixXi &eigen
 	assert(vectorData.size() == eigenData.cols());
 }
 
+void readCSVFile(string fileName, vector<vector<bool> > &dataset){
+
+	int lineNumber = 0;
+	ifstream infile(fileName.c_str());
+	while (infile){
+
+		for(int i = 0; i < NUM_FEATURES_NOVELTY * 2; i++){
+			dataset[i].push_back(false);
+		}
+
+		string s;
+		if (!getline( infile, s )) break;
+
+		istringstream ss( s );
+		vector <int> record;
+		vector<bool> tmp(NUM_FEATURES_NOVELTY * 2, false);
+
+		while (ss){
+			string s;
+			if (!getline( ss, s, ',' )) break;
+			record.push_back( atoi(s.c_str()) );
+		}
+		for(int i = 0; i < record.size(); i++){
+			dataset[record[i]][lineNumber] = true;
+		}
+
+		record.clear();
+		lineNumber++;
+	}
+}
+
 int main(int argc, char** argv){
 
 	//What I really need to know:
@@ -73,21 +106,25 @@ int main(int argc, char** argv){
 	    Each row contains an eigen-vector, and each eigen-vector will originate an option.*/
 	vector<vector<float> > eigenVectors (param.numNewOptionsPerIter, vector<float>(NUM_FEATURES_NOVELTY * 2, 0));
 
+	//readCSVFile("../data/iter1/events/freeway_bits.csv", dataset); //This can be used for testing
+
 	for(int iter = 0; iter < param.maxNumIterations; iter++){
 		/* We play randomly using the actions in the action set (primitive actions and options) checking for rare
 		  feature flips. The events we observe are called eigen-events, and it is returned in dataset (bit flips).*/
 		gatherSamplesFromRandomTrajectories(ale, &param, agent, iter, dataset);
+
 		/* Now I am going to create the Eigen::Matrix and then copy the obtained eigen-events (stored in dataset)
 		 to this new structure. It is necessary to run the Singular Value Decomposition. */
 		assert(dataset.size() > 0);
 		assert(dataset[0].size() > 0);
+
 		MatrixXi datasetOfEigenEvents(dataset[0].size(), dataset.size());
 		copyDataToEigenStructure(dataset, datasetOfEigenEvents);
 		/* Now we can run SVD on my dataset, to obtain the top K eigen-vectors (this is defined by the eigen-values).
 		 Each of these eigen-vectors, assisted by the centering vector, will be responsible to define the reward
 		 function that will be used to learn one option. */
 		reduceDimensionalityOfEvents(datasetOfEigenEvents, meansVector, stdsVector, 
-			eigenVectors, param.numNewOptionsPerIter);
+			eigenVectors, param.numNewOptionsPerIter, iter);
 		/* Finally, we can now learn the options using the obtained eigen-vectors and the centering vector. This is
 		done param.numNewOptionsPerIter times (it can be done in parallel or sequentially). Memory may be an issue
 		if one decides to learn each option in a thread, depending on the size of the feature set. TODO: To allow
