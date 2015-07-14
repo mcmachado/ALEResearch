@@ -2,6 +2,8 @@
 
 #include "RAMFeatures.hpp"
 
+using namespace std;
+
 #define BITS_IN_BYTE    8
 #define BYTES_RAM     128
 #define BITS_RAM     1024
