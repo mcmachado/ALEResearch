@@ -172,7 +172,6 @@ void SarsaWithOptionsMaxScore::learnPolicy(ALEInterface& ale, Features *features
 	vector<float> reward;
 	float elapsedTime;
 	float cumReward = 0, prevCumReward = 0;
-	float cumIntrReward = 0, prevCumIntrReward = 0;
 	unsigned int maxFeatVectorNorm = 1;
 	sawFirstReward = 0; firstReward = 1.0;
 
@@ -204,8 +203,7 @@ void SarsaWithOptionsMaxScore::learnPolicy(ALEInterface& ale, Features *features
 
 			sanityCheck();
 			//Take action, observe reward and next state:
-			act(ale, currentAction, transitions, features, reward, learnedOptions);
-			cumIntrReward += reward[0];
+			act(ale, currentAction, features, reward, learnedOptions);
 			cumReward  += reward[1];
 			if(!ale.game_over()){
 				//Obtain active features in the new state:
@@ -237,7 +235,6 @@ void SarsaWithOptionsMaxScore::learnPolicy(ALEInterface& ale, Features *features
 				}
 			}
 			F = Fnext;
-			FRam = FnextRam;
 			currentAction = nextAction;
 		}
 		gettimeofday(&tvEnd, NULL);
@@ -245,12 +242,11 @@ void SarsaWithOptionsMaxScore::learnPolicy(ALEInterface& ale, Features *features
 		elapsedTime = float(tvDiff.tv_sec) + float(tvDiff.tv_usec)/1000000.0;
 		
 		float fps = float(ale.getEpisodeFrameNumber())/elapsedTime;
-		printf("episode: %d,\t%.0f points,\tavg. return: %.1f,\tnovelty reward: %.2f (%.2f),\t%d frames,\t%.0f fps\n",
+		printf("episode: %d,\t%.0f points,\tavg. return: %.1f,\t%d frames,\t%.0f fps\n",
 			episode + 1, cumReward - prevCumReward, (float)cumReward/(episode + 1.0),
-			cumIntrReward - prevCumIntrReward, cumIntrReward/(episode + 1.0), ale.getEpisodeFrameNumber(), fps);
+			ale.getEpisodeFrameNumber(), fps);
 		totalNumberFrames += ale.getEpisodeFrameNumber();
 		prevCumReward = cumReward;
-		prevCumIntrReward = cumIntrReward;
 		ale.reset_game();
 		if(toSaveWeightsAfterLearning && episode%saveWeightsEveryXSteps == 0 && episode > 0){
 			stringstream ss;
@@ -266,6 +262,7 @@ void SarsaWithOptionsMaxScore::learnPolicy(ALEInterface& ale, Features *features
 }
 
 void SarsaWithOptionsMaxScore::evaluatePolicy(ALEInterface& ale, Features *features){
+	/* This code does not play options. TODO: Fix it.
 	float reward = 0;
 	float cumReward = 0; 
 	float prevCumReward = 0;
@@ -298,4 +295,5 @@ void SarsaWithOptionsMaxScore::evaluatePolicy(ALEInterface& ale, Features *featu
 		ale.reset_game();
 		prevCumReward = cumReward;
 	}
+	*/
 }

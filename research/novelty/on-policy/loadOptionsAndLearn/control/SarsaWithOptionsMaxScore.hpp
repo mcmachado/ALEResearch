@@ -69,7 +69,6 @@ class SarsaWithOptionsMaxScore : public RLLearner{
  		*/		
 		void loadWeights();
 
-		void updateTransitionVector(std::vector<bool> F, std::vector<bool> Fnext, std::vector<float>& transitions);
 	public:
 		SarsaWithOptionsMaxScore(ALEInterface& ale, Features *features, Parameters *param);
 		/**

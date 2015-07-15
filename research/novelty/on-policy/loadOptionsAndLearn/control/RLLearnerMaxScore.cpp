@@ -10,8 +10,6 @@
 
 #include <fstream>
 
-#define NUM_BITS 1024
-
 using namespace std;
 
 RLLearner::RLLearner(ALEInterface& ale, Features *features, Parameters *param){
@@ -25,10 +23,6 @@ RLLearner::RLLearner(ALEInterface& ale, Features *features, Parameters *param){
 	episodeLength       = param->getEpisodeLength();
 	numEpisodesEval     = param->getNumEpisodesEval();
 	totalNumberOfFramesToLearn = param->getLearningLength();
-
-	for(int i = 0; i < (ramFeatures.getNumberOfFeatures() - 1)*2; i++){
-		transitions.push_back(0);
-	}
 
 	//Get the number of effective actions:
 	if(param->isMinimalAction()){
@@ -65,10 +59,6 @@ int RLLearner::playOption(ALEInterface& ale, int option, Features *features,
 	vector<int> Fbpro;	                      //Set of features active
 	vector<float> Q(numBasicActions, 0.0);    //Q(a) entries
 
-	RAMFeatures ramFeatures;
-	vector<bool> F(NUM_BITS, 0); //Set of active features
-	vector<bool> Fprev;
-
 	while(rand()%1000 > 1000 * termProb && !ale.game_over()){
 		//Get state and features active on that state:		
 		Fbpro.clear();
@@ -86,31 +76,8 @@ int RLLearner::playOption(ALEInterface& ale, int option, Features *features,
 		currentAction = epsilonGreedy(Q);
 		//Take action, observe reward and next state:
 		r_real += ale.act((Action) currentAction);
-		Fprev.swap(F);
-		F.clear();
-		ramFeatures.getCompleteFeatureVector(ale.getScreen(), ale.getRAM(), F);
-		F.pop_back();
 	}
 	return r_real;
-}
-
-void RLLearner::updateTransitionVector(vector<bool> F, vector<bool> Fnext, vector<float>& transitions){
-	int numTransitionFeatures = F.size();
-	
-	for(int i = 0; i < F.size(); i++){
-		if(!F[i] && Fnext[i]){ //0->1
-			transitions[i] = 1;
-		}
-		else{
-			transitions[i] = 0;	
-		}
-		if(F[i] && !Fnext[i]){ //1->0
-			transitions[i + numTransitionFeatures - 1] = 1;
-		}
-		else{
-			transitions[i + numTransitionFeatures - 1] = 0;	
-		}
-	}
 }
 
 /**
@@ -118,13 +85,10 @@ void RLLearner::updateTransitionVector(vector<bool> F, vector<bool> Fnext, vecto
  * pass aditional information to the running algorithm (like 'real score' if one
  * is using a surrogate reward function).
  */
-void RLLearner::act(ALEInterface& ale, int action, vector<float>& transitions, Features *features,
+void RLLearner::act(ALEInterface& ale, int action, Features *features,
 	vector<float> &reward, vector<vector<vector<float> > > &learnedOptions){
 
 	float r_alg = 0.0, r_real = 0.0;
-
-	FRam.clear();
-	ramFeatures.getCompleteFeatureVector(ale.getScreen(), ale.getRAM(), FRam);
 
 	if(action < numBasicActions){
 		r_real = ale.act(actions[action]);
@@ -133,14 +97,17 @@ void RLLearner::act(ALEInterface& ale, int action, vector<float>& transitions, F
 		int option_idx = action - numBasicActions;
 		r_real = playOption(ale, option_idx, features, learnedOptions);
 	}
-
-	FnextRam.clear();
-	ramFeatures.getCompleteFeatureVector(ale.getScreen(), ale.getRAM(), FnextRam);
-	updateTransitionVector(FRam, FnextRam, transitions);
-
-	for(int i = 0; i < transitions.size(); i++){
-		transitions[i] = (transitions[i] - mean[i])/std[i];
-		r_alg += option[i] * transitions[i];
+	/* Here I am letting the option return a single reward and then I am
+	 normalizing over it. I don't know if it is not better to normalize
+	 each step of the option. */
+	if(r_real != 0.0){
+		if(!sawFirstReward){
+			firstReward = std::abs(r_real);
+			sawFirstReward = 1;
+		}
+	}
+	if(sawFirstReward){
+		r_alg = r_real/firstReward;
 	}
 
 	reward[0] = r_alg;

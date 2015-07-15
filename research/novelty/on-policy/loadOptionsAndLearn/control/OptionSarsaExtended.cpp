@@ -266,6 +266,7 @@ void OptionSarsaExtended::learnPolicy(ALEInterface& ale, Features *features, vec
 }
 
 void OptionSarsaExtended::evaluatePolicy(ALEInterface& ale, Features *features){
+	/* This code does not play options. TODO: Fix it.
 	float reward = 0;
 	float cumReward = 0; 
 	float prevCumReward = 0;
@@ -298,4 +299,5 @@ void OptionSarsaExtended::evaluatePolicy(ALEInterface& ale, Features *features){
 		ale.reset_game();
 		prevCumReward = cumReward;
 	}
+	*/
 }
