@@ -37,10 +37,9 @@ void loadWeights(BPROFeatures *features, Parameters *param, vector<vector<vector
 	int numFeatures = features->getNumberOfFeatures();
 
 	for(int i = 0; i < param->getNumOptionsLoad(); i++){
-		w.push_back(vector< vector<float> >(NUM_ACTIONS, vector<float>(numFeatures, 0.0)));
 	}
 
-	for(int i = 0; i < param->getNumOptionsLoad(); i++){
+	for(int i = param->getNumOptionsLoad()-1; i >= 0; i--){
 		string line;
 		int nActions, nFeatures;
 		int j, k;
@@ -49,11 +48,21 @@ void loadWeights(BPROFeatures *features, Parameters *param, vector<vector<vector
 		std::ifstream weightsFile (param->pathToOptionFiles[i].c_str());
 
 		weightsFile >> nActions >> nFeatures;
-		assert(nActions == NUM_ACTIONS);
+		
+		/*I cannot make this verification anymore, because we are going to load the first X options (iter. 1)
+		  that rely on 18 actions, but then the next Y are going to rely on 18 + X actions, and my parameters
+		  do not let me know when this changes. Since I am not going to implement this now, I can only rely
+		  in myself when I am passing the parameters. This wouldn't fix it anyway.
+		  assert(nActions == NUM_ACTIONS);
+		*/
 		assert(nFeatures == numFeatures);
 
+		int idx = param->getNumOptionsLoad() - 1 - i;
+		w.push_back(vector< vector<float> >(nActions, vector<float>(numFeatures, 0.0)));
+		printf("%d (%s) %d %d %d\n", idx, param->pathToOptionFiles[i].c_str(), 
+			nActions, NUM_ACTIONS, param->getNumOptionsLoad());
 		while(weightsFile >> j >> k >> value){
-			w[i][j][k] = value;
+			w[idx][j][k] = value;
 		}
 	}
 }
