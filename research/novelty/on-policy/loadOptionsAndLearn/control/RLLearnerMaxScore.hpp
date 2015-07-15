@@ -19,18 +19,11 @@
 class RLLearner : public Agent{
 	protected:
 
-		//For the use of options:
-		RAMFeatures ramFeatures;
-		std::vector<bool> FRam, FnextRam;
-		std::vector<float> transitions;
-
 		ActionVect actions;
 
 		std::vector<float> option;
 		std::vector<float> mean;
 		std::vector<float> std;
-		std::string pathToRewardDescription;
-		std::string pathToStatsDescription;
 
 		float gamma, epsilon;
 		float firstReward;
@@ -55,7 +48,7 @@ class RLLearner : public Agent{
  		* the reward to be used by the RL algorithm is returned; in the second position, the game score is
  		* returned.
  		*/
-		void act(ALEInterface& ale, int action, std::vector<float> &transitions, Features *features, std::vector<float> &reward, std::vector<std::vector<std::vector<float> > > &learnedOptions);
+		void act(ALEInterface& ale, int action, Features *features, std::vector<float> &reward, std::vector<std::vector<std::vector<float> > > &learnedOptions);
 
 		/**
  		* Implementation of an epsilon-greedy function. Epsilon is defined in the constructor,
