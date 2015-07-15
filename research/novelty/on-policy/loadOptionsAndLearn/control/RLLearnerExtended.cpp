@@ -12,6 +12,8 @@
 
 #define NUM_BITS 1024
 
+using namespace std;
+
 RLLearner::RLLearner(ALEInterface& ale, Features *features, Parameters *param){
 	randomActionTaken   = 0;
 

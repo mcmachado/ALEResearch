@@ -42,7 +42,7 @@ class Features{
  		* 
  		* @return nothing since one will receive the requested data by the last parameter, by reference.
  		*/
-		virtual void getActiveFeaturesIndices(const ALEScreen &screen, const ALERAM &ram, vector<int>& features) = 0;
+		virtual void getActiveFeaturesIndices(const ALEScreen &screen, const ALERAM &ram, std::vector<int>& features) = 0;
 		/**
  		* It 'returns' a binary vector containing 1's where the feature is active. Ideally this
  		* method will never be used as iterating over all features is far less efficient than
@@ -61,7 +61,7 @@ class Features{
  		*        therefore it must be passed by reference. Its i-th position is TRUE if the i-th feature is active.
  		* @return nothing since one will receive the requested data by the last parameter, by reference.
  		*/
-		void getCompleteFeatureVector(const ALEScreen &screen, const ALERAM &ram, vector<bool>& features);
+		void getCompleteFeatureVector(const ALEScreen &screen, const ALERAM &ram, std::vector<bool>& features);
 		/**
  		* This pure virtual method must be implemented by every class inhereting from this one.
  		* It returns the number of features existent in the defined representation. It is the total size,

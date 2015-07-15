@@ -13,6 +13,8 @@
 #include "OptionSarsaExtended.hpp"
 #include "../../../../../src/common/Timer.hpp"
 
+using namespace std;
+
 OptionSarsaExtended::OptionSarsaExtended(ALEInterface& ale, Features *features, Parameters *param) : RLLearner(ale, features, param) {
 	delta = 0.0;
 	
