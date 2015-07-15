@@ -13,7 +13,8 @@ USE_SDL     := 1
 # -D_REENTRANT causes the compiler to use thread safe (i.e. re-entrant) versions of several functions in the C library.
 FLAGS := -O3 -I$(ALE)/src -I/opt/local/include -L$(ALE) -D_GNU_SOURCE=1 -D_REENTRANT -D__STDC_CONSTANT_MACROS
 CXX := g++ -std=c++11
-OUT_FILE := sarsaLoadWeightsProxyOption
+OUT_FILE1 := sarsaLoadWeightsProxyOption
+OUT_FILE2 := sarsaMaxScore
 # Search for library 'ale' and library 'z' when linking.
 LDFLAGS := -lale -lz -lm
 
@@ -22,13 +23,19 @@ ifeq ($(strip $(USE_SDL)), 1)
   LDFLAGS += -lSDL -lSDL_gfx -lSDL_image 
 endif
 
-all: sarsaLoadWeightsProxyOption
+all: sarsaLoadWeightsProxyOption sarsaMaxScore
 
 sarsaLoadWeightsProxyOption: sarsaLoadWeightsProxyOption.o     Mathematics.o     Timer.o     ParametersLoadingWeights.o     Features.o     Background.o     BPROFeatures.o     RAMFeatures.o     RLLearnerExtended.o     OptionSarsaExtended.o
-	$(CXX) $(FLAGS)      bin/sarsaLoadWeightsProxyOption.o bin/Mathematics.o bin/Timer.o bin/ParametersLoadingWeights.o bin/Features.o bin/Background.o bin/BPROFeatures.o bin/RAMFeatures.o bin/RLLearnerExtended.o bin/OptionSarsaExtended.o $(LDFLAGS) -o $(OUT_FILE) 	
+	$(CXX) $(FLAGS)      bin/sarsaLoadWeightsProxyOption.o bin/Mathematics.o bin/Timer.o bin/ParametersLoadingWeights.o bin/Features.o bin/Background.o bin/BPROFeatures.o bin/RAMFeatures.o bin/RLLearnerExtended.o bin/OptionSarsaExtended.o $(LDFLAGS) -o $(OUT_FILE1)
+
+sarsaMaxScore:               sarsaLoadWeightsMaxScore.o     Mathematics.o     Timer.o     ParametersLoadingWeights.o     Features.o     Background.o     BPROFeatures.o     RAMFeatures.o     RLLearnerMaxScore.o     SarsaWithOptionsMaxScore.o
+	$(CXX) $(FLAGS)      bin/sarsaLoadWeightsMaxScore.o bin/Mathematics.o bin/Timer.o bin/ParametersLoadingWeights.o bin/Features.o bin/Background.o bin/BPROFeatures.o bin/RAMFeatures.o bin/RLLearnerMaxScore.o bin/SarsaWithOptionsMaxScore.o $(LDFLAGS) -o $(OUT_FILE2)
 
 sarsaLoadWeightsProxyOption.o: sarsaLoadWeightsProxyOption.cpp
 	$(CXX) $(FLAGS) -c sarsaLoadWeightsProxyOption.cpp -o bin/sarsaLoadWeightsProxyOption.o
+
+sarsaLoadWeightsMaxScore.o: sarsaLoadWeightsMaxScore.cpp
+	$(CXX) $(FLAGS) -c sarsaLoadWeightsMaxScore.cpp -o bin/sarsaLoadWeightsMaxScore.o
 
 Mathematics.o: ../../../../src/common/Mathematics.cpp
 	$(CXX) $(FLAGS) -c ../../../../src/common/Mathematics.cpp -o bin/Mathematics.o
@@ -51,11 +58,17 @@ BPROFeatures.o: ../../../../src/features/BPROFeatures_Old.cpp
 RAMFeatures.o: ../../../../src/features/RAMFeatures.cpp
 	$(CXX) $(FLAGS) -c ../../../../src/features/RAMFeatures.cpp -o bin/RAMFeatures.o		
 
+RLLearnerMaxScore.o: control/RLLearnerMaxScore.cpp
+	$(CXX) $(FLAGS) -c control/RLLearnerMaxScore.cpp -o bin/RLLearnerMaxScore.o	
+
 RLLearnerExtended.o: control/RLLearnerExtended.cpp
 	$(CXX) $(FLAGS) -c control/RLLearnerExtended.cpp -o bin/RLLearnerExtended.o	
 
 OptionSarsaExtended.o: control/OptionSarsaExtended.cpp
 	$(CXX) $(FLAGS) -c control/OptionSarsaExtended.cpp -o bin/OptionSarsaExtended.o
+
+SarsaWithOptionsMaxScore.o: control/SarsaWithOptionsMaxScore.cpp
+	$(CXX) $(FLAGS) -c control/SarsaWithOptionsMaxScore.cpp -o bin/SarsaWithOptionsMaxScore.o
 
 clean:
 	rm -rf ${OUT_FILE} bin/*.o	
