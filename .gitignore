@@ -127,3 +127,4 @@ tools/replay/mr42/
 tools/replay/pac02/
 tools/replay/pac32/
 tools/replay/run2.sh
+research/novelty/on-policy/loadOptionsAndLearn/sarsaMaxScore
