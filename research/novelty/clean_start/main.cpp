@@ -125,11 +125,13 @@ int main(int argc, char** argv){
 		 function that will be used to learn one option. */
 		reduceDimensionalityOfEvents(datasetOfEigenEvents, meansVector, stdsVector, 
 			eigenVectors, param.numNewOptionsPerIter, iter);
+
 		/* Finally, we can now learn the options using the obtained eigen-vectors and the centering vector. This is
 		done param.numNewOptionsPerIter times (it can be done in parallel or sequentially). Memory may be an issue
 		if one decides to learn each option in a thread, depending on the size of the feature set. TODO: To allow
 		this to be done, 5 ALE's need to be instantiated. Maybe we cannot use the ALE we instantiated above. */
 		learnOptionsDerivedFromEigenEvents();
+
 		/* Now we have to clean everything for a second iteration. Everything that is useful for replication should
 		have been properly saved in the adequate methods. */
 		stdsVector.clear();
