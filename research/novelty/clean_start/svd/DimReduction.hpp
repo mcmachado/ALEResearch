@@ -1,6 +1,7 @@
 /* Author: Marlos C. Machado */
 
 #include <vector>
+#include <RedSVD.h>
 #include <Eigen/SVD>
 #include <Eigen/Dense>
 
@@ -9,7 +10,8 @@
 void centerMatrix(Eigen::MatrixXi dataset, std::vector<float> &datasetMeans, 
 	std::vector<float> &datasetStds, Eigen::MatrixXf &centeredDataset);
 
-void fillWithTopEigenVectors(int k, Eigen::JacobiSVD<Eigen::MatrixXf> svdResult, 
+//void fillWithTopEigenVectors(int k, Eigen::JacobiSVD<Eigen::MatrixXf> svdResult, 
+void fillWithTopEigenVectors(int k, RedSVD::RedSVD<Eigen::MatrixXf> svdResult, 
 	std::vector<std::vector<float> > &eigenVectors);
 
 void obtainStatistics(Eigen::MatrixXi dataset, std::vector<float> &datasetMeans, 

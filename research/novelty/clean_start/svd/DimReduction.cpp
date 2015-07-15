@@ -28,7 +28,7 @@ void obtainStatistics(MatrixXi dataset, vector<float> &datasetMeans,
 			datasetStds.push_back(1.0);
 		}
 		else{
-			datasetStds.push_back(sqrt(sumSquaredErrors));
+			datasetStds.push_back(sqrt(sumSquaredErrors/numRows));
 		}
 	}	
 }
@@ -48,14 +48,15 @@ void centerMatrix(MatrixXi dataset, vector<float> &datasetMeans,
 	}
 }
 
-void fillWithTopEigenVectors(int k, JacobiSVD<MatrixXf> svdResult, 
+//void fillWithTopEigenVectors(int k, JacobiSVD<MatrixXf> svdResult, 
+void fillWithTopEigenVectors(int k, RedSVD::RedSVD<MatrixXf> svdResult, 
 	vector<vector<float> > &eigenVectors){
 
 	assert(eigenVectors.size() == k);
 	assert(eigenVectors[0].size() == svdResult.matrixV().rows());
 
 	for(int i = 0; i < eigenVectors.size(); i++){
-		for(int j = 0; j < eigenVectors[i].size(); i++){
+		for(int j = 0; j < eigenVectors[i].size(); j++){
 			eigenVectors[i][j] = svdResult.matrixV()(j, i);
 		}
 	}
@@ -68,13 +69,35 @@ void saveDecompositionInFile(vector<vector<float> > &eigenVectors,
 	stringstream sstm_fileName;
 	sstm_fileName << baseName << iter + 1 << "_mean.out";
 	string outputPathMean_param = sstm_fileName.str();
+	sstm_fileName.str("");
+	sstm_fileName << baseName << iter + 1 << "_std.out";
+	string outputPathStd_param = sstm_fileName.str();
 
 
+	ofstream outputStd;
 	ofstream outputMean;
-	outputMean.open(outputPathMean_param, ios::app);
+	outputMean.open(outputPathMean_param, ios::out);
+	outputStd.open(outputPathStd_param, ios::out);
 	for(int i = 0; i < datasetMeans.size(); i++){
 		outputMean << datasetMeans[i] << endl;
+		outputStd << datasetStds[i] << endl;
 	}
+	outputStd.close();
+	outputMean.close();
+
+	for(int i = 0; i < eigenVectors.size(); i++){
+		sstm_fileName.str("");
+		sstm_fileName << baseName << iter + 1 << "_eig" << i + 1 << ".out";
+		string outputPath = sstm_fileName.str();
+
+		ofstream output;
+		output.open(outputPath, ios::out);
+		for(int j = 0; j < eigenVectors[i].size(); j++){
+			output << eigenVectors[i][j] << endl;
+		}
+		output.close();
+	}
+
 }
 
 void reduceDimensionalityOfEvents(MatrixXi dataset, vector<float> &datasetMeans, 
@@ -89,7 +112,13 @@ void reduceDimensionalityOfEvents(MatrixXi dataset, vector<float> &datasetMeans,
 	centerMatrix(dataset, datasetMeans, datasetStds, centeredDataset);
 	/* Once we centered the matrix we can run the SVD itself. We also want
 	the eigenvectors, not only the eigenvalues, this is why we ask for U and V.*/
-	JacobiSVD<MatrixXf> svd(centeredDataset, ComputeThinU | ComputeThinV);
+	//JacobiSVD<MatrixXf> svd(centeredDataset, ComputeThinU | ComputeThinV);
+	/* I was using JacobiSVD to do the SVD but it is too slow. I am now using an
+	approach based on a randomized algorithm. The algorithm I am using was
+	introduced in "Finding structure with randomness: Stochastic algorithms for 
+	constructing approximate matrix decompositions", N. Halko, P.G. Martinsson, 
+	J. Tropp, arXiv 0909.4061"*/
+	RedSVD::RedSVD<MatrixXf> svd(centeredDataset);
 	/* Finally, we need to obtain the top k eigenvectors (we are not concerned
 	with the whole decomposition). Here I fill the matrix eigenVectors to be
 	later used in the learning part of my algorithm.*/
