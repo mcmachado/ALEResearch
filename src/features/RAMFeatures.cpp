@@ -20,6 +20,8 @@
 
 typedef unsigned char byte_t;
 
+using namespace std;
+
 RAMFeatures::RAMFeatures(){
 }
 
