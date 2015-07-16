@@ -6,6 +6,7 @@ GQLearner::GQLearner(unsigned numFeatures, const std::vector<Action>& actions, P
     weights.resize(numActions,std::vector<float>(numFeatures,0.0));
     aux_weights.resize(numActions,std::vector<float>(numFeatures,0.0));
     e.resize(numActions);
+    maxFeatVectorNorm = 0;
 }
 
 
@@ -102,13 +103,16 @@ void GQLearner::receiveSample(const std::vector<int>& features_current_state, Ac
     //compute dot product (phi_t * w_t)
     float phi_w_dotprod = Mathematics::weighted_sparse_dotprod(aux_weights[action],features_current_state,1.0);
     //std::cout<<"phi*w "<<phi_w_dotprod<<std::endl;
+
+    //to avoid divergence, we divide the stepsiwe by the max norm of the feature vector
+    maxFeatVectorNorm = std::max(features_current_state.size(),maxFeatVectorNorm);
     
     //we do three computations at the same time :
     //theta <- theta + alpha * delta_t * e_t
     //w <- w + beta * delta_t * e_t
     //and compute dot product e_t * w_t
     dotProd = 0.0;
-    float c1 = alpha*delta, c2 = beta*delta;
+    float c1 = (alpha/double(maxFeatVectorNorm))*delta, c2 = beta*delta;
     for(unsigned a = 0; a < numActions; a++){
         for(const auto& it : e[a]){
             dotProd += it.second * aux_weights[a][it.first];
@@ -119,7 +123,7 @@ void GQLearner::receiveSample(const std::vector<int>& features_current_state, Ac
     //std::cout<<"e*weights "<<dotProd<<std::endl;
 
     //theta <- theta - alpha * gamma * (1 - lambda) * (e_t * w_t) * \bar{phi}_{t+1}
-    float coeff = -1.0 * alpha * gamma * (1.0 - lambda) * dotProd;
+    float coeff = -1.0 * (alpha/double(maxFeatVectorNorm)) * gamma * (1.0 - lambda) * dotProd;
     for(unsigned a = 0; a < numActions; a++){
         float policy_coeff = epsilon/double(numActions) + ((a==argmax_nextQ) ? 1.0 - epsilon : 0);
         for(const auto& feat : features_next_state){
