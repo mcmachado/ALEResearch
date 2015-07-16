@@ -28,18 +28,35 @@ void GQLearner::receiveSample(const std::vector<int>& features_current_state, Ac
     //first, we compute the q values with respect to the current state and the next state, and we compute the argmax simultaneously
     std::vector<float> nextQValues(numActions),currentQValues(numActions);
     unsigned argmax_nextQ = 0, argmax_currentQ = 0;
+    std::vector<unsigned> indices_nextQ,indices_currentQ;
+    float max_nextQ=-1e9, max_currentQ=-1e9;
     for(unsigned a = 0; a < numActions ; a++){
         nextQValues[a] = std::accumulate(features_next_state.begin(),features_next_state.end(),0.0,
                                          [&a,this](const float& elem, const int& id){ return elem+weights[a][id];});
         currentQValues[a] = std::accumulate(features_current_state.begin(),features_current_state.end(),0.0,
                                             [&a,this](const float& elem, const int& id){ return elem+weights[a][id];});
-        if(nextQValues[a] > nextQValues[argmax_nextQ]){
-            argmax_nextQ = a;
+        if(fabs(nextQValues[a]-max_nextQ)<1e-6){
+            indices_nextQ.push_back(a);
+        }else{
+            if(nextQValues[a] > max_nextQ){
+                max_nextQ = nextQValues[a];
+                indices_nextQ.clear();
+                indices_nextQ.push_back(a);
+            }
         }
-        if(currentQValues[a] > currentQValues[argmax_currentQ]){
-            argmax_currentQ = a;
+        if(fabs(currentQValues[a]-max_currentQ)<1e-6){
+            indices_currentQ.push_back(a);
+        }else{
+            if(currentQValues[a] > max_currentQ){
+                max_currentQ = currentQValues[a];
+                indices_currentQ.clear();
+                indices_currentQ.push_back(a);
+            }
         }
     }
+    assert(indices_currentQ.size()>0 && indices_nextQ.size()>0);
+    argmax_nextQ = indices_nextQ[rand()%indices_nextQ.size()];
+    argmax_currentQ = indices_currentQ[rand()%indices_currentQ.size()];
     //std::cout<<"currQ :";
     for(const auto & q : currentQValues){
         //std::cout<<q<<" ";
@@ -56,7 +73,7 @@ void GQLearner::receiveSample(const std::vector<int>& features_current_state, Ac
     //now we compute the dot product theta*\bar{phi}_{t+1}
     float dotProd = 0.0;
     for(unsigned a = 0; a < numActions ; a++){
-        float coeff = epsilon/double(numActions) + ((a==argmax_nextQ) ? 1.0 - epsilon : 0);
+        float coeff = epsilon/double(numActions) + ((fabs(nextQValues[a]-max_nextQ)<1e-6) ? (1.0 - epsilon)/double(indices_nextQ.size()) : 0);
         dotProd += Mathematics::weighted_sparse_dotprod(weights[a],features_next_state,coeff);
     }
     //std::cout<<"theta * bar_phi "<<dotProd<<std::endl;
@@ -67,7 +84,8 @@ void GQLearner::receiveSample(const std::vector<int>& features_current_state, Ac
 
     //std::cout<<"delta "<<delta<<std::endl;
     //compute rho_t, the ratio of policies
-    float rho = epsilon/double(numActions) + ((action == argmax_currentQ) ? 1.0 - epsilon : 0);
+    //to compute the probability of current action in the target policy, we have to see if its Q Value is maximal. If so, it may be chosen when breaking ties amongst maximal Qvalues with proba (1.0-epsilon)/(number of maximal Qvalues)
+    float rho = epsilon/double(numActions) + ((fabs(currentQValues[action] - max_currentQ)<1e-6) ? (1.0 - epsilon)/double(indices_currentQ.size()) : 0);
     rho /= proba_action_bpolicy;
     //std::cout<<"rho "<<rho<<std::endl;
 

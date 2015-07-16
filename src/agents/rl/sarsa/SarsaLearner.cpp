@@ -269,7 +269,16 @@ double SarsaLearner::evaluatePolicy(Environment<bool>& env,unsigned numSteps){
 			updateQValues(F, Q);       //Update Q-values for each possible action
 			currentAction = epsilonGreedy(Q);
             //compute proba of taking current action
-            double proba_action = epsilon/double(numActions) + (randomActionTaken ? 0 : 1.0 - epsilon);
+            //first, we need the number of QValues that are tied
+            double numTies = 0;
+            if(!randomActionTaken){
+                for(const auto& q : Q){
+                    if(q==Q[currentAction])
+                        numTies++;
+                }
+            }
+            
+            double proba_action = epsilon/double(numActions) + (randomActionTaken ? 0 : (1.0 - epsilon)/numTies);
 			//Take action, observe reward and next state:
 			reward = env.act(actions[currentAction],proba_action);
 			cumReward  += reward;
