@@ -50,14 +50,15 @@ int RLLearner::epsilonGreedy(vector<float> &QValues){
 	return action;
 }
 
-int RLLearner::playOption(ALEInterface& ale, int option, Features *features,
-	vector<vector<vector<float> > > &learnedOptions){
+void RLLearner::playOption(ALEInterface& ale, int option, Features *features,
+	vector<float> &reward, vector<vector<vector<float> > > &learnedOptions){
 
+	int numActionsInOption = learnedOptions[option].size();
 	int r_real = 0;
 	float termProb = 0.01;
 	int currentAction;
 	vector<int> Fbpro;	                      //Set of features active
-	vector<float> Q(numBasicActions, 0.0);    //Q(a) entries
+	vector<float> Q(numActionsInOption, 0.0);    //Q(a) entries
 
 	while(rand()%1000 > 1000 * termProb && !ale.game_over()){
 		//Get state and features active on that state:		
@@ -65,7 +66,7 @@ int RLLearner::playOption(ALEInterface& ale, int option, Features *features,
 		features->getActiveFeaturesIndices(ale.getScreen(), ale.getRAM(), Fbpro);
 
 		//Update Q-values for each possible action
-		for(int a = 0; a < numBasicActions; a++){
+		for(int a = 0; a < numActionsInOption; a++){
 			float sumW = 0;
 			for(unsigned int i = 0; i < Fbpro.size(); i++){
 				sumW += learnedOptions[option][a][Fbpro[i]];
@@ -75,9 +76,11 @@ int RLLearner::playOption(ALEInterface& ale, int option, Features *features,
 
 		currentAction = epsilonGreedy(Q);
 		//Take action, observe reward and next state:
-		r_real += ale.act((Action) currentAction);
+		//r_real += ale.act((Action) currentAction);
+		/* Now things get nasty. We need to do it recursively because one 
+		option can call another one. Hopefully everything is going to work.*/
+		this->act(ale, currentAction, features, reward, learnedOptions);
 	}
-	return r_real;
 }
 
 /**
@@ -95,7 +98,7 @@ void RLLearner::act(ALEInterface& ale, int action, Features *features,
 	} 
 	else{
 		int option_idx = action - numBasicActions;
-		r_real = playOption(ale, option_idx, features, learnedOptions);
+		playOption(ale, option_idx, features, reward, learnedOptions);
 	}
 	/* Here I am letting the option return a single reward and then I am
 	 normalizing over it. I don't know if it is not better to normalize
@@ -110,7 +113,7 @@ void RLLearner::act(ALEInterface& ale, int action, Features *features,
 		r_alg = r_real/firstReward;
 	}
 
-	reward[0] = r_alg;
-	reward[1] = r_real;
+	reward[0] += r_alg;
+	reward[1] += r_real;
 }
 

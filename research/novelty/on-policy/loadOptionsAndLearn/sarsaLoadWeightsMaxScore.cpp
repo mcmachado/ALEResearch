@@ -59,8 +59,6 @@ void loadWeights(BPROFeatures *features, Parameters *param, vector<vector<vector
 
 		int idx = param->getNumOptionsLoad() - 1 - i;
 		w.push_back(vector< vector<float> >(nActions, vector<float>(numFeatures, 0.0)));
-		printf("%d (%s) %d %d %d\n", idx, param->pathToOptionFiles[i].c_str(), 
-			nActions, NUM_ACTIONS, param->getNumOptionsLoad());
 		while(weightsFile >> j >> k >> value){
 			w[idx][j][k] = value;
 		}

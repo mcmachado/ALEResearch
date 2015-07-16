@@ -70,9 +70,7 @@ class RLLearner : public Agent{
 		*/
 		RLLearner(ALEInterface& ale, Features *features, Parameters *param);
 
-		int playOption(ALEInterface& ale, int option, Features *features, std::vector<std::vector<std::vector<float> > > &learnedOptions);
-
-		void updateTransitionVector(std::vector<bool> F, std::vector<bool> Fnext, std::vector<float>& transitions);
+		void playOption(ALEInterface& ale, int option, Features *features, std::vector<float> &reward, std::vector<std::vector<std::vector<float> > > &learnedOptions);
 
 	public:
 	   /**
