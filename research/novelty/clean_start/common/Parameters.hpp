@@ -41,7 +41,7 @@ class Parameters{
 		int seed;                       //seed to be used by the random number generator
 		int display;                    //if it should display screen
 		int episodeLength;              //length of a single episode
-		int learningLength;             //The number of frames to be learned, in total
+		int learningLength;             //The number of frames to be learned, in total (for each option)
 		int isMinimalAction;            //use only valid actions for the game or all the Atari legal actions
 		int maxNumIterations;           //number of times I am going to iterate over all steps in my algorithm
 		int framesToDefRarity;          //number of frames to use to calculate the first average that will be used to define rarity

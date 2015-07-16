@@ -105,13 +105,18 @@ int main(int argc, char** argv){
 	/* This matrix contains the K (defined as a parameter) eigen-vectors that are obtained after running the SVD.
 	    Each row contains an eigen-vector, and each eigen-vector will originate an option.*/
 	vector<vector<float> > eigenVectors (param.numNewOptionsPerIter, vector<float>(NUM_FEATURES_NOVELTY * 2, 0));
-
 	//readCSVFile("../data/iter1/events/freeway_bits.csv", dataset); //This can be used for testing
+	/* This matrix is initially empty, but each new learned option is going to add its learned set of weights on
+	   it. Therefore, when initialized it will be 0x0. After learnined the first set of options (e.g. 5) it will
+	   be 5 x |A| x |F|, where |A| is 18 and |F| is the size of the feature vector. In the second iteration it
+	   be concatenated to another matrix with dimensions 5 x |A + 5| x |F|. It is declared here because this is
+	   one of the largest matrices I'll have, and I need to keep passing it by reference. */
+	vector<vector<vector<float> > > learnedOptions;
 
 	for(int iter = 0; iter < param.maxNumIterations; iter++){
 		/* We play randomly using the actions in the action set (primitive actions and options) checking for rare
 		  feature flips. The events we observe are called eigen-events, and it is returned in dataset (bit flips).*/
-		gatherSamplesFromRandomTrajectories(ale, &param, agent, iter, dataset);
+		gatherSamplesFromRandomTrajectories(ale, &param, agent, dataset, learnedOptions, iter);
 
 		/* Now I am going to create the Eigen::Matrix and then copy the obtained eigen-events (stored in dataset)
 		 to this new structure. It is necessary to run the Singular Value Decomposition. */
@@ -130,12 +135,15 @@ int main(int argc, char** argv){
 		done param.numNewOptionsPerIter times (it can be done in parallel or sequentially). Memory may be an issue
 		if one decides to learn each option in a thread, depending on the size of the feature set. TODO: To allow
 		this to be done, 5 ALE's need to be instantiated. Maybe we cannot use the ALE we instantiated above. */
-		learnOptionsDerivedFromEigenEvents();
+		learnOptionsDerivedFromEigenEvents(ale, &param, agent,
+			meansVector, stdsVector, eigenVectors, learnedOptions, iter);
 
 		/* Now we have to clean everything for a second iteration. Everything that is useful for replication should
 		have been properly saved in the adequate methods. */
 		stdsVector.clear();
 		meansVector.clear();
 	}
+
+	//learnToMaximizeReward();
 	return 1;
 }
