@@ -10,7 +10,7 @@ do
     echo "difficulty ${difficulty}"
     name=`ls ${file}  | pcregrep -o1 'out_(.*)_d[0-9]'  `
     echo "name ${name}"
-    cat $file | grep -o "episode.*[1-9][0-9]* fps" | head -n 1000 > "${file}.tmp"
+    cat $file | grep -o "episode.*[1-9][0-9]* fps" | head -n 100 > "${file}.tmp"
     if ! test -e "${name}.printscript"
     then
         echo "set term pdfcairo" >> ${name}.printscript
@@ -25,14 +25,16 @@ do
         echo "set format '%g'" >> ${name}.printscript
         echo "load 'parula.pal'" >> ${name}.printscript
         echo "set palette rgbformulae 7,5,15"  >> ${name}.printscript
-        echo "plot '< awk -vn=50 -f average_all.awk ${file}.tmp' using 1:2 title 'mode ${mode} difficulty ${difficulty}' with lines ls 1" >> ${name}.printscript
+        echo "plot '< awk -vn=5 -f average_all.awk ${file}.tmp' using 1:2 title 'mode ${mode} difficulty ${difficulty}' with lines ls 1" >> ${name}.printscript
+	    #echo "plot '${file}.tmp' using 2:3 title 'mode ${mode} difficulty ${difficulty}' with lines ls 1" >> ${name}.printscript
     else
         mv ${name}.printscript ttmp.printscript
         escaped=`ls "${file}.tmp"| sed 's#/#\\\/#g'`
         last_num=`cat ttmp.printscript | pcregrep -o1 'lines ls ([0-9]*)$'`
         #echo "s/lines$/lines, '< awk -vn=1000 -f average.awk ${escaped}' using 1:2 title 'mode ${mode} difficulty ${difficulty}' with lines/g" ttmp.printscript
         next_num=$(($last_num+1))
-        sed "s/lines ls ${last_num}$/lines ls ${last_num}, '< awk -vn=50 -f average_all.awk ${escaped}' using 1:2 title 'mode ${mode} difficulty ${difficulty}' with lines ls ${next_num}/g" ttmp.printscript > ${name}.printscript
+        sed "s/lines ls ${last_num}$/lines ls ${last_num}, '< awk -vn=5 -f average_all.awk ${escaped}' using 1:2 title 'mode ${mode} difficulty ${difficulty}' with lines ls ${next_num}/g" ttmp.printscript > ${name}.printscript
+        #sed "s/lines ls ${last_num}$/lines ls ${last_num}, '${escaped}' using 2:3 title 'mode ${mode} difficulty ${difficulty}' with lines ls ${next_num}/g" ttmp.printscript > ${name}.printscript
         rm ttmp.printscript
     fi
     

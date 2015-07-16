@@ -39,4 +39,4 @@ do
 done
 
 gnuplot -p *.printscript
-#rm -rf *.printscript
+rm -rf *.printscript
