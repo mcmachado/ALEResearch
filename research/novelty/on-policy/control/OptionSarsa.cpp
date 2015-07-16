@@ -201,7 +201,6 @@ void OptionSarsa::learnPolicy(ALEInterface& ale, Features *features){
 
 	//Repeat (for each episode):
 	int episode, totalNumberFrames = 0;
-	//This is going to be interrupted by the ALE code since I set max_num_frames beforehand
 	for(episode = 0; totalNumberFrames < totalNumberOfFramesToLearn; episode++){ 
 		//We have to clean the traces every episode:
 		for(unsigned int a = 0; a < nonZeroElig.size(); a++){
