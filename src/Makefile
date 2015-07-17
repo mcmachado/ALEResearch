@@ -20,6 +20,7 @@ GETTER := mode_difficulty_getter
 VALUE_TRANSFER := value_transfer
 VALUE_TRANSFER_RELEARN := value_transfer_relearn
 OFFPOLICY_LEARN := offpolicy_learn
+SVD := svd
 # Search for library 'ale' and library 'z' when linking.
 LDFLAGS := -L$(ALE) -lale -lz -lm
 
@@ -35,10 +36,10 @@ SRCS = Mathematics.cpp Parameters.cpp Timer.cpp Features.cpp Background.cpp Basi
 OBJS = $(subst .cpp,.o, $(addprefix bin/,$(SRCS)))
 DEPS = $(subst .cpp,.d, $(addprefix bin/,$(SRCS))) bin/main_grid_example.d bin/main_offpolicy.d
 
-all: $(EXE) $(GETTER) $(VALUE_TRANSFER) $(VALUE_TRANSFER_RELEARN) $(OFFPOLICY_LEARN) 
+all: $(EXE) $(GETTER) $(VALUE_TRANSFER) $(VALUE_TRANSFER_RELEARN) $(OFFPOLICY_LEARN) $(SVD)
 
-$(EXE): $(OBJS) bin/main_grid_example.o
-	$(CXX) $(LDFLAGS) $(OBJS) bin/main_grid_example.o -o $(EXE)
+$(EXE): $(OBJS) bin/main_sarsa_example.o
+	$(CXX) $(LDFLAGS) $(OBJS) bin/main_sarsa_example.o -o $(EXE)
 
 $(GETTER):
 	$(CXX) $(LDFLAGS) $(CFLAGS) mode_difficulty_getter.cpp -o $(GETTER)
@@ -51,11 +52,16 @@ $(VALUE_TRANSFER_RELEARN): $(OBJS) bin/value_transfer_relearn.o
 
 $(OFFPOLICY_LEARN): $(OBJS) bin/main_offpolicy.o
 	$(CXX) $(LDFLAGS) $(CFLAGS) $(OBJS) bin/main_offpolicy.o -o $(OFFPOLICY_LEARN)
+
+$(SVD): $(OBJS) bin/svd.o
+	$(CXX) $(LDFLAGS) $(CFLAGS) $(OBJS) bin/svd.o -o $(SVD)
+
+
 bin/%.o: %.cpp
 	$(CXX) -o $@ -c $< $(CFLAGS)
 
 clean:
-	rm -rf $(OBJS) $(EXE) $(DEPS) $(VALUE_TRANSFER) $(GETTER) bin/*
+	rm -rf $(OBJS) $(EXE) $(DEPS) $(VALUE_TRANSFER) $(GETTER) $(SVD) bin/*
 
 -include $(OBJS:%.o=%.d) #for handling dependencies between files
 
