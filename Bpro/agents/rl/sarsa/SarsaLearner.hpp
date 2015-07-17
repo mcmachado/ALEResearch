@@ -20,25 +20,25 @@ class SarsaLearner : public RLLearner{
 	private:
 		float alpha, delta, lambda, traceThreshold;
 		int currentAction, nextAction;
-        long long numFeatures;
+        	long long numFeatures;
 		int toSaveWeightsAfterLearning, saveWeightsEveryXFrames, toSaveCheckPoint;
 
 		std::string nameWeightsFile, pathWeightsFileToLoad;
-        std::string checkPointName;
-        std::string nameForLearningCondition;
-        int episodePassed;
-        int totalNumberFrames;
-        long long maxFeatVectorNorm;
-        int saveThreshold;
+        	std::string checkPointName;
+        	std::string nameForLearningCondition;
+        	int episodePassed;
+        	int totalNumberFrames;
+        	long long maxFeatVectorNorm;
+        	int saveThreshold;
 
-		vector<long long> F;					//Set of features active
-		vector<long long> Fnext;              //Set of features active in next state
-		vector<float> Q;               //Q(a) entries
-		vector<float> Qnext;           //Q(a) entries for next action
-    vector<unordered_map<long long, float> > e;       //Eligibility trace
-    vector<unordered_map<long long, float> > w;     //Theta, weights vector
+		std::vector<long long> F;					//Set of features active
+		std::vector<long long> Fnext;              //Set of features active in next state
+		std::vector<float> Q;               //Q(a) entries
+		std::vector<float> Qnext;           //Q(a) entries for next action
+    		std::vector<std::unordered_map<long long, float> > e;       //Eligibility trace
+    		std::vector<std::unordered_map<long long, float> > w;     //Theta, weights vector
 		//vector<vector<long long> >nonZeroElig;//To optimize the implementation
-        //vector<vector<int> > featureSeen;
+        	//vector<vector<int> > featureSeen;
     
 
 		/**
@@ -57,29 +57,29 @@ class SarsaLearner : public RLLearner{
  		* It updates the vector<double> Q assuming that vector<int> F is filled, as it sums just the weights
  		* that are active in F.
  		*/
-		void updateQValues(vector<long long> &Features, vector<float> &QValues);
+		void updateQValues(std::vector<long long> &Features, std::vector<float> &QValues);
 		/**
  		* When using Replacing traces, all values not related to the current action are set to 0, while the
  		* values for the current action that their features are active are set to 1. The traces decay following
  		* the rule: e[action][i] = gamma * lambda * e[action][i]. It is possible to also define thresholding.
  		*/
-		void updateReplTrace(int action, vector<long long> &Features);
+		void updateReplTrace(int action, std::vector<long long> &Features);
 		/**
  		* When using Replacing traces, all values not related to the current action are set to 0, while the
  		* values for the current action that their features are active are added 1. The traces decay following
  		* the rule: e[action][i] = gamma * lambda * e[action][i]. It is possible to also define thresholding.
  		*/
-		void updateAcumTrace(int action, vector<long long> &Features);
+		void updateAcumTrace(int action, std::vector<long long> &Features);
         /**
         * Prints the weights in a file. Each line will contain a weight.
         */
-        void saveWeightsToFile(string suffix="");
+        void saveWeightsToFile(std::string suffix="");
         /**
         * Loads the weights saved in a file. Each line will contain a weight.
         */
         void loadWeights();
-        void saveCheckPoint(int episode, int totalNumberFrames,  vector<float>& episodeResults, int& frequency, vector<int>& episodeFrames, vector<double>& episodeFps);
-        void loadCheckPoint(ifstream& checkPointToLoad);
+        void saveCheckPoint(int episode, int totalNumberFrames,  std::vector<float>& episodeResults, int& frequency, std::vector<int>& episodeFrames, std::vector<double>& episodeFps);
+        void loadCheckPoint(std::ifstream& checkPointToLoad);
     public:
 		SarsaLearner(ALEInterface& ale, Features *features, Parameters *param, int seed);
 		/**
