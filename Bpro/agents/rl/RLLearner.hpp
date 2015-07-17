@@ -24,7 +24,7 @@ class RLLearner : public Agent{
 		int    randomActionTaken, numActions;
 		int    episodeLength, numEpisodesEval;
 		int    totalNumberOfFramesToLearn;
-        mt19937 agentRand;
+        	std::mt19937 agentRand;
 
 		/**
  		* It acts in the environment and makes the proper operations in the reward signal (normalizing,
@@ -39,7 +39,7 @@ class RLLearner : public Agent{
  		* the reward to be used by the RL algorithm is returned; in the second position, the game score is
  		* returned.
  		*/
-		void act(ALEInterface& ale, int action, vector<float> &reward);
+		void act(ALEInterface& ale, int action, std::vector<float> &reward);
 
 		/**
  		* Implementation of an epsilon-greedy function. Epsilon is defined in the constructor,
@@ -47,7 +47,7 @@ class RLLearner : public Agent{
  		*
  		* @return int action to be taken
  		*/
-		int epsilonGreedy(vector<float> &QValues);
+		int epsilonGreedy(std::vector<float> &QValues);
 
 		/**
 		* Constructor to be used by the RL classes to save the parameters that
