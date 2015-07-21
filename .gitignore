@@ -128,3 +128,14 @@ tools/replay/pac02/
 tools/replay/pac32/
 tools/replay/run2.sh
 research/novelty/on-policy/loadOptionsAndLearn/sarsaMaxScore
+research/novelty/clean_start/test.cpp
+research/novelty/on-policy/loadOptionsAndLearn/1.wgt100
+tools/replay/runAsteroids.sh
+tools/replay/runBowling.sh
+tools/replay/runFreeway.sh
+tools/replay/runFrostbite.sh
+tools/replay/runGravitar.sh
+tools/replay/runMontezumaRevenge.sh
+tools/replay/runMsPacMan.sh
+tools/replay/runPitfall.sh
+tools/replay/runPrivateEye.sh
