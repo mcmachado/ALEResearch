@@ -10,7 +10,7 @@
 int playGame(ALEInterface& ale, Parameters *param, int iter, vector<vector<bool> > &dataset);
 
 void gatherSamplesFromRandomTrajectories(ALEInterface& ale, Parameters *param, Agent &agent,
-	vector<vector<bool> > &dataset, int iter);
+	vector<vector<bool> > &dataset, vector<vector<vector<float> > > learnedOptions, int iter);
 
 //Learning Options:
 int argmax(std::vector<float> array);
