@@ -142,7 +142,7 @@ int Agent::playActionUpdatingAvg(ALEInterface& ale, Parameters *param, int &fram
 			//Get state and features active on that state:		
 			Fbpro.clear();
 			bproFeatures.getActiveFeaturesIndices(ale.getScreen(), Fbpro);
-			updateQValues(Fbpro, Q, option); //Update Q-values for each possible action
+			updateQValues(learnedOptions[option], Fbpro, Q, option); //Update Q-values for each possible action
 			currentAction = epsilonGreedy(Q, param->epsilon);
 			//Take action, observe reward and next state:
 			reward += ale.act((Action) currentAction);
@@ -157,11 +157,11 @@ int Agent::playActionUpdatingAvg(ALEInterface& ale, Parameters *param, int &fram
 	return reward;
 }
 
-void Agent::updateQValues(vector<int> &Features, vector<float> &QValues, int option){
+void Agent::updateQValues(vector<vector<float> > &weights, vector<int> &Features, vector<float> &QValues, int option){
 	for(int a = 0; a < numberOfAvailActions; a++){
 		float sumW = 0;
 		for(unsigned int i = 0; i < Features.size(); i++){
-			sumW += w[option][a][Features[i]];
+			sumW += weights[a][Features[i]];
 		}
 		QValues[a] = sumW;
 	}
@@ -180,3 +180,53 @@ int Agent::epsilonGreedy(vector<float> &QValues, float epsilon){
 	return action;
 }
 
+void Agent::updateReplTrace(Parameters *param, int action, vector<int> &Features){
+	//e <- gamma * lambda * e
+	for(unsigned int a = 0; a < nonZeroElig.size(); a++){
+		int numNonZero = 0;
+	 	for(unsigned int i = 0; i < nonZeroElig[a].size(); i++){
+	 		int idx = nonZeroElig[a][i];
+	 		//To keep the trace sparse, if it is
+	 		//less than a threshold it is zero-ed.
+			e[a][idx] = param->gamma * param->lambda * e[a][idx];
+			if(e[a][idx] < param->traceThreshold){
+				e[a][idx] = 0;
+			}
+			else{
+				nonZeroElig[a][numNonZero] = idx;
+		  		numNonZero++;
+			}
+		}
+		nonZeroElig[a].resize(numNonZero);
+	}
+
+	//For all i in Fa:
+	for(unsigned int i = 0; i < Features.size(); i++){
+		int idx = Features[i];
+		//If the trace is zero it is not in the vector
+		//of non-zeros, thus it needs to be added
+		if(e[action][idx] == 0){
+	       nonZeroElig[action].push_back(idx);
+	    }
+		e[action][idx] = 1;
+	}
+}
+
+void Agent::cleanTraces(){
+	for(unsigned int a = 0; a < nonZeroElig.size(); a++){
+		for(unsigned int i = 0; i < nonZeroElig[a].size(); i++){
+			int idx = nonZeroElig[a][i];
+			e[a][idx] = 0.0;
+		}
+		nonZeroElig[a].clear();
+	}
+}
+
+void Agent::sanityCheck(vector<float> &QValues){
+	for(int i = 0; i < numberOfAvailActions; i++){
+		if(fabs(QValues[i]) > 10e7 || QValues[i] != QValues[i] /*NaN*/){
+			printf("It seems your algorithm diverged!\n");
+			exit(0);
+		}
+	}
+}
