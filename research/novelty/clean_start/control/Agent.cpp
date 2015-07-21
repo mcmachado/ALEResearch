@@ -20,6 +20,7 @@ Agent::Agent(ALEInterface& ale, Parameters *param) : bproFeatures(param) {
 
 	for(int i = 0; i < 2 * NUM_BITS; i++){
 		freqOfBitFlips.push_back(0.0);
+		transitions.push_back(0.0);
 	}
 
 	for(int i = 0; i < numberOfOptions; i++){
@@ -155,6 +156,99 @@ int Agent::playActionUpdatingAvg(ALEInterface& ale, Parameters *param, int &fram
 		}
 	}
 	return reward;
+}
+
+/**
+ * The first parameter is the one that is used by Sarsa. The second is used to
+ * pass aditional information to the running algorithm (like 'real score' if one
+ * is using a surrogate reward function).
+ */
+void Agent::act(ALEInterface& ale, int action, Parameters *param,
+	std::vector<float> &mean, std::vector<float> &std,
+	std::vector<float> &eigenVectors, vector<float> &reward){
+
+	vector<bool> FRam, FnextRam;
+	float r_alg = 0.0, r_real = 0.0;
+
+	FRam.clear();
+	ramFeatures.getCompleteFeatureVector(ale.getRAM(), FRam);
+
+	if(action < numberOfPrimitiveActions){
+		r_real = ale.act(actions[action]);
+	}
+	else{
+		int option_idx = action - numberOfPrimitiveActions;
+		r_real = playOption(ale, param->epsilon, option_idx);
+	}
+
+	FnextRam.clear();
+	ramFeatures.getCompleteFeatureVector(ale.getRAM(), FnextRam);
+	updateTransitionVector(FRam, FnextRam);
+
+	for(int i = 0; i < transitions.size(); i++){
+		transitions[i] = (transitions[i] - mean[i])/std[i];
+		r_alg += eigenVectors[i] * transitions[i];
+	}
+
+	reward[0] = r_alg;
+	reward[1] = r_real;
+}
+
+
+int Agent::playOption(ALEInterface& ale, float epsilon, int option){
+
+	int r_real = 0;
+	float termProb = 0.01;
+	int currentAction;
+	vector<int> Fbpro;	                      //Set of features active
+	vector<float> Q(numberOfPrimitiveActions, 0.0);    //Q(a) entries
+
+	RAMFeatures ramFeatures;
+	vector<bool> F(NUM_BITS, 0); //Set of active features
+	vector<bool> Fprev;
+
+	while(rand()%1000 > 1000 * termProb && !ale.game_over()){
+		//Get state and features active on that state:
+		Fbpro.clear();
+		bproFeatures.getActiveFeaturesIndices(ale.getScreen(), Fbpro);
+
+		//Update Q-values for each possible action
+		for(int a = 0; a < numberOfPrimitiveActions; a++){
+			float sumW = 0;
+			for(unsigned int i = 0; i < Fbpro.size(); i++){
+				sumW += learnedOptions[option][a][Fbpro[i]];
+			}
+			Q[a] = sumW;
+		}
+
+		currentAction = epsilonGreedy(Q, epsilon);
+		//Take action, observe reward and next state:
+		r_real += ale.act((Action) currentAction);
+		Fprev.swap(F);
+		F.clear();
+		ramFeatures.getCompleteFeatureVector(ale.getRAM(), F);
+		F.pop_back();
+	}
+	return r_real;
+}
+
+void Agent::updateTransitionVector(vector<bool> F, vector<bool> Fnext){
+	int numTransitionFeatures = F.size();
+
+	for(int i = 0; i < F.size(); i++){
+		if(!F[i] && Fnext[i]){ //0->1
+			transitions[i] = 1;
+		}
+		else{
+			transitions[i] = 0;
+		}
+		if(F[i] && !Fnext[i]){ //1->0
+			transitions[i + numTransitionFeatures - 1] = 1;
+		}
+		else{
+			transitions[i + numTransitionFeatures - 1] = 0;
+		}
+	}
 }
 
 void Agent::updateQValues(vector<vector<float> > &weights, vector<int> &Features, vector<float> &QValues, int option){
