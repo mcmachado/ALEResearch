@@ -21,7 +21,7 @@ int playGame(ALEInterface& ale, Parameters *param, Agent &agent, int iter, vecto
 }
 
 void gatherSamplesFromRandomTrajectories(ALEInterface& ale, Parameters *param, Agent &agent,
-	vector<vector<bool> > &dataset, vector<vector<vector<float> > > learnedOptions, int iter){
+	vector<vector<bool> > &dataset, int iter){
 
 	cout << "Generating Samples to Identify Rare Events\n";
 	for(int i = 1; i < param->numGamesToSampleRareEvents + 1; i++){
@@ -32,12 +32,9 @@ void gatherSamplesFromRandomTrajectories(ALEInterface& ale, Parameters *param, A
 
 void learnOptionsDerivedFromEigenEvents(ALEInterface &ale, Parameters *param,
 	Agent &agent, std::vector<float> &datasetMeans, std::vector<float> &datasetStds,
-	std::vector<std::vector<float> > &eigenVectors, vector<vector<vector<float> > > learnedOptions, int iter){
+	std::vector<std::vector<float> > &eigenVectors, int iter){
 
 	cout << "Learning Options from Eigen-Events\n";
-
-	RAMFeatures ramFeatures;
-	BPROFeatures bproFeatures(param);
 
 	/* We are going to learn each option iteratively. We could do this in parallel,
 	   but for sake of simplicity this is being done sequentially now. I may have
@@ -45,7 +42,7 @@ void learnOptionsDerivedFromEigenEvents(ALEInterface &ale, Parameters *param,
 	  for(int i = 0; i <  param->numNewOptionsPerIter; i++){
 		cout << "Learning Option #" << i+1 << endl;
 		int currOptionIdx = iter * param->numNewOptionsPerIter + i;
-		learnOptions(ale, param, agent, ramFeatures, bproFeatures, currOptionIdx);
+		learnOptions(ale, param, agent, datasetMeans, datasetStds, eigenVectors[i], currOptionIdx);
 	  }
 
 	/* For checkpointing reasons (and replayability) I am also going to save every
@@ -59,14 +56,15 @@ void learnOptionsDerivedFromEigenEvents(ALEInterface &ale, Parameters *param,
         code when I am going to learn the policy that tries to maximize the
         total score. */
 void learnOptions(ALEInterface &ale, Parameters *param, Agent &agent,
-	RAMFeatures ramFeatures, BPROFeatures bproFeatures, int option){
+	std::vector<float> &datasetMeans, std::vector<float> &datasetStds,
+	std::vector<float> &eigenVectors, int option){
 	//Performance monitoring:
 	double elapsedTime;
 	struct timeval tvBegin, tvEnd, tvDiff;
 	//Rewards monitoring:
 	vector<float> reward;
 	bool sawFirstReward = 0;
-	float cumIntrReward = 0, prevCumIntrReward = 0;
+	float cumIntrReward = 0, prevCumIntrReward = 0, delta = 0;
 	float firstReward = 1.0, cumReward = 0, prevCumReward = 0;
 	//Variables necessary for acting:
 	vector<float> Q;               //Q(a) entries
@@ -76,52 +74,75 @@ void learnOptions(ALEInterface &ale, Parameters *param, Agent &agent,
 	//Features monitoring:
 	vector<int> Fbpro;				//Set of features active
 	vector<int> FbproNext;          //Set of features active in next state
-	vector<bool> FRam, FnextRam;
 	unsigned int maxFeatVectorNorm = 1;
-	vector<float> transitions((ramFeatures.getNumberOfFeatures() - 1)*2, 0);
-	//Vectors required in the learning process:
-	vector<vector<float> > e;       //Eligibility trace
-	vector<vector<int> >nonZeroElig; //To optimize the implementation
 
 	//Repeat (for each episode):
 	int episode, totalNumberFrames = 0;
 	int totalNumberOfFramesToLearn = param->learningLength;
 	for(episode = 0; totalNumberFrames < totalNumberOfFramesToLearn; episode++){
-		cleanTraces(e, nonZeroElig);
+		agent.cleanTraces();
 		//Obtain new observation:
-		FRam.clear();
-		ramFeatures.getCompleteFeatureVector(ale.getRAM(), FRam);
 		Fbpro.clear();
-		bproFeatures.getActiveFeaturesIndices(ale.getScreen(), Fbpro);
-		agent.updateQValues(Fbpro, Q, option);
+		agent.bproFeatures.getActiveFeaturesIndices(ale.getScreen(), Fbpro);
+		agent.updateQValues(agent.learnedOptions[option], Fbpro, Q, option);
 		currentAction = agent.epsilonGreedy(Q, param->epsilon);
 		//Repeat(for each step of episode) until game is over (or the maximum number of steps is reached):
 		gettimeofday(&tvBegin, NULL);
 		while(!ale.game_over()){
-			//TODO write inner loop [I need to remember several things are implemented in the agent class]
+			reward.clear();
+			reward.push_back(0.0);
+			reward.push_back(0.0);
+			agent.updateQValues(agent.learnedOptions[option], Fbpro, Q, option);
+
+			agent.sanityCheck(Q);
+			//Take action, observe reward and next state:
+			agent.act(ale, currentAction, param, datasetMeans, datasetStds, eigenVectors, reward);
+			cumIntrReward += reward[0];
+			cumReward  += reward[1];
+			if(!ale.game_over()){
+				//Obtain active features in the new state:
+				FbproNext.clear();
+				agent.bproFeatures.getActiveFeaturesIndices(ale.getScreen(), FbproNext);
+				agent.updateQValues(agent.learnedOptions[option], FbproNext, Qnext, option);     //Update Q-values for the new active features
+				nextAction = agent.epsilonGreedy(Qnext, param->epsilon);
+			}
+			else{
+				nextAction = 0;
+				for(unsigned int i = 0; i < Qnext.size(); i++){
+					Qnext[i] = 0;
+				}
+			}
+			//To ensure the learning rate will never increase along
+			//the time, Marc used such approach in his JAIR paper
+			if (Fbpro.size() > maxFeatVectorNorm){
+				maxFeatVectorNorm = Fbpro.size();
+			}
+
+			delta = reward[0] + param->gamma * Qnext[nextAction] - Q[currentAction];
+
+			agent.updateReplTrace(param, currentAction, Fbpro);
+			//Update weights vector:
+			for(unsigned int a = 0; a < agent.nonZeroElig.size(); a++){
+				for(unsigned int i = 0; i < agent.nonZeroElig[a].size(); i++){
+					int idx = agent.nonZeroElig[a][i];
+					agent.learnedOptions[option][a][idx] += (param->alpha/maxFeatVectorNorm) * delta * agent.e[a][idx];
+				}
+			}
+			Fbpro = FbproNext;
+			currentAction = nextAction;
 		}
 		gettimeofday(&tvEnd, NULL);
 		timeval_subtract(&tvDiff, &tvEnd, &tvBegin);
 		elapsedTime = double(tvDiff.tv_sec) + double(tvDiff.tv_usec)/1000000.0;
 
 		double fps = double(ale.getEpisodeFrameNumber())/elapsedTime;
-		//printf("episode: %d,\t%.0f points,\tavg. return: %.1f,\tnovelty reward: %.2f (%.2f),\t%d frames,\t%.0f fps\n",
-		//	episode + 1, cumReward - prevCumReward, (double)cumReward/(episode + 1.0),
-		//	cumIntrReward - prevCumIntrReward, cumIntrReward/(episode + 1.0), ale.getEpisodeFrameNumber(), fps);
+		printf("episode: %d,\t%.0f points,\tavg. return: %.1f,\tnovelty reward: %.2f (%.2f),\t%d frames,\t%.0f fps\n",
+			episode + 1, cumReward - prevCumReward, (double)cumReward/(episode + 1.0),
+			cumIntrReward - prevCumIntrReward, cumIntrReward/(episode + 1.0), ale.getEpisodeFrameNumber(), fps);
 		totalNumberFrames += ale.getEpisodeFrameNumber();
 		prevCumReward = cumReward;
 		prevCumIntrReward = cumIntrReward;
 		ale.reset_game();
-	}
-}
-
-void cleanTraces(vector<vector<float> > &e, vector<vector<int> > &nonZeroElig){
-	for(unsigned int a = 0; a < nonZeroElig.size(); a++){
-		for(unsigned int i = 0; i < nonZeroElig[a].size(); i++){
-			int idx = nonZeroElig[a][i];
-			e[a][idx] = 0.0;
-		}
-		nonZeroElig[a].clear();
 	}
 }
 

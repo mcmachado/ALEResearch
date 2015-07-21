@@ -19,6 +19,8 @@ class Agent{
 		std::vector<float> freqOfBitFlips; //[0:1023] transitions 0->1; [1024:2048] transitions 1->0
 		int numberOfAvailActions, numberOfOptions, numberOfPrimitiveActions;
 
+		vector<float> transitions;
+
 		vector<vector<float> > e;       //Eligibility trace
 		vector<vector<int> >nonZeroElig; //To optimize the implementation
 		/* This is the theta vector, the one containing the weights that really try
@@ -33,6 +35,9 @@ class Agent{
 		with dimensions 5 x |A + 5| x |F|. */
 		vector<vector<vector<float> > > learnedOptions;
 
+		void act(ALEInterface& ale, int action, Parameters *param, std::vector<float> &mean,
+			std::vector<float> &std, std::vector<float> &eigenVectors, vector<float> &reward);
+
 		Agent(ALEInterface& ale, Parameters *param);
 		int playActionUpdatingAvg(ALEInterface& ale, Parameters *param, int &frame, 
 			int nextAction, int iter, vector<vector<bool> > &dataset);
@@ -41,11 +46,14 @@ class Agent{
 		void sanityCheck(vector<float> &QValues);
 		int epsilonGreedy(vector<float> &QValues, float epsilon);
 		void updateReplTrace(Parameters *param, int action, vector<int> &Features);
+		void updateTransitionVector(vector<bool> F, vector<bool> Fnext);
 		void updateQValues(vector<vector<float> > &learnedOptions, vector<int> &Features, vector<float> &QValues, int option);
 	private:
 		Agent();
 		void updateAverage(Parameters *param, vector<bool> Fprev, vector<bool> F, 
 			int frame, int iter, vector<vector<bool> > &dataset);
+
+		int playOption(ALEInterface& ale, float epsilon, int option);
 };
 
 #endif
