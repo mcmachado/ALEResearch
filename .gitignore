@@ -139,3 +139,5 @@ tools/replay/runMontezumaRevenge.sh
 tools/replay/runMsPacMan.sh
 tools/replay/runPitfall.sh
 tools/replay/runPrivateEye.sh
+research/novelty/tools/bitCount/bin/
+research/novelty/tools/bitCount/humanPlayer
