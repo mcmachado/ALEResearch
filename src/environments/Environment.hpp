@@ -103,6 +103,8 @@ public:
         m_offPolicyLearner = l;
     }
 
+
+    virtual void setFlavor(unsigned f){};
 protected:
     std::shared_ptr<OffPolicyLearner> m_offPolicyLearner;
 

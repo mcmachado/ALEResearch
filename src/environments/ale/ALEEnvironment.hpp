@@ -171,6 +171,18 @@ public:
     {
         return this->m_feat->getNumberOfFeatures();
     }
+
+    virtual void setFlavor(unsigned f)
+    {
+        auto diff = this->m_ale->getAvailableDifficulties();
+        auto modes = this->m_ale->getAvailableModes();
+        auto target_d = f % diff.size();
+        auto target_m = (f - (f%diff.size())) / diff.size();
+        std::cout<<"Setting difficulty "<<diff[target_d]<<std::endl;
+        std::cout<<"Setting mode "<<modes[target_m]<<std::endl;
+        this->m_ale->setDifficulty(diff[target_d]);
+        this->m_ale->setMode(modes[target_m]);
+    }
 protected:
 };
 
