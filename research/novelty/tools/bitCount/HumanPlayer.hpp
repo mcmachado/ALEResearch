@@ -30,7 +30,7 @@ class HumanAgent{
  		* @param ALEInterface& ale Arcade Learning Environment interface: object used to define agents'
  		*        actions, obtain simulator screen, RAM, etc.
  		*/
-		void evaluatePolicy(ALEInterface& ale);
+		void evaluatePolicy(ALEInterface& ale, string outputFile);
 		/**
 		* Destructor, not necessary in this class.
 		*/

@@ -6,6 +6,7 @@
 
 #include <iostream>
 
+#include "RAMFeatures.hpp"
 #include "HumanPlayer.hpp"
 #include "SDL.h"
 
@@ -17,15 +18,34 @@ HumanAgent::HumanAgent(){
 	maxStepsInEpisode = 18000;
 }
 		
-void HumanAgent::evaluatePolicy(ALEInterface& ale){
-#ifdef __USE_SDL
-	Action action;
-	int reward = 0;
+void HumanAgent::evaluatePolicy(ALEInterface& ale, string outputFile){
+    Action action;
+    RAMFeatures features;
+    vector<bool> F;
 
-	int step = 0;
+    ofstream outFile;
+    outFile.open(outputFile);
+
+	int reward = 0;
+    int step = 0;
+
+    F.clear();
+    features.getCompleteFeatureVector(ale.getRAM(), F);
+    for(int i = 0; i < F.size(); i++){
+        outFile << F[i] << ",";
+    }
+    outFile << endl;
+
 	while(!ale.game_over() && step < maxStepsInEpisode) {
 		action = receiveAction();
 		reward += ale.act(action);
+        F.clear();
+        features.getCompleteFeatureVector(ale.getRAM(), F);
+
+        for(int i = 0; i < F.size(); i++){
+            outFile << F[i] << ",";
+        }
+        outFile << endl;
 		step++;
 	}
 	printf("Episode ended with a score of %d points\n", reward);
@@ -81,8 +101,7 @@ Action HumanAgent::receiveAction(){
         } else if (keymap[SDLK_DOWN]) {
             a = PLAYER_A_DOWN;
         } 
-    return a;    
-    #endif    
+    return a;
 }
 
 HumanAgent::~HumanAgent(){}
