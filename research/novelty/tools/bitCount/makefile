@@ -5,18 +5,26 @@
 ALE := ../../../../../Arcade-Learning-Environment/
 
 
-FLAGS := -O3 -I$(ALE)/src -D__USE_SDL `sdl-config --cflags --libs`
 CXX := g++ -std=c++11
-OUT_FILE := humanPlayer
+FLAGS := -O3 -I$(ALE)/src -D__USE_SDL `sdl-config --cflags --libs`
 LDFLAGS := -lale -lz -lm -lSDL -lSDL_gfx -lSDL_image
 
-all: humanPlayer
+OUT_FILE1 := humanPlayer
+OUT_FILE2 := randomPlayer
 
-humanPlayer: bin/main.o bin/HumanPlayer.o bin/RAMFeatures.o
-	$(CXX) $(FLAGS) -L$(ALE) bin/main.o bin/HumanPlayer.o bin/RAMFeatures.o $(LDFLAGS) -o $(OUT_FILE)
+all: humanPlayer randomPlayer
 
-bin/main.o: main.cpp
-	$(CXX) $(FLAGS) -c main.cpp -o bin/main.o
+humanPlayer: bin/human.o bin/HumanPlayer.o bin/RAMFeatures.o
+	$(CXX) $(FLAGS) -L$(ALE) bin/human.o bin/HumanPlayer.o bin/RAMFeatures.o $(LDFLAGS) -o $(OUT_FILE1)
+
+randomPlayer: bin/random.o bin/HumanPlayer.o bin/RAMFeatures.o
+	$(CXX) $(FLAGS) -L$(ALE) bin/random.o bin/HumanPlayer.o bin/RAMFeatures.o $(LDFLAGS) -o $(OUT_FILE2)
+
+bin/random.o: random.cpp
+	$(CXX) $(FLAGS) -c random.cpp -o bin/random.o
+
+bin/human.o: human.cpp
+	$(CXX) $(FLAGS) -c human.cpp -o bin/human.o
 
 bin/HumanPlayer.o: HumanPlayer.cpp
 	$(CXX) $(FLAGS) -c HumanPlayer.cpp -o bin/HumanPlayer.o
