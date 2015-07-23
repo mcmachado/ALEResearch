@@ -20,15 +20,22 @@ with open(inputFile, 'r') as f:
 #Now I can finally collect the statistics:
 totalNumFlips = 0
 totalNumSteps = len(data)
+indivNumFlips = 1024 * [0]
 
 for i, val in enumerate(data):
 	for j, val in enumerate(data[i]):
 		if i < len(data) - 1:
 			if data[i][j] != data[i+1][j]:
 				totalNumFlips += 1
+				indivNumFlips[j] += 1
 
 avgNumFlips = float(totalNumFlips)/float(totalNumSteps)
 numUniqStates = len(set(str_data))
 
 print "file , totalNumFlips , totalNumSteps , avgNumFlips , numUniqStates"
 print inputFile, ",", totalNumFlips, ",", totalNumSteps, ",", avgNumFlips, ",", numUniqStates
+
+#for i, val in enumerate(indivNumFlips):
+#	indivNumFlips[i] = float(indivNumFlips[i])/float(totalNumSteps)
+
+#print indivNumFlips
