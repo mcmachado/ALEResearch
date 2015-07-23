@@ -15,7 +15,6 @@ HumanAgent::HumanAgent(){
         printf("This code must be compiled with the SDL Library\n");
         exit(1);
     #endif
-	maxStepsInEpisode = 18000;
 }
 		
 void HumanAgent::evaluatePolicy(ALEInterface& ale, string outputFile){
@@ -27,7 +26,6 @@ void HumanAgent::evaluatePolicy(ALEInterface& ale, string outputFile){
     outFile.open(outputFile);
 
 	int reward = 0;
-    int step = 0;
 
     F.clear();
     features.getCompleteFeatureVector(ale.getRAM(), F);
@@ -36,7 +34,7 @@ void HumanAgent::evaluatePolicy(ALEInterface& ale, string outputFile){
     }
     outFile << endl;
 
-	while(!ale.game_over() && step < maxStepsInEpisode) {
+	while(!ale.game_over()) {
 		action = receiveAction();
 		reward += ale.act(action);
         F.clear();
@@ -46,7 +44,6 @@ void HumanAgent::evaluatePolicy(ALEInterface& ale, string outputFile){
             outFile << F[i] << ",";
         }
         outFile << endl;
-		step++;
 	}
 	printf("Episode ended with a score of %d points\n", reward);
 }
