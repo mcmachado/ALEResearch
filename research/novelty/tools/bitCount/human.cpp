@@ -18,7 +18,7 @@ int main(int argc, char** argv){
 
 	int seed = atoi(argv[3]);
 
-	ale.setInt("frame_skip", 1);
+	ale.setInt("frame_skip", 5);
 	ale.setInt("random_seed", seed);
 	ale.setInt("max_num_frames_per_episode", 18000);
 	ale.setFloat("repeat_action_prob", 0.00);
