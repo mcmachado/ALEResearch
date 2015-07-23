@@ -45,6 +45,7 @@ void HumanAgent::evaluatePolicy(ALEInterface& ale, string outputFile){
         }
         outFile << endl;
 	}
+    outFile.close();
 	printf("Episode ended with a score of %d points\n", reward);
 }
 

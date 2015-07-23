@@ -11,8 +11,9 @@ LDFLAGS := -lale -lz -lm -lSDL -lSDL_gfx -lSDL_image
 
 OUT_FILE1 := humanPlayer
 OUT_FILE2 := randomPlayer
+OUT_FILE3 := optionsPlayer
 
-all: humanPlayer randomPlayer
+all: humanPlayer randomPlayer optionsPlayer
 
 humanPlayer: bin/human.o bin/HumanPlayer.o bin/RAMFeatures.o
 	$(CXX) $(FLAGS) -L$(ALE) bin/human.o bin/HumanPlayer.o bin/RAMFeatures.o $(LDFLAGS) -o $(OUT_FILE1)
@@ -20,17 +21,29 @@ humanPlayer: bin/human.o bin/HumanPlayer.o bin/RAMFeatures.o
 randomPlayer: bin/random.o bin/HumanPlayer.o bin/RAMFeatures.o
 	$(CXX) $(FLAGS) -L$(ALE) bin/random.o bin/HumanPlayer.o bin/RAMFeatures.o $(LDFLAGS) -o $(OUT_FILE2)
 
+optionsPlayer: bin/options.o bin/RAMFeatures.o bin/BPROFeatures.o bin/Background.o
+	$(CXX) $(FLAGS) -L$(ALE) bin/options.o bin/RAMFeatures.o bin/BPROFeatures.o bin/Background.o $(LDFLAGS) -o $(OUT_FILE3)
+
 bin/random.o: random.cpp
 	$(CXX) $(FLAGS) -c random.cpp -o bin/random.o
 
 bin/human.o: human.cpp
 	$(CXX) $(FLAGS) -c human.cpp -o bin/human.o
 
+bin/options.o: options.cpp
+	$(CXX) $(FLAGS) -c options.cpp -o bin/options.o
+
 bin/HumanPlayer.o: HumanPlayer.cpp
 	$(CXX) $(FLAGS) -c HumanPlayer.cpp -o bin/HumanPlayer.o
 
 bin/RAMFeatures.o: RAMFeatures.cpp
 	$(CXX) $(FLAGS) -c RAMFeatures.cpp -o bin/RAMFeatures.o
+
+bin/BPROFeatures.o: BPROFeatures.cpp
+	$(CXX) $(FLAGS) -c BPROFeatures.cpp -o bin/BPROFeatures.o
+
+bin/Background.o: Background.cpp
+	$(CXX) $(FLAGS) -c Background.cpp -o bin/Background.o
 
 clean:
 	rm -rf ${OUT_FILE} bin/*.o	

@@ -34,7 +34,6 @@ int main(int argc, char** argv){
     outFile.open(outputFile);
 
 	int reward = 0;
-    int step = 0;
 	
 	F.clear();
     features.getCompleteFeatureVector(ale.getRAM(), F);
@@ -52,8 +51,8 @@ int main(int argc, char** argv){
             outFile << F[i] << ",";
         }
         outFile << endl;
-		step++;
 	}
 	printf("Episode ended with a score of %d points\n", reward);
+	outFile.close();
     return 0;
 }
