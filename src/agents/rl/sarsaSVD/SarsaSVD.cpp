@@ -333,13 +333,15 @@ void SarsaSVD::learnPolicy(Environment<bool>& env){
                 if(numDeltas == deltaCapa && currentFlavor==numFlavors-1 && rank<numFlavors){
                     //if we have gone through all the flavors, we can compute the mean derivative
                     float derivativeSum = 0.0;
+                    bool tresh = false;
                     for(unsigned i = 0;i<numFlavors;i++){
                         std::cout<<deltaSum[i]<<std::endl;
                         derivativeSum += deltaSum[i]/double(deltaCapa);
+                        tresh = tresh || (deltaSum[i]/double(deltaCapa) < 0.05);
                     }
                     float meanDerivative = derivativeSum / double(numFlavors);
                     std::cout<<"Derivative "<<meanDerivative<<std::endl;
-                    if(meanDerivative < 0.05){
+                    if(tresh){
                         std::fill(deltaSum.begin(),deltaSum.end(),0.0);
                         numDeltas = 0;
                         rankIncreaseNeeded = true;
