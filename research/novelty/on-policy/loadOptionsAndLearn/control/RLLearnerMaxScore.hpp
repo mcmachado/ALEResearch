@@ -25,6 +25,7 @@ class RLLearner : public Agent{
 		std::vector<float> mean;
 		std::vector<float> std;
 
+		float termProb;
 		float gamma, epsilon;
 		float firstReward;
 		bool   sawFirstReward;

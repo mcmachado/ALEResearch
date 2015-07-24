@@ -23,13 +23,13 @@ class SarsaWithOptionsMaxScore : public RLLearner{
 
 		std::string nameWeightsFile, pathWeightsFileToLoad;
 
-		std::vector<int> F;					//Set of features active
-		std::vector<int> Fnext;              //Set of features active in next state
-		std::vector<float> Q;               //Q(a) entries
-		std::vector<float> Qnext;           //Q(a) entries for next action
-		std::vector<std::vector<float> > e;      //Eligibility trace
-		std::vector<std::vector<float> > w;      //Theta, weights vector
-		std::vector<std::vector<int> >nonZeroElig;//To optimize the implementation
+		std::vector<int> F;							//Set of features active
+		std::vector<int> Fnext;              		//Set of features active in next state
+		std::vector<float> Q;               		//Q(a) entries
+		std::vector<float> Qnext;           		//Q(a) entries for next action
+		std::vector<std::vector<float> > e;     	//Eligibility trace
+		std::vector<std::vector<float> > w;     	//Theta, weights vector
+		std::vector<std::vector<int> >nonZeroElig;	//To optimize the implementation
 
 		/**
  		* Constructor declared as private to force the user to instantiate OptionSarsa
