@@ -65,6 +65,7 @@ int main(int argc, char** argv){
 	//Instantiating the learning algorithm:
 	SarsaSVD sarsaLearner(env,&param,ale.getAvailableModes().size()*ale.getAvailableDifficulties().size());
     //Learn a policy:
+    cout<<"Learning in r "<<param.getRank()<<endl;
     sarsaLearner.learnPolicy(env);
     //sarsaLearner.saveWeightsToFile("weights_"+gameName+"_RAM_d"+std::to_string(param.getDifficultyLevel())+"_m"+std::to_string(param.getGameMode())+".w");
     printf("\n\n== Evaluation without Learning == \n\n");

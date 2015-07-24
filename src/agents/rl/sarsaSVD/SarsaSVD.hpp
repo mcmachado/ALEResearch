@@ -25,7 +25,7 @@ public:
     float alpha, delta, lambda, traceThreshold;
     int numFeatures, currentAction, nextAction;
     int toSaveWeightsAfterLearning, saveWeightsEveryXSteps;
-    unsigned numFlavors;
+    unsigned numFlavors,rank;
 
     std::string nameWeightsFile, pathWeightsFileToLoad;
 

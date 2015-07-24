@@ -52,6 +52,7 @@ class Parameters{
 		int learningLength;             //The number of frames to be learned, in total. DQN uses, for example, 50,000,000.
         int difficultyLevel;            //The difficulty level in which the game should be played
         int gameMode;                    //The mode in which the game should be played
+    int rank;
 	   /**
  		* Constructor defined as private to force the use of the constructor 
  		* that receive the commmand line information as parameter.
@@ -367,7 +368,9 @@ class Parameters{
     int getGameMode(){
         return gameMode;
     }
-    
+    int getRank(){
+        return rank;
+    }
 };
 
 
