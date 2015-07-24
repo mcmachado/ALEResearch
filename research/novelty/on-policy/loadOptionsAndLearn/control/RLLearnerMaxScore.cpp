@@ -24,8 +24,6 @@ RLLearner::RLLearner(ALEInterface& ale, Features *features, Parameters *param){
 	numEpisodesEval     = param->getNumEpisodesEval();
 	totalNumberOfFramesToLearn = param->getLearningLength();
 
-	termProb 			= 0.01; //I am testing it twice, so in fact this is 0.01
-
 	//Get the number of effective actions:
 	if(param->isMinimalAction()){
 		actions = ale.getMinimalActionSet();
@@ -59,6 +57,23 @@ void RLLearner::playOption(ALEInterface& ale, int option, Features *features,
 	int currentAction;
 	vector<int> Fbpro;	                      //Set of features active
 	vector<float> Q(numActionsInOption, 0.0);    //Q(a) entries
+
+	float termProb = 0.0;
+
+	/* Rationale: Right now we have 'hierarchical' options. Options in the
+	   lower level can act over the 18 actions, and then they should take
+	   shorter than options that can call other options. Because the frame
+	   skip is 5, what we do is the following: the low-level options have
+	   a prob. of 0.05 of finishing, which corresponds on expectation to 20
+	   steps (x5 ~ 1.6s). High level options have a termination prob. of 0.2
+	   because if they call a low-level option they will have a termination
+	   probability of 0.2 * 0.05 in fact (100 steps x 5 ~ 8.3s). */
+	if(numActionsInOption > actions.size()){
+		termProb = 0.2;
+	}
+	else{
+		termProb = 0.05;
+	}
 
 	while(rand()%1000 > 1000 * termProb && !ale.game_over()){
 		//Get state and features active on that state:		
