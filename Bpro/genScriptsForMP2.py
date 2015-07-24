@@ -49,7 +49,4 @@ for game_name in list_of_games:
 	f.write('mkdir results/' + game_name + '\n')
 	for i in xrange(24):
 		f.write('bqsub ' + game_name + '_' + str(i+1) + '.pbs\n')
-	f.write('echo Submitting ' + game_name + '...\n')
-	f.write('bqsub --submit\n')
-
 f.close()
