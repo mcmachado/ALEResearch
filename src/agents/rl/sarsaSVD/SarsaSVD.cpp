@@ -141,12 +141,19 @@ void SarsaSVD::learnPolicy(Environment<bool>& env){
 
     //whether we saw a positive reward so far
     bool started_learning=false;
-    const unsigned deltaCapa = 100;
+    const unsigned deltaCapa = 50;
     std::vector<std::array<float,deltaCapa>> deltas(numFlavors);
     unsigned curDeltaPos=0; //current position in the deltas array
     unsigned numDeltas = 0; //number of deltas stored for the current rank.
     std::vector<float> deltaSum(numFlavors,0.0);
     std::vector<float> lastReward(numFlavors,0.0);
+
+    const unsigned meanCapa = 50;
+    std::vector<std::array<float,meanCapa>> means(numFlavors);
+    unsigned curMeanPos=0; //current position in the deltas array
+    unsigned numMeans = 0; //number of deltas stored for the current rank.
+    std::vector<float> meanSum(numFlavors,0.0);
+    
     //initial rank
     unsigned rank = 1;
     U = MatrixXf::Ones(numFlavors,rank);
@@ -167,8 +174,8 @@ void SarsaSVD::learnPolicy(Environment<bool>& env){
 
     
     S = MatrixXf::Zero(rank,rank);
-    S(0,0) = 1;
-    w = U*S*V.transpose();
+    //S(0,0) = 1;
+    //w = U*S*V.transpose();
     
     bool rankIncreaseNeeded = false;
     for(episode = 0; totalNumberFrames < totalNumberOfFramesToLearn; episode++){
@@ -290,60 +297,57 @@ void SarsaSVD::learnPolicy(Environment<bool>& env){
 
         started_learning |= (cumReward - prevCumReward) > 0;
         if(started_learning){
-            float curDelta = (cumReward - prevCumReward) - lastReward[currentFlavor];
-            lastReward[currentFlavor] = (cumReward - prevCumReward);
-            if(numDeltas == deltaCapa){
-                deltaSum[currentFlavor] -= deltas[currentFlavor][curDeltaPos];
-                deltas[currentFlavor][curDeltaPos] = curDelta;
-                deltaSum[currentFlavor] += deltas[currentFlavor][curDeltaPos];
+            if(numMeans < meanCapa){
+                meanSum[currentFlavor] += (cumReward - prevCumReward);
+                means[currentFlavor][curMeanPos] += (cumReward - prevCumReward);
                 if(currentFlavor == numFlavors - 1){
-                    curDeltaPos = (curDeltaPos+1) % deltaCapa;
-                }
+                    curMeanPos = (curMeanPos + 1) % meanCapa;
+                    numMeans++;
+                }                
             }else{
-                deltas[currentFlavor][curDeltaPos] = curDelta;
-                deltaSum[currentFlavor] += curDelta;
+                meanSum[currentFlavor] -= means[currentFlavor][curMeanPos];
+                means[currentFlavor][curMeanPos] = (cumReward - prevCumReward);
+                meanSum[currentFlavor] += means[currentFlavor][curMeanPos];
                 if(currentFlavor == numFlavors - 1){
-                    curDeltaPos = (curDeltaPos + 1) % deltaCapa;
-                    numDeltas++;
-                }
-            }
-
-            if(numDeltas == deltaCapa && currentFlavor==numFlavors-1 && rank<numFlavors){
-                //if we have gone through all the flavors, we can compute the mean derivative
-                float derivativeSum = 0.0;
-                for(unsigned i = 0;i<numFlavors;i++){
-                    std::cout<<deltaSum[i]<<std::endl;
-                    derivativeSum += deltaSum[i]/double(deltaCapa);
-                }
-                float meanDerivative = derivativeSum / double(numFlavors);
-                std::cout<<"Derivative "<<meanDerivative<<std::endl;
-                if(meanDerivative < 0.05){
-                    std::fill(deltaSum.begin(),deltaSum.end(),0.0);
-                    numDeltas = 0;
-                    rankIncreaseNeeded = true;
-                    std::cout<<"Switching to rank "<<rank+1<<" on episode "<<episode<<std::endl;
-                }
+                    curMeanPos = (curMeanPos + 1) % meanCapa;
+                }                
                 
+                float curDelta = meanSum[currentFlavor]/double(meanCapa) - lastReward[currentFlavor];
+                lastReward[currentFlavor] = meanSum[currentFlavor]/double(meanCapa);
+                if(numDeltas == deltaCapa){
+                    deltaSum[currentFlavor] -= deltas[currentFlavor][curDeltaPos];
+                    deltas[currentFlavor][curDeltaPos] = curDelta;
+                    deltaSum[currentFlavor] += deltas[currentFlavor][curDeltaPos];
+                    if(currentFlavor == numFlavors - 1){
+                        curDeltaPos = (curDeltaPos+1) % deltaCapa;
+                    }
+                }else{
+                    deltas[currentFlavor][curDeltaPos] = curDelta;
+                    deltaSum[currentFlavor] += curDelta;
+                    if(currentFlavor == numFlavors - 1){
+                        curDeltaPos = (curDeltaPos + 1) % deltaCapa;
+                        numDeltas++;
+                    }
+                }
+
+                if(numDeltas == deltaCapa && currentFlavor==numFlavors-1 && rank<numFlavors){
+                    //if we have gone through all the flavors, we can compute the mean derivative
+                    float derivativeSum = 0.0;
+                    for(unsigned i = 0;i<numFlavors;i++){
+                        std::cout<<deltaSum[i]<<std::endl;
+                        derivativeSum += deltaSum[i]/double(deltaCapa);
+                    }
+                    float meanDerivative = derivativeSum / double(numFlavors);
+                    std::cout<<"Derivative "<<meanDerivative<<std::endl;
+                    if(meanDerivative < 0.05){
+                        std::fill(deltaSum.begin(),deltaSum.end(),0.0);
+                        numDeltas = 0;
+                        rankIncreaseNeeded = true;
+                        std::cout<<"Switching to rank "<<rank+1<<" on episode "<<episode<<std::endl;
+                    }
+                
+                }
             }
-            // for(int i = 0; i<w.rows();i++){
-            //     for(int j = 0; j<w.cols();j++){
-            //         std::cout<<w(i,j)<<" ";
-            //     }
-            //     std::cout<<std::endl<<std::endl;
-            // }
-            // for(int i = 0; i<S.rows();i++){
-            //     for(int j = 0; j<S.cols();j++){
-            //         std::cout<<S(i,j)<<" ";
-            //     }
-            //     std::cout<<std::endl<<std::endl;
-            // }
-            //  for(int i = 0; i<U.rows();i++){
-            //      for(int j = 0; j<U.cols();j++){
-            //          std::cout<<U(i,j)<<" ";
-            //      }
-            //      std::cout<<std::endl<<std::endl;
-            //  }
-            // throw 1;
         }
         
         totalNumberFrames += env.getEpisodeFrameNumber();
