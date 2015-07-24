@@ -24,6 +24,8 @@ RLLearner::RLLearner(ALEInterface& ale, Features *features, Parameters *param){
 	numEpisodesEval     = param->getNumEpisodesEval();
 	totalNumberOfFramesToLearn = param->getLearningLength();
 
+	termProb 			= 0.01; //I am testing it twice, so in fact this is 0.01
+
 	//Get the number of effective actions:
 	if(param->isMinimalAction()){
 		actions = ale.getMinimalActionSet();
@@ -52,10 +54,8 @@ int RLLearner::epsilonGreedy(vector<float> &QValues){
 
 void RLLearner::playOption(ALEInterface& ale, int option, Features *features,
 	vector<float> &reward, vector<vector<vector<float> > > &learnedOptions){
-
 	int numActionsInOption = learnedOptions[option].size();
 	int r_real = 0;
-	float termProb = 0.01;
 	int currentAction;
 	vector<int> Fbpro;	                      //Set of features active
 	vector<float> Q(numActionsInOption, 0.0);    //Q(a) entries
@@ -75,8 +75,6 @@ void RLLearner::playOption(ALEInterface& ale, int option, Features *features,
 		}
 
 		currentAction = epsilonGreedy(Q);
-		//Take action, observe reward and next state:
-		//r_real += ale.act((Action) currentAction);
 		/* Now things get nasty. We need to do it recursively because one 
 		option can call another one. Hopefully everything is going to work.*/
 		this->act(ale, currentAction, features, reward, learnedOptions);
