@@ -159,7 +159,7 @@ void SarsaSVD::learnPolicy(Environment<bool>& env){
     //unsigned rank = 1;
     U = MatrixXf::Ones(numFlavors,rank);
     V = MatrixXf::Ones(numFeatures*numActions,rank);
-
+    
     std::mt19937 g1(3);
     std::normal_distribution<float> distribution(0.0,0.1);
     // for(unsigned i = 0;i<U.rows();i++){
@@ -172,7 +172,8 @@ void SarsaSVD::learnPolicy(Environment<bool>& env){
             V(i,j) = distribution(g1);
         }
     }
-
+    std::cout<<"U "<<U<<std::endl;
+    std::cout<<"V "<<V<<std::endl;
     
     S = MatrixXf::Zero(rank,rank);
     //S(0,0) = 1;
@@ -283,6 +284,9 @@ void SarsaSVD::learnPolicy(Environment<bool>& env){
             }
 
             w = U*S*V.transpose();
+            //std::cout<<"U "<<U<<std::endl;
+            //std::cout<<"V "<<V<<std::endl;
+            //std::cout<<"w "<<w<<std::endl;
 
             F = Fnext;
             currentAction = nextAction;
@@ -297,7 +301,7 @@ void SarsaSVD::learnPolicy(Environment<bool>& env){
                env.getEpisodeFrameNumber(), fps,currentFlavor);
 
         started_learning |= (cumReward - prevCumReward) > 0;
-        if(started_learning){
+        /*if(started_learning){
             if(numMeans < meanCapa){
                 meanSum[currentFlavor] += (cumReward - prevCumReward);
                 means[currentFlavor][curMeanPos] += (cumReward - prevCumReward);
@@ -351,7 +355,7 @@ void SarsaSVD::learnPolicy(Environment<bool>& env){
                 
                 }
             }
-        }
+            }*/
         
         totalNumberFrames += env.getEpisodeFrameNumber();
         prevCumReward = cumReward;
