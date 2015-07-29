@@ -9,7 +9,7 @@ int playGame(ALEInterface& ale, Parameters *param, Agent &agent, int iter, vecto
 
 	int score = 0;
 	int frame = 0;
-	int totalNumActions = agent.numberOfAvailActions;
+	int totalNumActions = agent.getNumAvailActions();
 
 	ale.reset_game();
 	while(!ale.game_over()){
@@ -42,8 +42,12 @@ void learnOptionsDerivedFromEigenEvents(ALEInterface &ale, Parameters *param,
 	  for(int i = 0; i <  param->numNewOptionsPerIter; i++){
 		cout << "Learning Option #" << i+1 << endl;
 		int currOptionIdx = iter * param->numNewOptionsPerIter + i;
+		agent.learnedOptions.push_back(vector< vector<float> >(agent.getNumAvailActions(), 
+			vector<float>(agent.bproFeatures.getNumberOfFeatures(), 0.0)));
+
 		learnOptions(ale, param, agent, datasetMeans, datasetStds, eigenVectors[i], currOptionIdx);
 	  }
+	  agent.numberOfOptions += param->numNewOptionsPerIter;
 
 	/* For checkpointing reasons (and replayability) I am also going to save every
 	   set of weights I learned, representing each of the options. */
@@ -58,6 +62,7 @@ void learnOptionsDerivedFromEigenEvents(ALEInterface &ale, Parameters *param,
 void learnOptions(ALEInterface &ale, Parameters *param, Agent &agent,
 	std::vector<float> &datasetMeans, std::vector<float> &datasetStds,
 	std::vector<float> &eigenVectors, int option){
+
 	//Performance monitoring:
 	double elapsedTime;
 	struct timeval tvBegin, tvEnd, tvDiff;
@@ -67,15 +72,15 @@ void learnOptions(ALEInterface &ale, Parameters *param, Agent &agent,
 	float cumIntrReward = 0, prevCumIntrReward = 0, delta = 0;
 	float firstReward = 1.0, cumReward = 0, prevCumReward = 0;
 	//Variables necessary for acting:
-	vector<float> Q;               //Q(a) entries
-	vector<float> Qnext;           //Q(a) entries for next action
+	int numActions = agent.getNumAvailActions();
+	vector<float> Q(numActions, 0.0); 		//Q(a) entries
+	vector<float> Qnext(numActions, 0.0);   //Q(a) entries for next action
 	int currentAction, nextAction;
-	int numActions = agent.numberOfAvailActions;
+	
 	//Features monitoring:
 	vector<int> Fbpro;				//Set of features active
 	vector<int> FbproNext;          //Set of features active in next state
 	unsigned int maxFeatVectorNorm = 1;
-
 	//Repeat (for each episode):
 	int episode, totalNumberFrames = 0;
 	int totalNumberOfFramesToLearn = param->learningLength;
@@ -93,7 +98,6 @@ void learnOptions(ALEInterface &ale, Parameters *param, Agent &agent,
 			reward.push_back(0.0);
 			reward.push_back(0.0);
 			agent.updateQValues(agent.learnedOptions[option], Fbpro, Q, option);
-
 			agent.sanityCheck(Q);
 			//Take action, observe reward and next state:
 			agent.act(ale, currentAction, param, datasetMeans, datasetStds, eigenVectors, reward);
@@ -117,9 +121,7 @@ void learnOptions(ALEInterface &ale, Parameters *param, Agent &agent,
 			if (Fbpro.size() > maxFeatVectorNorm){
 				maxFeatVectorNorm = Fbpro.size();
 			}
-
 			delta = reward[0] + param->gamma * Qnext[nextAction] - Q[currentAction];
-
 			agent.updateReplTrace(param, currentAction, Fbpro);
 			//Update weights vector:
 			for(unsigned int a = 0; a < agent.nonZeroElig.size(); a++){

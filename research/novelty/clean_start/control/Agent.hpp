@@ -17,7 +17,7 @@ class Agent{
 		BPROFeatures bproFeatures;
 		ActionVect actions; //Basic actions
 		std::vector<float> freqOfBitFlips; //[0:1023] transitions 0->1; [1024:2048] transitions 1->0
-		int numberOfAvailActions, numberOfOptions, numberOfPrimitiveActions;
+		int numberOfOptions, numberOfPrimitiveActions;
 
 		vector<float> transitions;
 
@@ -48,6 +48,7 @@ class Agent{
 		void updateReplTrace(Parameters *param, int action, vector<int> &Features);
 		void updateTransitionVector(vector<bool> F, vector<bool> Fnext);
 		void updateQValues(vector<vector<float> > &learnedOptions, vector<int> &Features, vector<float> &QValues, int option);
+		int getNumAvailActions();
 	private:
 		Agent();
 		void updateAverage(Parameters *param, vector<bool> Fprev, vector<bool> F, 
