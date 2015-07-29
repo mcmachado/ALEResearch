@@ -36,6 +36,8 @@ void learnOptionsDerivedFromEigenEvents(ALEInterface &ale, Parameters *param,
 
 	cout << "Learning Options from Eigen-Events\n";
 
+	//agent.augmentDataStructures();
+
 	/* We are going to learn each option iteratively. We could do this in parallel,
 	   but for sake of simplicity this is being done sequentially now. I may have
 	   this to my TODO list, to parallelize this step of the computation. */
@@ -63,6 +65,14 @@ void learnOptions(ALEInterface &ale, Parameters *param, Agent &agent,
 	std::vector<float> &datasetMeans, std::vector<float> &datasetStds,
 	std::vector<float> &eigenVectors, int option){
 
+	vector<vector<float> > e;        //Eligibility trace
+	vector<vector<int> >nonZeroElig; //To optimize the implementation
+
+	for(int i = 0; i < agent.getNumAvailActions(); i++){
+		e.push_back(vector<float>(agent.bproFeatures.getNumberOfFeatures(), 0.0));
+		nonZeroElig.push_back(vector<int>());
+	}
+
 	//Performance monitoring:
 	double elapsedTime;
 	struct timeval tvBegin, tvEnd, tvDiff;
@@ -85,7 +95,7 @@ void learnOptions(ALEInterface &ale, Parameters *param, Agent &agent,
 	int episode, totalNumberFrames = 0;
 	int totalNumberOfFramesToLearn = param->learningLength;
 	for(episode = 0; totalNumberFrames < totalNumberOfFramesToLearn; episode++){
-		agent.cleanTraces();
+		agent.cleanTraces(e, nonZeroElig);
 		//Obtain new observation:
 		Fbpro.clear();
 		agent.bproFeatures.getActiveFeaturesIndices(ale.getScreen(), Fbpro);
@@ -122,12 +132,12 @@ void learnOptions(ALEInterface &ale, Parameters *param, Agent &agent,
 				maxFeatVectorNorm = Fbpro.size();
 			}
 			delta = reward[0] + param->gamma * Qnext[nextAction] - Q[currentAction];
-			agent.updateReplTrace(param, currentAction, Fbpro);
+			agent.updateReplTrace(param, currentAction, Fbpro, e, nonZeroElig);
 			//Update weights vector:
-			for(unsigned int a = 0; a < agent.nonZeroElig.size(); a++){
-				for(unsigned int i = 0; i < agent.nonZeroElig[a].size(); i++){
-					int idx = agent.nonZeroElig[a][i];
-					agent.learnedOptions[option][a][idx] += (param->alpha/maxFeatVectorNorm) * delta * agent.e[a][idx];
+			for(unsigned int a = 0; a < nonZeroElig.size(); a++){
+				for(unsigned int i = 0; i < nonZeroElig[a].size(); i++){
+					int idx = nonZeroElig[a][i];
+					agent.learnedOptions[option][a][idx] += (param->alpha/maxFeatVectorNorm) * delta * e[a][idx];
 				}
 			}
 			Fbpro = FbproNext;

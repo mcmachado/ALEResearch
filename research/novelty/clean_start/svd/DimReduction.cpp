@@ -142,14 +142,14 @@ void reduceDimensionalityOfEvents(MatrixXi dataset, vector<float> &datasetMeans,
 	saveSVDResult(svd.singularValues(), "svdS", iter);
 	saveSVDResult(svd.matrixV(), "svdV", iter);
 
-	cout << svd.singularValues() << endl;
+	//cout << svd.singularValues() << endl;
 	MatrixXf m_matrixU = svd.matrixU();
 	MatrixXf m_vectorS = svd.singularValues();
 	MatrixXf m_matrixV = svd.matrixV();
 
 	//MatrixXf reconstructed = m_matrixU * m_vectorS * m_matrixV.transpose();
-	cout << m_matrixU.rows() << "x" << m_matrixU.cols() << " x " << m_vectorS.rows() << "x" << m_vectorS.cols()
-		<< " x " << m_matrixV.rows() << "x" << m_matrixV.cols() << endl;
+	//cout << m_matrixU.rows() << "x" << m_matrixU.cols() << " x " << m_vectorS.rows() << "x" << m_vectorS.cols()
+	//	<< " x " << m_matrixV.rows() << "x" << m_matrixV.cols() << endl;
 
 	/* Finally, we need to obtain the top k eigenvectors (we are not concerned
 	with the whole decomposition). Here I fill the matrix eigenVectors to be

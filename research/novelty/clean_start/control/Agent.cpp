@@ -22,11 +22,6 @@ Agent::Agent(ALEInterface& ale, Parameters *param) : bproFeatures(param) {
 		transitions.push_back(0.0);
 	}
 
-	for(int i = 0; i < getNumAvailActions(); i++){
-		e.push_back(vector<float>(bproFeatures.getNumberOfFeatures(), 0.0));
-		nonZeroElig.push_back(vector<int>());
-	}
-
 	for(int i = 0; i < numberOfOptions; i++){
 		w.push_back(vector< vector<float> >(numberOfPrimitiveActions, vector<float>(bproFeatures.getNumberOfFeatures(), 0.0)));
 	}
@@ -49,7 +44,6 @@ void Agent::updateAverage(Parameters *param, vector<bool> Fprev, vector<bool> F,
 	string outputPath_param = sstm_fileName.str();
 
 	vector<int> tempVector(2 * NUM_BITS, 0);
-
 	for(int i = 0; i < NUM_BITS; i++){
 		if(!Fprev[i] && F[i]){ // 0->1
 			freqOfBitFlips[i] = (freqOfBitFlips[i] * (frame - 1) + 1) / frame;
@@ -72,7 +66,6 @@ void Agent::updateAverage(Parameters *param, vector<bool> Fprev, vector<bool> F,
 			freqOfBitFlips[i + NUM_BITS] = (freqOfBitFlips[i + NUM_BITS] * (frame - 1) + 0) / frame;
 		}
 	}
-
 	ofstream myFileBits;
 	myFileBits.open (outputPath_param, ios::app);
 	vector<int> bytesToPrint;
@@ -108,12 +101,11 @@ void Agent::updateAverage(Parameters *param, vector<bool> Fprev, vector<bool> F,
 		}
 		myFileBits << endl;
 	}
-	myFileBits.close();	
+	myFileBits.close();
 }
 
 int Agent::playActionUpdatingAvg(ALEInterface& ale, Parameters *param, int &frame, 
 	int nextAction, int iter, vector<vector<bool> > &dataset){
-
 	vector<bool> F(NUM_BITS, 0); //Set of active features
 	vector<bool> Fprev;
 	int reward = 0;
@@ -256,7 +248,7 @@ void Agent::updateTransitionVector(vector<bool> F, vector<bool> Fnext){
 }
 
 void Agent::updateQValues(vector<vector<float> > &weights, vector<int> &Features, vector<float> &QValues, int option){
-	for(int a = 0; a < getNumAvailActions(); a++){
+	for(int a = 0; a < weights.size(); a++){
 		float sumW = 0;
 		for(unsigned int i = 0; i < Features.size(); i++){
 			sumW += weights[a][Features[i]];
@@ -278,7 +270,8 @@ int Agent::epsilonGreedy(vector<float> &QValues, float epsilon){
 	return action;
 }
 
-void Agent::updateReplTrace(Parameters *param, int action, vector<int> &Features){
+void Agent::updateReplTrace(Parameters *param, int action, vector<int> &Features,
+	vector<vector<float> > &e, vector<vector<int> > &nonZeroElig){
 	//e <- gamma * lambda * e
 	for(unsigned int a = 0; a < nonZeroElig.size(); a++){
 		int numNonZero = 0;
@@ -309,7 +302,7 @@ void Agent::updateReplTrace(Parameters *param, int action, vector<int> &Features
 	}
 }
 
-void Agent::cleanTraces(){
+void Agent::cleanTraces(vector<vector<float> > &e, vector<vector<int> > &nonZeroElig){
 	for(unsigned int a = 0; a < nonZeroElig.size(); a++){
 		for(unsigned int i = 0; i < nonZeroElig[a].size(); i++){
 			int idx = nonZeroElig[a][i];
