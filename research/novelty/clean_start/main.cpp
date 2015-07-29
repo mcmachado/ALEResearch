@@ -31,7 +31,7 @@ void initializeALE(ALEInterface &ale, const Parameters param){
 	ale.setInt  ("max_num_frames_per_episode", param.episodeLength);
 	ale.setBool ("sound"                     , param.display);
 	ale.setBool ("display_screen"            , param.display);
-	ale.setFloat("stochasticity"             , 0.00);
+	ale.setFloat("repeat_action_probability" , 0.00);
 	/*In a first moment I am not using this because I need to see the
 	  intermediate screens. If I use this I will just see every 5th
 	  screen, if a bit flips and unflips between these 5 frames I will
