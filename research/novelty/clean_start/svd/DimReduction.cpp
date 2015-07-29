@@ -100,6 +100,24 @@ void saveDecompositionInFile(vector<vector<float> > &eigenVectors,
 
 }
 
+void saveSVDResult(MatrixXf matrix, string prefix, int iter){
+	std::stringstream sstm_fileName;
+	sstm_fileName << prefix << "Iter" << iter + 1 << ".csv";
+	string outputPath = sstm_fileName.str();
+
+	ofstream outFile;
+	outFile.open(outputPath, ios::out);
+	outFile << matrix.rows() << "," << matrix.cols() << endl;
+
+	for(int i = 0; i < matrix.rows(); i++){
+		for(int j = 0; j < matrix.cols(); j++){
+			outFile << matrix(i, j) << ",";
+		}
+		outFile << endl;
+	}
+	outFile.close();
+}
+
 void reduceDimensionalityOfEvents(MatrixXi dataset, vector<float> &datasetMeans, 
 	vector<float> &datasetStds, vector<vector<float> > &eigenVectors, int k, int iter){
 
@@ -112,13 +130,27 @@ void reduceDimensionalityOfEvents(MatrixXi dataset, vector<float> &datasetMeans,
 	centerMatrix(dataset, datasetMeans, datasetStds, centeredDataset);
 	/* Once we centered the matrix we can run the SVD itself. We also want
 	the eigenvectors, not only the eigenvalues, this is why we ask for U and V.*/
-	//JacobiSVD<MatrixXf> svd(centeredDataset, ComputeThinU | ComputeThinV);
+	//JacobiSVD<MatrixXf> svd(centeredDataset, ComputeFullU | ComputeFullV);
 	/* I was using JacobiSVD to do the SVD but it is too slow. I am now using an
 	approach based on a randomized algorithm. The algorithm I am using was
 	introduced in "Finding structure with randomness: Stochastic algorithms for 
 	constructing approximate matrix decompositions", N. Halko, P.G. Martinsson, 
 	J. Tropp, arXiv 0909.4061"*/
-	RedSVD::RedSVD<MatrixXf> svd(centeredDataset);
+	RedSVD::RedSVD<MatrixXf> svd(centeredDataset, 20);
+
+	saveSVDResult(svd.matrixU(), "svdU", iter);
+	saveSVDResult(svd.singularValues(), "svdS", iter);
+	saveSVDResult(svd.matrixV(), "svdV", iter);
+
+	cout << svd.singularValues() << endl;
+	MatrixXf m_matrixU = svd.matrixU();
+	MatrixXf m_vectorS = svd.singularValues();
+	MatrixXf m_matrixV = svd.matrixV();
+
+	//MatrixXf reconstructed = m_matrixU * m_vectorS * m_matrixV.transpose();
+	cout << m_matrixU.rows() << "x" << m_matrixU.cols() << " x " << m_vectorS.rows() << "x" << m_vectorS.cols()
+		<< " x " << m_matrixV.rows() << "x" << m_matrixV.cols() << endl;
+
 	/* Finally, we need to obtain the top k eigenvectors (we are not concerned
 	with the whole decomposition). Here I fill the matrix eigenVectors to be
 	later used in the learning part of my algorithm.*/
