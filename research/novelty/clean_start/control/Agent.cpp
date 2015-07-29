@@ -16,11 +16,15 @@ Agent::Agent(ALEInterface& ale, Parameters *param) : bproFeatures(param) {
 
 	numberOfOptions          = 0;
 	numberOfPrimitiveActions = actions.size();
-	numberOfAvailActions     = numberOfPrimitiveActions + numberOfOptions;
 
 	for(int i = 0; i < 2 * NUM_BITS; i++){
 		freqOfBitFlips.push_back(0.0);
 		transitions.push_back(0.0);
+	}
+
+	for(int i = 0; i < getNumAvailActions(); i++){
+		e.push_back(vector<float>(bproFeatures.getNumberOfFeatures(), 0.0));
+		nonZeroElig.push_back(vector<int>());
 	}
 
 	for(int i = 0; i < numberOfOptions; i++){
@@ -252,7 +256,7 @@ void Agent::updateTransitionVector(vector<bool> F, vector<bool> Fnext){
 }
 
 void Agent::updateQValues(vector<vector<float> > &weights, vector<int> &Features, vector<float> &QValues, int option){
-	for(int a = 0; a < numberOfAvailActions; a++){
+	for(int a = 0; a < getNumAvailActions(); a++){
 		float sumW = 0;
 		for(unsigned int i = 0; i < Features.size(); i++){
 			sumW += weights[a][Features[i]];
@@ -293,7 +297,6 @@ void Agent::updateReplTrace(Parameters *param, int action, vector<int> &Features
 		}
 		nonZeroElig[a].resize(numNonZero);
 	}
-
 	//For all i in Fa:
 	for(unsigned int i = 0; i < Features.size(); i++){
 		int idx = Features[i];
@@ -317,10 +320,14 @@ void Agent::cleanTraces(){
 }
 
 void Agent::sanityCheck(vector<float> &QValues){
-	for(int i = 0; i < numberOfAvailActions; i++){
+	for(int i = 0; i < getNumAvailActions(); i++){
 		if(fabs(QValues[i]) > 10e7 || QValues[i] != QValues[i] /*NaN*/){
 			printf("It seems your algorithm diverged!\n");
 			exit(0);
 		}
 	}
+}
+
+int Agent::getNumAvailActions(){
+	return numberOfPrimitiveActions + numberOfOptions;
 }
