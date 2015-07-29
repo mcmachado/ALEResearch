@@ -21,8 +21,6 @@ class Agent{
 
 		vector<float> transitions;
 
-		vector<vector<float> > e;       //Eligibility trace
-		vector<vector<int> >nonZeroElig; //To optimize the implementation
 		/* This is the theta vector, the one containing the weights that really try
 		to maximize the external rewards (score). They are learned only at the end.
 		What we really learn during each iteration are the options, which the learned
@@ -42,13 +40,14 @@ class Agent{
 		int playActionUpdatingAvg(ALEInterface& ale, Parameters *param, int &frame, 
 			int nextAction, int iter, vector<vector<bool> > &dataset);
 
-		void cleanTraces();
+		int getNumAvailActions();
 		void sanityCheck(vector<float> &QValues);
 		int epsilonGreedy(vector<float> &QValues, float epsilon);
-		void updateReplTrace(Parameters *param, int action, vector<int> &Features);
 		void updateTransitionVector(vector<bool> F, vector<bool> Fnext);
+		void cleanTraces(vector<vector<float> > &e, vector<vector<int> > &nonZeroElig);
 		void updateQValues(vector<vector<float> > &learnedOptions, vector<int> &Features, vector<float> &QValues, int option);
-		int getNumAvailActions();
+		void updateReplTrace(Parameters *param, int action, vector<int> &Features, 
+			vector<vector<float> > &e, vector<vector<int> > &nonZeroElig);
 	private:
 		Agent();
 		void updateAverage(Parameters *param, vector<bool> Fprev, vector<bool> F, 

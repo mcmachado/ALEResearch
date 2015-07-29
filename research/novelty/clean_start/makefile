@@ -8,7 +8,7 @@ REDSVD := lib/RedSVD/include/RedSVD
 USE_SDL     := 0
 
 # -O3 Optimize code (urns on all optimizations specified by -O2 and also turns on the -finline-functions, -funswitch-loops, -fpredictive-commoning, -fgcse-after-reload, -ftree-loop-vectorize, -ftree-slp-vectorize, -fvect-cost-model, -ftree-partial-pre and -fipa-cp-clone options).
-FLAGS := -O3 -I$(ALE)/src -I$(EIGEN) -I$(REDSVD)
+FLAGS := -g -O3 -I$(ALE)/src -I$(EIGEN) -I$(REDSVD)
 
 CXX := g++ -std=c++11
 OUT_FILE := pfd
