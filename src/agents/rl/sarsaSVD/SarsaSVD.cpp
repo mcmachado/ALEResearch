@@ -296,7 +296,7 @@ void SarsaSVD::learnPolicy(Environment<bool>& env){
                env.getEpisodeFrameNumber(), fps,currentFlavor);
 
         started_learning |= (cumReward - prevCumReward) > 0;
-        if(started_learning){
+        /*if(started_learning){
             if(numMeans < meanCapa){
                 meanSum[currentFlavor] += (cumReward - prevCumReward);
                 means[currentFlavor][curMeanPos] += (cumReward - prevCumReward);
@@ -350,9 +350,12 @@ void SarsaSVD::learnPolicy(Environment<bool>& env){
                 
                 }
             }
-        }
-        
+        }*/
         totalNumberFrames += env.getEpisodeFrameNumber();
+        if(rank<numFlavors && totalNumberFrames>(rank*3300000)){
+            rankIncreaseNeeded = true;
+            std::cout<<"Switching to rank "<<rank+1<<" on episode "<<episode<<std::endl;
+        }
         prevCumReward = cumReward;
         env.reset();
         if(toSaveWeightsAfterLearning && episode%saveWeightsEveryXSteps == 0 && episode > 0){
