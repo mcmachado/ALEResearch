@@ -188,7 +188,6 @@ void Parameters::parseParametersFromConfigFile(std::string cfgFileName){
 	this->setLearningLength(atoi(parameters["TOTAL_FRAMES_LEARN"].c_str()));
     this->difficultyLevel=atoi(parameters["DIFFICULTY_LEVEL"].c_str());
     this->gameMode=atoi(parameters["GAME_MODE"].c_str());
-    this->rank=atoi(parameters["RANK"].c_str());
 	if(this->getSubtractBackground()){
 		std::string folderWithBackgrounds = parameters["PATH_TO_BACKGROUND"];
 		setPathToBackground(folderWithBackgrounds, this->gameBeingPlayed);

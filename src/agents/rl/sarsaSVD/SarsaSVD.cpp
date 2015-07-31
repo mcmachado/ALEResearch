@@ -29,7 +29,6 @@ SarsaSVD::SarsaSVD(Environment<bool>& env, Parameters *param, unsigned nFlavors)
     pathWeightsFileToLoad = param->getPathToWeightsFiles();
 
     numFlavors = nFlavors;
-    rank = param->getRank();
 
     w = MatrixXf::Zero(numFlavors,numFeatures*numActions);
     // std::mt19937 g1(param->getSeed());
@@ -156,7 +155,7 @@ void SarsaSVD::learnPolicy(Environment<bool>& env){
     std::vector<float> meanSum(numFlavors,0.0);
     
     //initial rank
-    //unsigned rank = 1;
+    unsigned rank = 1;
     U = MatrixXf::Ones(numFlavors,rank);
     V = MatrixXf::Ones(numFeatures*numActions,rank);
 
