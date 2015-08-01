@@ -20,6 +20,7 @@ GETTER := mode_difficulty_getter
 VALUE_TRANSFER := value_transfer
 VALUE_TRANSFER_RELEARN := value_transfer_relearn
 OFFPOLICY_LEARN := offpolicy_learn
+ONPOLICY_LEARN := onpolicy_learn
 SVD := svd
 # Search for library 'ale' and library 'z' when linking.
 LDFLAGS := -L$(ALE) -lale -lz -lm
@@ -36,7 +37,7 @@ SRCS = SarsaSVD.cpp Mathematics.cpp Parameters.cpp Timer.cpp Features.cpp Backgr
 OBJS = $(subst .cpp,.o, $(addprefix bin/,$(SRCS)))
 DEPS = $(subst .cpp,.d, $(addprefix bin/,$(SRCS))) bin/main_grid_example.d bin/main_offpolicy.d
 
-all: $(EXE) $(GETTER) $(VALUE_TRANSFER) $(VALUE_TRANSFER_RELEARN) $(OFFPOLICY_LEARN) $(SVD)
+all: $(EXE) $(GETTER) $(VALUE_TRANSFER) $(VALUE_TRANSFER_RELEARN) $(OFFPOLICY_LEARN) $(SVD) $(ONPOLICY_LEARN)
 
 $(EXE): $(OBJS) bin/main_sarsa_example.o
 	$(CXX) $(LDFLAGS) $(OBJS) bin/main_sarsa_example.o -o $(EXE)
@@ -52,6 +53,9 @@ $(VALUE_TRANSFER_RELEARN): $(OBJS) bin/value_transfer_relearn.o
 
 $(OFFPOLICY_LEARN): $(OBJS) bin/main_offpolicy.o
 	$(CXX) $(LDFLAGS) $(CFLAGS) $(OBJS) bin/main_offpolicy.o -o $(OFFPOLICY_LEARN)
+
+$(ONPOLICY_LEARN): $(OBJS) bin/main_onpolicy.o
+	$(CXX) $(LDFLAGS) $(CFLAGS) $(OBJS) bin/main_onpolicy.o -o $(ONPOLICY_LEARN)
 
 $(SVD): $(OBJS) bin/svd_multi.o
 	$(CXX) $(LDFLAGS) $(CFLAGS) $(OBJS) -pthread bin/svd_multi.o -o $(SVD)

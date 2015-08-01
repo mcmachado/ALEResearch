@@ -56,6 +56,16 @@ void SarsaLearner::updateQValues(std::vector<int> &Features, std::vector<float> 
 		QValues[a] = sumW;
 	}
 }
+void SarsaLearner::updateBehaviorQValues(std::vector<int> &Features, std::vector<float> &QValues,const std::vector<std::vector<float>>& weights)
+{
+	for(int a = 0; a < numActions; a++){
+		float sumW = 0;
+		for(unsigned int i = 0; i < Features.size(); i++){
+			sumW += weights[a][Features[i]];
+		}
+		QValues[a] = sumW;
+	}
+}
 
 void SarsaLearner::updateReplTrace(int action, std::vector<int> &Features){
 	//e <- gamma * lambda * e
@@ -157,7 +167,7 @@ void SarsaLearner::loadWeights(){
     loadWeights(pathWeightsFileToLoad.c_str());
 }
 
-void SarsaLearner::learnPolicy(Environment<bool>& env){
+void SarsaLearner::learnPolicy(Environment<bool>& env, bool transfering,const std::vector<std::vector<float> >& b_policy){
 	
 	struct timeval tvBegin, tvEnd, tvDiff;
     std::vector<double> reward;
@@ -165,6 +175,7 @@ void SarsaLearner::learnPolicy(Environment<bool>& env){
 	float cumReward = 0, prevCumReward = 0;
 	unsigned int maxFeatVectorNorm = 1;
 	sawFirstReward = 0; firstReward = 1.0;
+    std::vector<float> bQ(numActions,0.0);               //Q(a) entries for behavior policy
 
 	//Repeat (for each episode):
 	int episode, totalNumberFrames = 0;
@@ -178,7 +189,12 @@ void SarsaLearner::learnPolicy(Environment<bool>& env){
 
 		env.getActiveFeaturesIndices(F);
 		updateQValues(F, Q);
-		currentAction = epsilonGreedy(Q);
+        if(transfering){		
+            updateBehaviorQValues(F,bQ,b_policy);
+            currentAction = epsilonGreedy(bQ);
+        }else{
+            currentAction = epsilonGreedy(Q);
+        }
 		//Repeat(for each step of episode) until game is over:
 		gettimeofday(&tvBegin, NULL);
 
@@ -198,7 +214,12 @@ void SarsaLearner::learnPolicy(Environment<bool>& env){
 				Fnext.clear();
 				env.getActiveFeaturesIndices(Fnext);
 				updateQValues(Fnext, Qnext);     //Update Q-values for the new active features
-				nextAction = epsilonGreedy(Qnext);
+                if(transfering){		
+                    updateBehaviorQValues(Fnext,bQ,b_policy);
+                    nextAction = epsilonGreedy(bQ);
+                }else{
+                    nextAction = epsilonGreedy(Qnext);
+                }
 			}
 			else{
 				nextAction = 0;
@@ -252,13 +273,14 @@ void SarsaLearner::learnPolicy(Environment<bool>& env){
 double SarsaLearner::evaluatePolicy(Environment<bool>& env){
     return evaluatePolicy(env,numEpisodesEval);
 }
-double SarsaLearner::evaluatePolicy(Environment<bool>& env,unsigned numSteps){
+double SarsaLearner::evaluatePolicy(Environment<bool>& env,unsigned numSteps, bool epsilonAnneal){
 	float reward = 0;
 	float cumReward = 0; 
 	float prevCumReward = 0;
 	struct timeval tvBegin, tvEnd, tvDiff;
 	double elapsedTime;
-
+    if(epsilonAnneal)
+        epsilon = 1.0;
 	//Repeat (for each episode):
 	for(int episode = 0; episode < numSteps; episode++){
 		//Repeat(for each step of episode) until game is over:
@@ -288,11 +310,16 @@ double SarsaLearner::evaluatePolicy(Environment<bool>& env,unsigned numSteps){
 		elapsedTime = double(tvDiff.tv_sec) + double(tvDiff.tv_usec)/1000000.0;
 		double fps = double(env.getEpisodeFrameNumber())/elapsedTime;
 
-		printf("episode: %d,\t%.0f points,\tavg. return: %.1f,\t%d frames,\t%.0f fps\n", 
-			episode + 1, (cumReward-prevCumReward), (double)cumReward/(episode + 1.0), env.getEpisodeFrameNumber(), fps);
+		printf("episode: %d,\t%.0f points,\tavg. return: %.1f,\t%d frames,\t%.0f fps epsilon : %f\n", 
+               episode + 1, (cumReward-prevCumReward), (double)cumReward/(episode + 1.0), env.getEpisodeFrameNumber(), fps,epsilon);
 
 		env.reset();
 		prevCumReward = cumReward;
+        if(epsilonAnneal)
+            epsilon-=1/(double)(numSteps);
 	}
     return cumReward/(double)(numSteps);
 }
+
+
+

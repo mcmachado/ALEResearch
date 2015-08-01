@@ -78,7 +78,11 @@ class SarsaLearner : public RLLearner<bool>{
  		* @param Environment& env Arcade Learning Environment interface: object used to define agents'
  		*        actions, obtain simulator's screen, RAM, etc.
  		*/
-		void learnPolicy(Environment<bool>& env);
+
+    void learnPolicy(Environment<bool>& env){
+        learnPolicy(env,false,std::vector<std::vector<float>>());
+    }
+    void learnPolicy(Environment<bool>& env, bool transfering , const std::vector<std::vector<float> >& weights);
 		/**
  		* After the policy was learned it is necessary to evaluate its quality. Therefore, a given number
  		* of episodes is run without learning (the vector of weights and the trace are not updated).
@@ -87,7 +91,10 @@ class SarsaLearner : public RLLearner<bool>{
  		*        actions, obtain simulator's screen, RAM, etc.
  		*/
 		double evaluatePolicy(Environment<bool>& env);
-    double evaluatePolicy(Environment<bool>& env,unsigned numSteps);
+    double evaluatePolicy(Environment<bool>& env,unsigned numSteps, bool epsilonAnneal = false);
+
+    void updateBehaviorQValues(std::vector<int> &Features, std::vector<float> &QValues,const std::vector<std::vector<float>>& weights);
+
 		/**
 		* Destructor, not necessary in this class.
 		*/
