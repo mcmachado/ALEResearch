@@ -12,7 +12,7 @@ USE_SDL     := 1
 # -D_GNU_SOURCE=1 means the compiler will use the GNU standard of compilation, the superset of all other standards under GNU C libraries.
 # -D_REENTRANT causes the compiler to use thread safe (i.e. re-entrant) versions of several functions in the C library.
 FLAGS := -O3 -I$(ALE)/src -I/opt/local/include -L$(ALE) -D_GNU_SOURCE=1 -D_REENTRANT -D__STDC_CONSTANT_MACROS
-CXX := g++
+CXX := g++ -std=c++0x
 OUT_FILE1 := sarsaProxyOption
 OUT_FILE2 := loadAndLearn
 OUT_FILE3 := sarsaLoadWeightsProxyOption

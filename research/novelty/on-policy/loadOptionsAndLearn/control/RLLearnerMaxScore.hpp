@@ -48,7 +48,8 @@ class RLLearner : public Agent{
  		* the reward to be used by the RL algorithm is returned; in the second position, the game score is
  		* returned.
  		*/
-		void act(ALEInterface& ale, int action, Features *features, std::vector<float> &reward, std::vector<std::vector<std::vector<float> > > &learnedOptions);
+		void act(ALEInterface& ale, int action, Features *features, std::vector<float> &reward, 
+			std::vector<std::vector<std::vector<float> > > &learnedOptions, std::vector<std::vector<float> > &w);
 
 		/**
  		* Implementation of an epsilon-greedy function. Epsilon is defined in the constructor,
@@ -70,7 +71,10 @@ class RLLearner : public Agent{
 		*/
 		RLLearner(ALEInterface& ale, Features *features, Parameters *param);
 
-		void playOption(ALEInterface& ale, int option, Features *features, std::vector<float> &reward, std::vector<std::vector<std::vector<float> > > &learnedOptions);
+		void playOption(ALEInterface& ale, int option, Features *features, std::vector<float> &reward, 
+			std::vector<std::vector<std::vector<float> > > &learnedOptions, std::vector<std::vector<float> > &w);
+
+		bool toInterruptOption(int action, std::vector<int> &Features, vector<vector<float> > &w);
 
 	public:
 	   /**
