@@ -269,7 +269,7 @@ int main(int argc, char** argv){
 
 	//Initializing ALE:
 	ALEInterface ale;
-	ale.setBool("display_screen", true);
+	ale.setBool("display_screen", false);
 	ale.setBool("sound", false);
 	ale.setFloat("frame_skip", NUM_STEPS_PER_ACTION);
 	ale.setFloat("repeat_action_probability", STOCHASTICITY);
