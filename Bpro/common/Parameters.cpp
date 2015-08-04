@@ -158,10 +158,10 @@ void Parameters::parseParametersFromConfigFile(std::string cfgFileName){
 		while( getline(cfgFile, line)){
 			if(line.length() > 0){
 				std::vector<std::string> parsed = parseLine(line);
-				//Add the parsed elements to an appropriate structure:
+                //Add the parsed elements to an appropriate structure:
 				if(parsed.size() == 2){
 					parameters[parsed[0]] = parsed[1];
-				}
+                }
 			}
 		}
 		cfgFile.close();
@@ -196,6 +196,24 @@ void Parameters::parseParametersFromConfigFile(std::string cfgFileName){
 		std::string folderWithBackgrounds = parameters["PATH_TO_BACKGROUND"];
 		setPathToBackground(folderWithBackgrounds, this->gameBeingPlayed);
 	}
+    
+    if (parameters.count("RESOLUTIONS")>0){
+        this->setResolutions(atoi(parameters["RESOLUTIONS"].c_str()));
+    }else{
+        this->setResolutions(3);
+    }
+     
+    if (parameters.count("EPSILON_DECAY")>0){
+        this->setEpsilonDecay(atoi(parameters["EPSILON_DECAY"].c_str()));
+    }else{
+        this->setEpsilonDecay(0);
+    }
+    
+    if (parameters.count("FINAL_EXPLORATION_FRAME")>0){
+        this->setFinalExplorationFrame(atoi(parameters["FINAL_EXPLORATION_FRAME"].c_str()));
+    }else{
+        this->setFinalExplorationFrame(0);
+    }
 }
 
 void Parameters::setSaveTrajectoryPath(std::string name){
@@ -414,6 +432,18 @@ void Parameters::setToLoadWeights(int a){
 	this->toLoadWeights = a;
 }
 
+void Parameters::setResolutions(int a){
+    this->numResolutions = a;
+}
+
+void Parameters::setEpsilonDecay(int a){
+    this->epsilonDecay =a;
+}
+
+void Parameters::setFinalExplorationFrame(int a){
+    this->finalExplorationFrame = a;
+}
+
 std::string Parameters::getPathToWeightsFiles(){
 	return this->pathToWeightsFiles;
 }
@@ -444,4 +474,16 @@ void Parameters::setToSaveCheckPoint(int a){
 
 int Parameters::getToSaveCheckPoint(){
     return this->toSaveCheckPoint;
+}
+
+int Parameters::getResolutions(){
+    return this->numResolutions;
+}
+
+int Parameters::getEpsilonDecay() {
+    return this->epsilonDecay;
+}
+
+int Parameters::getFinalExplorationFrame(){
+    return this->finalExplorationFrame;
 }

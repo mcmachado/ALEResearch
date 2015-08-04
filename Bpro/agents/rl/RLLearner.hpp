@@ -11,12 +11,13 @@
 #include "../Agent.hpp"
 #endif
 #include <random>
+using namespace std;
 
 class RLLearner : public Agent{
 	protected:
 		ActionVect actions;
 
-		float gamma, epsilon;
+		float gamma, finalEpsilon;
 		float firstReward;
 		bool   sawFirstReward;
 
@@ -24,6 +25,8 @@ class RLLearner : public Agent{
 		int    randomActionTaken, numActions;
 		int    episodeLength, numEpisodesEval;
 		int    totalNumberOfFramesToLearn;
+        int epsilonDecay;
+        int finalExplorationFrame;
         mt19937 agentRand;
 
 		/**
@@ -48,6 +51,7 @@ class RLLearner : public Agent{
  		* @return int action to be taken
  		*/
 		int epsilonGreedy(vector<float> &QValues);
+        int epsilonGreedy(vector<float> &QValues,int episode);
 
 		/**
 		* Constructor to be used by the RL classes to save the parameters that

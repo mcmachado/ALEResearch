@@ -13,13 +13,16 @@ RLLearner::RLLearner(ALEInterface& ale, Parameters *param, int seed){
 	randomActionTaken   = 0;
 
 	gamma               = param->getGamma();
-	epsilon             = param->getEpsilon();
+	finalEpsilon             = param->getEpsilon();
 	toUseOnlyRewardSign = param->getUseRewardSign();
 	toBeOptimistic      = param->getOptimisticInitialization();
 	
 	episodeLength       = param->getEpisodeLength();
 	numEpisodesEval     = param->getNumEpisodesEval();
 	totalNumberOfFramesToLearn = param->getLearningLength();
+    
+    epsilonDecay = param->getEpsilonDecay();
+    finalExplorationFrame = param->getFinalExplorationFrame();
 
 	//Get the number of effective actions:
 	if(param->isMinimalAction()){
@@ -38,6 +41,7 @@ int RLLearner::epsilonGreedy(vector<float> &QValues){
 	int action = Mathematics::argmax(QValues,agentRand);
 	//With probability epsilon: a <- random action in A(s)
 	int random = agentRand();
+    float epsilon = finalEpsilon;
 	if((random % int(nearbyint(1.0/epsilon))) == 0) {
         //if((rand()%int(1.0/epsilon)) == 0){
 		randomActionTaken = 1;
@@ -45,6 +49,25 @@ int RLLearner::epsilonGreedy(vector<float> &QValues){
 	}
     return action;
 }
+
+int RLLearner::epsilonGreedy(vector<float> &QValues, int episode){
+    randomActionTaken = 0;
+    
+    int action = Mathematics::argmax(QValues,agentRand);
+    //With probability epsilon: a <- random action in A(s)
+    int random = agentRand();
+    float epsilon = finalEpsilon;
+    if (epsilonDecay && episode<=finalExplorationFrame){
+        epsilon = 1 - (1-finalEpsilon)*episode/finalExplorationFrame;
+    }
+    if((random % int(nearbyint(1.0/epsilon))) == 0) {
+        //if((rand()%int(1.0/epsilon)) == 0){
+        randomActionTaken = 1;
+        action = agentRand() % numActions;
+    }
+    return action;
+}
+
 
 /**
  * The first parameter is the one that is used by Sarsa. The second is used to

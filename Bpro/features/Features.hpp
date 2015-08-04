@@ -16,6 +16,8 @@
 #include <ale_interface.hpp>
 #endif
 
+using namespace std;
+
 class Features{
 	private:
 		
@@ -76,4 +78,5 @@ class Features{
 		* Destructor, not necessary in this class.
 		*/
 		virtual ~Features();
+        virtual void clearCash() = 0 ;
 };
