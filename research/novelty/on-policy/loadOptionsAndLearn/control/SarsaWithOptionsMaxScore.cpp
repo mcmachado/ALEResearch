@@ -203,7 +203,7 @@ void SarsaWithOptionsMaxScore::learnPolicy(ALEInterface& ale, Features *features
 
 			sanityCheck();
 			//Take action, observe reward and next state:
-			act(ale, currentAction, features, reward, learnedOptions);
+			act(ale, currentAction, features, reward, learnedOptions, w);
 			cumReward  += reward[1];
 			if(!ale.game_over()){
 				//Obtain active features in the new state:
