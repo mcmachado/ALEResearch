@@ -15,6 +15,7 @@ FLAGS := -O3 -I$(ALE)/src -I/opt/local/include -L$(ALE) -D_GNU_SOURCE=1 -D_REENT
 CXX := g++ -std=c++11
 OUT_FILE1 := sarsaLoadWeightsProxyOption
 OUT_FILE2 := sarsaMaxScore
+OUT_FILE3 := sarsaExpReplay
 # Search for library 'ale' and library 'z' when linking.
 LDFLAGS := -lale -lz -lm
 
@@ -23,7 +24,7 @@ ifeq ($(strip $(USE_SDL)), 1)
   LDFLAGS += -lSDL -lSDL_gfx -lSDL_image 
 endif
 
-all: sarsaLoadWeightsProxyOption sarsaMaxScore
+all: sarsaLoadWeightsProxyOption sarsaMaxScore sarsaExpReplay
 
 sarsaLoadWeightsProxyOption: sarsaLoadWeightsProxyOption.o     Mathematics.o     Timer.o     ParametersLoadingWeights.o     Features.o     Background.o     BPROFeatures.o     RAMFeatures.o     RLLearnerExtended.o     OptionSarsaExtended.o
 	$(CXX) $(FLAGS)      bin/sarsaLoadWeightsProxyOption.o bin/Mathematics.o bin/Timer.o bin/ParametersLoadingWeights.o bin/Features.o bin/Background.o bin/BPROFeatures.o bin/RAMFeatures.o bin/RLLearnerExtended.o bin/OptionSarsaExtended.o $(LDFLAGS) -o $(OUT_FILE1)
@@ -31,11 +32,17 @@ sarsaLoadWeightsProxyOption: sarsaLoadWeightsProxyOption.o     Mathematics.o    
 sarsaMaxScore:               sarsaLoadWeightsMaxScore.o     Mathematics.o     Timer.o     ParametersLoadingWeights.o     Features.o     Background.o     BPROFeatures.o     RAMFeatures.o     RLLearnerMaxScore.o     SarsaWithOptionsMaxScore.o
 	$(CXX) $(FLAGS)      bin/sarsaLoadWeightsMaxScore.o bin/Mathematics.o bin/Timer.o bin/ParametersLoadingWeights.o bin/Features.o bin/Background.o bin/BPROFeatures.o bin/RAMFeatures.o bin/RLLearnerMaxScore.o bin/SarsaWithOptionsMaxScore.o $(LDFLAGS) -o $(OUT_FILE2)
 
+sarsaExpReplay:              sarsaExpReplayMaxScore.o     Mathematics.o     Timer.o     ParametersLoadingWeights.o     Features.o     Background.o     BPROFeatures.o     RAMFeatures.o     RLLearnerExpReplay.o     SarsaLearnerExpReplay.o
+	$(CXX) $(FLAGS)      bin/sarsaExpReplayMaxScore.o bin/Mathematics.o bin/Timer.o bin/ParametersLoadingWeights.o bin/Features.o bin/Background.o bin/BPROFeatures.o bin/RAMFeatures.o bin/RLLearnerExpReplay.o bin/SarsaLearnerExpReplay.o $(LDFLAGS) -o $(OUT_FILE3)
+
 sarsaLoadWeightsProxyOption.o: sarsaLoadWeightsProxyOption.cpp
 	$(CXX) $(FLAGS) -c sarsaLoadWeightsProxyOption.cpp -o bin/sarsaLoadWeightsProxyOption.o
 
 sarsaLoadWeightsMaxScore.o: sarsaLoadWeightsMaxScore.cpp
 	$(CXX) $(FLAGS) -c sarsaLoadWeightsMaxScore.cpp -o bin/sarsaLoadWeightsMaxScore.o
+
+sarsaExpReplayMaxScore.o: sarsaExpReplayMaxScore.cpp
+	$(CXX) $(FLAGS) -c sarsaExpReplayMaxScore.cpp -o bin/sarsaExpReplayMaxScore.o
 
 Mathematics.o: ../../../../src/common/Mathematics.cpp
 	$(CXX) $(FLAGS) -c ../../../../src/common/Mathematics.cpp -o bin/Mathematics.o
@@ -69,6 +76,12 @@ OptionSarsaExtended.o: control/OptionSarsaExtended.cpp
 
 SarsaWithOptionsMaxScore.o: control/SarsaWithOptionsMaxScore.cpp
 	$(CXX) $(FLAGS) -c control/SarsaWithOptionsMaxScore.cpp -o bin/SarsaWithOptionsMaxScore.o
+
+SarsaLearnerExpReplay.o: control/SarsaLearnerExpReplay.cpp
+	$(CXX) $(FLAGS) -c control/SarsaLearnerExpReplay.cpp -o bin/SarsaLearnerExpReplay.o
+
+RLLearnerExpReplay.o: control/RLLearnerExpReplay.cpp
+	$(CXX) $(FLAGS) -c control/RLLearnerExpReplay.cpp -o bin/RLLearnerExpReplay.o
 
 clean:
 	rm -rf ${OUT_FILE} bin/*.o	
