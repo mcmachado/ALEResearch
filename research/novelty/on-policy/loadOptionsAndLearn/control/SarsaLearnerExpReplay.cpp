@@ -17,7 +17,7 @@ using namespace std;
 
 SarsaExpReplay::SarsaExpReplay(ALEInterface& ale, Features *features, Parameters *param) : RLLearner(ale, features, param) {
 	delta = 0.0;
-	
+
 	alpha = param->getAlpha();
 	lambda = param->getLambda();
 	traceThreshold = param->getTraceThreshold();
@@ -26,7 +26,7 @@ SarsaExpReplay::SarsaExpReplay(ALEInterface& ale, Features *features, Parameters
 	saveWeightsEveryXSteps = param->getFrequencySavingWeights();
 	pathWeightsFileToLoad = param->getPathToWeightsFiles();
 	
-	for(int i = 0; i < numTotalActions; i++){
+	for(int i = 0; i < numBasicActions; i++){
 		//Initialize Q;
 		Q.push_back(0);
 		Qnext.push_back(0);
@@ -50,7 +50,7 @@ SarsaExpReplay::SarsaExpReplay(ALEInterface& ale, Features *features, Parameters
 SarsaExpReplay::~SarsaExpReplay(){}
 
 void SarsaExpReplay::updateQValues(vector<int> &Features, vector<float> &QValues){
-	for(int a = 0; a < numTotalActions; a++){
+	for(int a = 0; a < QValues.size(); a++){
 		float sumW = 0;
 		for(unsigned int i = 0; i < Features.size(); i++){
 			sumW += w[a][Features[i]];
@@ -80,7 +80,7 @@ void SarsaExpReplay::updateReplTrace(int action, vector<int> &Features){
 	}
 
 	//For all i in Fa:
-	for(unsigned int i = 0; i < F.size(); i++){
+	for(unsigned int i = 0; i < Features.size(); i++){
 		int idx = Features[i];
 		//If the trace is zero it is not in the vector
 		//of non-zeros, thus it needs to be added
@@ -112,7 +112,7 @@ void SarsaExpReplay::updateAcumTrace(int action, vector<int> &Features){
 	}
 
 	//For all i in Fa:
-	for(unsigned int i = 0; i < F.size(); i++){
+	for(unsigned int i = 0; i < Features.size(); i++){
 		int idx = Features[i];
 		//If the trace is zero it is not in the vector
 		//of non-zeros, thus it needs to be added
@@ -124,7 +124,7 @@ void SarsaExpReplay::updateAcumTrace(int action, vector<int> &Features){
 }
 
 void SarsaExpReplay::sanityCheck(){
-	for(int i = 0; i < numTotalActions; i++){
+	for(int i = 0; i < Q.size(); i++){
 		if(fabs(Q[i]) > 10e7 || Q[i] != Q[i] /*NaN*/){
 			printf("It seems your algorithm diverged!\n");
 			exit(0);
@@ -167,6 +167,62 @@ void SarsaExpReplay::loadWeights(){
 	}
 }
 
+int SarsaExpReplay::actionFromOptions(vector<int> &Features, vector<vector<vector<float> > > &learnedOptions){
+	float termProb = 0.0;
+	int nextAction = -1;
+	if(optionBeingPlayed.size() != 0){
+		int currentOption = optionBeingPlayed[optionBeingPlayed.size() - 1];
+		//printf("playing option %d\n", currentOption);
+		//We need to be epsilon-greedy w.r.t. the argmax:
+		vector<float> Q(learnedOptions[currentOption].size(), 0.0);
+		for(int a = 0; a < Q.size(); a++){
+			float sumW = 0;
+			for(unsigned int i = 0; i < Features.size(); i++){
+				sumW += learnedOptions[currentOption][a][Features[i]];
+			}
+			Q[a] = sumW;
+		}
+		nextAction = epsilonGreedy(Q);
+	} else{ //If we did not commit to an action yet:
+		nextAction = rand() % numTotalActions;
+	}
+	
+	//What if the next action is an option?
+	if(nextAction >= numBasicActions){
+		optionBeingPlayed.push_back(nextAction - numBasicActions);
+		nextAction = actionFromOptions(Features, learnedOptions);
+	}
+
+	if(optionBeingPlayed.size() > 1){
+		termProb = 0.01 /*0.05 x 0.2*/;
+	} else{
+		termProb = 0.05;
+	}
+
+	if(rand()%1000 < 1000 * termProb){
+		if(optionBeingPlayed.size() != 0){
+			//int currentOption = optionBeingPlayed[optionBeingPlayed.size() - 1];
+			//printf("stopping option %d\n", currentOption);
+			optionBeingPlayed.pop_back();
+		}
+	}
+
+	return nextAction;
+}
+
+int SarsaExpReplay::getNextAction(vector<int> &Features, vector<float> &QValues, 
+	int episode, vector<vector<vector<float> > > &learnedOptions){
+	int nextAction = -1;
+	if(episode % 10 < 5){
+		nextAction = actionFromOptions(Features, learnedOptions);
+	}
+	else{
+		nextAction = epsilonGreedy(QValues);
+	}
+	return nextAction;
+}
+
+
 void SarsaExpReplay::learnPolicy(ALEInterface& ale, Features *features, vector<vector<vector<float> > > &learnedOptions){
 	struct timeval tvBegin, tvEnd, tvDiff;
 	vector<float> reward;
@@ -190,7 +246,9 @@ void SarsaExpReplay::learnPolicy(ALEInterface& ale, Features *features, vector<v
 		F.clear();
 		features->getActiveFeaturesIndices(ale.getScreen(), ale.getRAM(), F);
 		updateQValues(F, Q);
-		currentAction = epsilonGreedy(Q);
+		//currentAction = epsilonGreedy(Q);
+		currentAction = getNextAction(F, Q, episode, learnedOptions);
+
 		//Repeat(for each step of episode) until game is over:
 		gettimeofday(&tvBegin, NULL);
 
@@ -210,7 +268,8 @@ void SarsaExpReplay::learnPolicy(ALEInterface& ale, Features *features, vector<v
 				Fnext.clear();
 				features->getActiveFeaturesIndices(ale.getScreen(), ale.getRAM(), Fnext);
 				updateQValues(Fnext, Qnext);     //Update Q-values for the new active features
-				nextAction = epsilonGreedy(Qnext);
+				//nextAction = epsilonGreedy(Qnext);
+				nextAction = getNextAction(F, Q, episode, learnedOptions);
 			}
 			else{
 				nextAction = 0;
@@ -242,6 +301,9 @@ void SarsaExpReplay::learnPolicy(ALEInterface& ale, Features *features, vector<v
 		elapsedTime = float(tvDiff.tv_sec) + float(tvDiff.tv_usec)/1000000.0;
 		
 		float fps = float(ale.getEpisodeFrameNumber())/elapsedTime;
+		if(episode % 10 < 5){
+			printf("*");
+		}
 		printf("episode: %d,\t%.0f points,\tavg. return: %.1f,\t%d frames,\t%.0f fps\n",
 			episode + 1, cumReward - prevCumReward, (float)cumReward/(episode + 1.0),
 			ale.getEpisodeFrameNumber(), fps);
