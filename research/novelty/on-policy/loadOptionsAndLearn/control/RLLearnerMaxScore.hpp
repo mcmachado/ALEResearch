@@ -74,7 +74,7 @@ class RLLearner : public Agent{
 		void playOption(ALEInterface& ale, int option, Features *features, std::vector<float> &reward, 
 			std::vector<std::vector<std::vector<float> > > &learnedOptions, std::vector<std::vector<float> > &w);
 
-		bool toInterruptOption(int action, std::vector<int> &Features, vector<vector<float> > &w);
+		bool toInterruptOption(int action, std::vector<int> &Features, std::vector<std::vector<float> > &w);
 
 	public:
 	   /**
