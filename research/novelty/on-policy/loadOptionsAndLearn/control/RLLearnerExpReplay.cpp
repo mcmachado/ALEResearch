@@ -50,27 +50,6 @@ int RLLearner::epsilonGreedy(vector<float> &QValues){
 	return action;
 }
 
-bool RLLearner::toInterruptOption(int currentOption, vector<int> &Features, vector<vector<float> > &w){
-
-	vector<float> Q(w.size(), 0.0);    //Q(a) entries
-	//Update Q-values for each possible action
-	for(int a = 0; a < w.size(); a++){
-		float sumW = 0;
-		for(unsigned int i = 0; i < Features.size(); i++){
-			sumW += w[a][Features[i]];
-		}
-		Q[a] = sumW;
-	}
-
-	int bestAction = Mathematics::argmax(Q);
-
-	if(Q[bestAction] - Q[currentOption] < 10e-3){
-		return false;
-	} else {
-		return true;
-	}
-}
-
 void RLLearner::playOption(ALEInterface& ale, int option, Features *features,
 	vector<float> &reward, vector<vector<vector<float> > > &learnedOptions,
 	vector<std::vector<float> > &w){
@@ -113,9 +92,6 @@ void RLLearner::playOption(ALEInterface& ale, int option, Features *features,
 
 		currentAction = epsilonGreedy(Q);
 
-		if(toInterruptOption(currentAction, Fbpro, w)){
-			return;
-		}
 		/* Now things get nasty. We need to do it recursively because one 
 		option can call another one. Hopefully everything is going to work.*/
 		this->act(ale, currentAction, features, reward, learnedOptions, w);
@@ -132,13 +108,8 @@ void RLLearner::act(ALEInterface& ale, int action, Features *features,
 	vector<std::vector<float> > &w){
 	float r_alg = 0.0, r_real = 0.0;
 
-	if(action < numBasicActions){
-		r_real = ale.act(actions[action]);
-	} 
-	else{
-		int option_idx = action - numBasicActions;
-		playOption(ale, option_idx, features, reward, learnedOptions, w);
-	}
+	r_real = ale.act(actions[action]);
+
 	/* Here I am letting the option return a single reward and then I am
 	 normalizing over it. I don't know if it is not better to normalize
 	 each step of the option. */

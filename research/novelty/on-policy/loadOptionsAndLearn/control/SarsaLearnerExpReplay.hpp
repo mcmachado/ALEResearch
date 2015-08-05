@@ -23,6 +23,8 @@ class SarsaExpReplay : public RLLearner{
 
 		std::string nameWeightsFile, pathWeightsFileToLoad;
 
+		std::vector<int> optionBeingPlayed;
+
 		std::vector<int> F;							//Set of features active
 		std::vector<int> Fnext;              		//Set of features active in next state
 		std::vector<float> Q;               		//Q(a) entries
@@ -68,6 +70,10 @@ class SarsaExpReplay : public RLLearner{
  		* Loads the weights saved in a file. Each line will contain a weight.
  		*/		
 		void loadWeights();
+
+		int actionFromOptions(vector<int> &Features, std::vector<std::vector<std::vector<float> > > &learnedOptions);
+		int getNextAction(vector<int> &Features, vector<float> &QValues, 
+			int episode, std::vector<std::vector<std::vector<float> > > &learnedOptions);
 
 	public:
 		SarsaExpReplay(ALEInterface& ale, Features *features, Parameters *param);
