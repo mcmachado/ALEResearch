@@ -42,11 +42,13 @@ class BlobTimeFeatures : public Features::Features{
         int colorMultiplier;
     
         int numResolutions;
-        vector<tuple<int,int> >* fullNeighbors;
-        vector<tuple<int,int> >* extraNeighbors;
+        vector<vector<vector<unsigned short> > >* fullNeighbors;
+        vector<vector<vector<unsigned short> > >* extraNeighbors;
     
-        unordered_map<int,vector<tuple<int,int> > > blobs;
-        unordered_map<int,vector<tuple<int,int> > > previousBlobs;
+        vector<vector<tuple<int,int> > > blobs;
+        vector<vector<tuple<int,int> > > previousBlobs;
+        vector<int> blobActiveColors;
+        vector<int> previousBlobActiveColors;
     
         vector<tuple<int,int> > resolutions;
         vector<tuple<int,int> > numBlocks;
@@ -62,7 +64,7 @@ class BlobTimeFeatures : public Features::Features{
         int neighborSize;
     
     void getBlobs(const ALEScreen &screen);
-    void getBasicFeatures(vector<long long>& features,unordered_map<int,vector<tuple<int,int> > >& blobs);
+    void getBasicFeatures(vector<long long>& features);
     void addRelativeFeaturesIndices(vector<long long>& features);
     void addTimeDimensionalOffsets(vector<long long>& features);
     void addThreePointOffsetsIndices(vector<long long>& features, tuple<int,int>& offset, tuple<int,int>& p1, long long& bproIndex);
