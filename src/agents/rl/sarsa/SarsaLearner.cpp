@@ -220,7 +220,6 @@ void SarsaLearner::learnPolicy(ALEInterface& ale, Features *features){
     vector<double> episodeFps;
 
 	//Repeat (for each episode):
-	//This is going to be interrupted by the ALE code since I set max_num_frames beforehand
 	for(int episode = episodePassed+1; totalNumberFrames < totalNumberOfFramesToLearn; episode++){
 		//We have to clean the traces every episode:
 		for(unsigned int a = 0; a < nonZeroElig.size(); a++){
@@ -243,11 +242,12 @@ void SarsaLearner::learnPolicy(ALEInterface& ale, Features *features){
 			reward.push_back(0.0);
 			reward.push_back(0.0);
 			updateQValues(F, Q);
-
 			sanityCheck();
+
 			//Take action, observe reward and next state:
 			act(ale, currentAction, reward);
 			cumReward  += reward[1];
+
 			if(!ale.game_over()){
 				//Obtain active features in the new state:
 				Fnext.clear();
