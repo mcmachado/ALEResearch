@@ -12,6 +12,7 @@
 
 #include "SarsaLearnerExpReplay.hpp"
 #include "../../../../../src/common/Timer.hpp"
+#include "../../../../../src/common/Mathematics.hpp"
 
 using namespace std;
 
@@ -77,49 +78,6 @@ void SarsaExpReplay::updateReplTrace(int action, vector<int> &Features){
 			}
 		}
 		nonZeroElig[a].resize(numNonZero);
-	}
-
-	//For all i in Fa:
-	for(unsigned int i = 0; i < Features.size(); i++){
-		int idx = Features[i];
-		//If the trace is zero it is not in the vector
-		//of non-zeros, thus it needs to be added
-		if(e[action][idx] == 0){
-	       nonZeroElig[action].push_back(idx);
-	    }
-		e[action][idx] = 1;
-	}
-}
-
-void SarsaExpReplay::updateAcumTrace(int action, vector<int> &Features){
-	//e <- gamma * lambda * e
-	for(unsigned int a = 0; a < nonZeroElig.size(); a++){
-		int numNonZero = 0;
-	 	for(unsigned int i = 0; i < nonZeroElig[a].size(); i++){
-	 		int idx = nonZeroElig[a][i];
-	 		//To keep the trace sparse, if it is
-	 		//less than a threshold it is zero-ed.
-			e[a][idx] = gamma * lambda * e[a][idx];
-			if(e[a][idx] < traceThreshold){
-				e[a][idx] = 0;
-			}
-			else{
-				nonZeroElig[a][numNonZero] = idx;
-		  		numNonZero++;
-			}
-		}
-		nonZeroElig[a].resize(numNonZero);
-	}
-
-	//For all i in Fa:
-	for(unsigned int i = 0; i < Features.size(); i++){
-		int idx = Features[i];
-		//If the trace is zero it is not in the vector
-		//of non-zeros, thus it needs to be added
-		if(e[action][idx] == 0){
-	       nonZeroElig[action].push_back(idx);
-	    }
-		e[action][idx] += 1;
 	}
 }
 
@@ -194,7 +152,7 @@ int SarsaExpReplay::actionFromOptions(vector<int> &Features, vector<vector<vecto
 	}
 
 	if(optionBeingPlayed.size() > 1){
-		termProb = 0.01 /*0.05 x 0.2*/;
+		termProb = 0.20;
 	} else{
 		termProb = 0.05;
 	}
@@ -234,7 +192,8 @@ void SarsaExpReplay::learnPolicy(ALEInterface& ale, Features *features, vector<v
 	//Repeat (for each episode):
 	int episode, totalNumberFrames = 0;
 	//This is going to be interrupted by the ALE code since I set max_num_frames beforehand
-	for(episode = 0; totalNumberFrames < totalNumberOfFramesToLearn; episode++){ 
+	for(episode = 0; totalNumberFrames < totalNumberOfFramesToLearn; episode++){
+
 		//We have to clean the traces every episode:
 		for(unsigned int a = 0; a < nonZeroElig.size(); a++){
 			for(unsigned int i = 0; i < nonZeroElig[a].size(); i++){
@@ -245,11 +204,12 @@ void SarsaExpReplay::learnPolicy(ALEInterface& ale, Features *features, vector<v
 		}
 		F.clear();
 		features->getActiveFeaturesIndices(ale.getScreen(), ale.getRAM(), F);
-		updateQValues(F, Q);
-		//currentAction = epsilonGreedy(Q);
-		currentAction = getNextAction(F, Q, episode, learnedOptions);
-
-		//Repeat(for each step of episode) until game is over:
+		//To ensure the learning rate will never increase along
+		//the time, Marc used such approach in his JAIR paper		
+		if (F.size() > maxFeatVectorNorm){
+			maxFeatVectorNorm = F.size();
+		}
+		//currentAction = getNextAction(F, Q, episode, learnedOptions);
 		gettimeofday(&tvBegin, NULL);
 
 		//This also stops when the maximum number of steps per episode is reached
@@ -257,19 +217,21 @@ void SarsaExpReplay::learnPolicy(ALEInterface& ale, Features *features, vector<v
 			reward.clear();
 			reward.push_back(0.0);
 			reward.push_back(0.0);
-			updateQValues(F, Q);			
-
+			updateQValues(F, Q);
 			sanityCheck();
+
 			//Take action, observe reward and next state:
+			currentAction = getNextAction(F, Q, episode, learnedOptions);
 			act(ale, currentAction, features, reward, learnedOptions, w);
 			cumReward  += reward[1];
+
 			if(!ale.game_over()){
 				//Obtain active features in the new state:
 				Fnext.clear();
 				features->getActiveFeaturesIndices(ale.getScreen(), ale.getRAM(), Fnext);
 				updateQValues(Fnext, Qnext);     //Update Q-values for the new active features
-				//nextAction = epsilonGreedy(Qnext);
-				nextAction = getNextAction(F, Q, episode, learnedOptions);
+				//nextAction = getNextAction(F, Q, episode, learnedOptions);
+				nextAction = Mathematics::argmax(Qnext);
 			}
 			else{
 				nextAction = 0;
@@ -285,7 +247,29 @@ void SarsaExpReplay::learnPolicy(ALEInterface& ale, Features *features, vector<v
 
 			delta = reward[0] + gamma * Qnext[nextAction] - Q[currentAction];
 
-			updateReplTrace(currentAction, F);
+			if(randomActionTaken) {
+				for(unsigned int a = 0; a < nonZeroElig.size(); a++){
+					for(unsigned int i = 0; i < nonZeroElig[a].size(); i++){
+						int idx = nonZeroElig[a][i];
+						e[a][idx] = 0.0;
+					}
+					nonZeroElig[a].clear();
+				}
+			}
+			else{
+				updateReplTrace(currentAction, F);
+			}
+			//For all i in Fa:
+			for(unsigned int i = 0; i < F.size(); i++){
+				int idx = F[i];
+				//If the trace is zero it is not in the vector
+				//of non-zeros, thus it needs to be added
+				if(e[currentAction][idx] == 0){
+			       nonZeroElig[currentAction].push_back(idx);
+			    }
+				e[currentAction][idx] = 1;
+			}
+
 			//Update weights vector:
 			for(unsigned int a = 0; a < nonZeroElig.size(); a++){
 				for(unsigned int i = 0; i < nonZeroElig[a].size(); i++){
@@ -294,7 +278,6 @@ void SarsaExpReplay::learnPolicy(ALEInterface& ale, Features *features, vector<v
 				}
 			}
 			F = Fnext;
-			currentAction = nextAction;
 		}
 		gettimeofday(&tvEnd, NULL);
 		timeval_subtract(&tvDiff, &tvEnd, &tvBegin);
