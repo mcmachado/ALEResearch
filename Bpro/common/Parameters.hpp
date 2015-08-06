@@ -53,6 +53,7 @@ class Parameters{
         int numResolutions;
         int epsilonDecay;
         int finalExplorationFrame;
+        int neighborSize;
 
 	   /**
  		* Constructor defined as private to force the use of the constructor 
@@ -222,6 +223,7 @@ class Parameters{
         void setResolutions(int a);
         void setEpsilonDecay(int a);
         void setFinalExplorationFrame(int a);
+        void setNeighborSize(int a);
 		
 	public:
 		/**
@@ -360,4 +362,5 @@ class Parameters{
         int getResolutions();
         int getEpsilonDecay();
         int getFinalExplorationFrame();
+        int getNeighborSize();
 };

@@ -214,6 +214,12 @@ void Parameters::parseParametersFromConfigFile(std::string cfgFileName){
     }else{
         this->setFinalExplorationFrame(0);
     }
+    
+    if (parameters.count("NEIGHBOR_SIZE")>0){
+        this->setNeighborSize(atoi(parameters["NEIGHBOR_SIZE"].c_str()));
+    }else{
+        this->setNeighborSize(3);
+    }
 }
 
 void Parameters::setSaveTrajectoryPath(std::string name){
@@ -444,6 +450,10 @@ void Parameters::setFinalExplorationFrame(int a){
     this->finalExplorationFrame = a;
 }
 
+void Parameters::setNeighborSize(int a){
+    this->neighborSize = a;
+}
+
 std::string Parameters::getPathToWeightsFiles(){
 	return this->pathToWeightsFiles;
 }
@@ -486,4 +496,8 @@ int Parameters::getEpsilonDecay() {
 
 int Parameters::getFinalExplorationFrame(){
     return this->finalExplorationFrame;
+}
+
+int Parameters::getNeighborSize(){
+    return this->neighborSize;
 }
