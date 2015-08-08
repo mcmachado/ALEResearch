@@ -51,7 +51,7 @@ BPROFeatures::BPROFeatures(Parameters *param){
 BPROFeatures::~BPROFeatures(){}
 
 int BPROFeatures::getBasicFeaturesIndices(const ALEScreen &screen, int blockWidth, int blockHeight, 
-                                          vector<vector<tuple<int,int> > > &whichColors, vector<long long>& features){
+                                          vector<vector<tuple<int,int> > > &whichColors, vector<int>& features){
 	int featureIndex = 0;
 	// For each pixel block
 	for (int by = 0; by < numRows; by++) {
@@ -94,8 +94,8 @@ int BPROFeatures::getBasicFeaturesIndices(const ALEScreen &screen, int blockWidt
 	return featureIndex;
 }
 
-void BPROFeatures::addRelativeFeaturesIndices(const ALEScreen &screen, long long featureIndex,
-	vector<vector<tuple<int,int> > > &whichColors, vector<long long>& features){
+void BPROFeatures::addRelativeFeaturesIndices(const ALEScreen &screen, int featureIndex,
+	vector<vector<tuple<int,int> > > &whichColors, vector<int>& features){
 
 	int numRowOffsets = 2*numRows - 1;
 	int numColumnOffsets = 2*numColumns - 1;
@@ -146,7 +146,7 @@ void BPROFeatures::addRelativeFeaturesIndices(const ALEScreen &screen, long long
     }    
 }
 
-void BPROFeatures::getActiveFeaturesIndices(const ALEScreen &screen, const ALERAM &ram, vector<long long>& features){
+void BPROFeatures::getActiveFeaturesIndices(const ALEScreen &screen, const ALERAM &ram, vector<int>& features){
 	int screenWidth = screen.width();
 	int screenHeight = screen.height();
 	int blockWidth = screenWidth / numColumns;
@@ -170,7 +170,7 @@ void BPROFeatures::getActiveFeaturesIndices(const ALEScreen &screen, const ALERA
 	features.push_back(numBasicFeatures+numRelativeFeatures);
 }
 
-long long BPROFeatures::getNumberOfFeatures(){
+int BPROFeatures::getNumberOfFeatures(){
     return numBasicFeatures + numRelativeFeatures + 1;
 }
 

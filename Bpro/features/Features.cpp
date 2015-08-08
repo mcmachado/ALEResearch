@@ -15,11 +15,11 @@
 
 #include "Features.hpp"
 
-void Features::getCompleteFeatureVector(const ALEScreen &screen, const ALERAM &ram, std::vector<bool>& features){	
+void Features::getCompleteFeatureVector(const ALEScreen &screen, const ALERAM &ram, std::vector<bool>& features){
 	assert(features.size() == 0); //If the vector is not empty this can be a mess
 	//Get vector with active features:
-	std::vector<long long> temp;
-	std::vector<long long>& t = temp;
+	std::vector<int> temp;
+	std::vector<int>& t = temp;
 	this->getActiveFeaturesIndices(screen, ram, t);
 	//Iterate over vector with all features storing the non-zero indices in the new vector:
 	features = std::vector<bool>(this->getNumberOfFeatures(), 0);

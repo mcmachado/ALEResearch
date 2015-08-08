@@ -103,6 +103,6 @@ void BasicFeatures::getActiveFeaturesIndices(const ALEScreen &screen, const ALER
     features.push_back(this->param->getNumColumns() * this->param->getNumRows() * this->param->getNumColors());
 }
 
-long long BasicFeatures::getNumberOfFeatures(){
+int BasicFeatures::getNumberOfFeatures(){
     return numberOfFeatures + 1;
 }

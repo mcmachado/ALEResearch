@@ -24,7 +24,7 @@ class RLLearner : public Agent{
 		int    randomActionTaken, numActions;
 		int    episodeLength, numEpisodesEval;
 		int    totalNumberOfFramesToLearn;
-        	std::mt19937 agentRand;
+        std::mt19937 agentRand;
 
 		/**
  		* It acts in the environment and makes the proper operations in the reward signal (normalizing,

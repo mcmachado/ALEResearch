@@ -31,15 +31,16 @@ SarsaLearner::SarsaLearner(ALEInterface& ale, Features *features, Parameters *pa
     toSaveCheckPoint = param->getToSaveCheckPoint();
     saveWeightsEveryXFrames = param->getFrequencySavingWeights();
 	pathWeightsFileToLoad = param->getPathToWeightsFiles();
-    //featureSeen.resize(numActions);
+    featureSeen.resize(numActions);
 	
 	for(int i = 0; i < numActions; i++){
 		//Initialize Q;
 		Q.push_back(0);
 		Qnext.push_back(0);
 		//Initialize e:
-		e.push_back(unordered_map<long long, float>());
-		w.push_back(unordered_map<long long,float>());
+		e.push_back(vector<float>(numFeatures, 0.0));
+		w.push_back(vector<float>(numFeatures, 0.0));
+		nonZeroElig.push_back(vector<int>());
 	}
     
     episodePassed = 0;
@@ -67,63 +68,77 @@ SarsaLearner::SarsaLearner(ALEInterface& ale, Features *features, Parameters *pa
 
 SarsaLearner::~SarsaLearner(){}
 
-void SarsaLearner::updateQValues(vector<long long> &Features, vector<float> &QValues){
+void SarsaLearner::updateQValues(vector<int> &Features, vector<float> &QValues){
 	for(int a = 0; a < numActions; a++){
-		float sumW = 0;
-		for(unsigned long long i = 0; i < Features.size(); i++){
-            auto got = w[a].find(Features[i]);
-            if (got!=w[a].end()){
-                sumW += w[a][Features[i]];
-            }
+		double sumW = 0;
+		for(unsigned int i = 0; i < Features.size(); i++){
+			sumW += w[a][Features[i]];
 		}
 		QValues[a] = sumW;
 	}
 }
 
-void SarsaLearner::updateReplTrace(int action, vector<long long> &Features){
+void SarsaLearner::updateReplTrace(int action, vector<int> &Features){
 	//e <- gamma * lambda * e
-	for(unsigned int a = 0; a < e.size(); a++){
-        for (auto it=e[a].begin();it!=e[a].end();){
-            it->second = it->second*gamma*lambda;
-            if (it->second<traceThreshold){
-                it = e[a].erase(it);
-            }else{
-                it++;
-            }
-        }
-    }
+	for(unsigned int a = 0; a < nonZeroElig.size(); a++){
+		int numNonZero = 0;
+		for(unsigned int i = 0; i < nonZeroElig[a].size(); i++){
+			int idx = nonZeroElig[a][i];
+			//To keep the trace sparse, if it is
+			//less than a threshold it is zero-ed.
+			e[a][idx] = gamma * lambda * e[a][idx];
+			if(e[a][idx] < traceThreshold){
+				e[a][idx] = 0;
+			}
+			else{
+				nonZeroElig[a][numNonZero] = idx;
+				numNonZero++;
+			}
+		}
+		nonZeroElig[a].resize(numNonZero);
+	}
+
 	//For all i in Fa:
 	for(unsigned int i = 0; i < F.size(); i++){
-		long long idx = Features[i];
+		int idx = Features[i];
 		//If the trace is zero it is not in the vector
 		//of non-zeros, thus it needs to be added
+		if(e[action][idx] == 0){
+			nonZeroElig[action].push_back(idx);
+		}
 		e[action][idx] = 1;
 	}
 }
 
-void SarsaLearner::updateAcumTrace(int action, vector<long long> &Features){
+void SarsaLearner::updateAcumTrace(int action, vector<int> &Features){
 	//e <- gamma * lambda * e
-    for(unsigned int a = 0; a < e.size(); a++){
-        for (auto it=e[a].begin();it!=e[a].end();){
-            it->second = gamma*lambda;
-            if (it->second<traceThreshold){
-                it = e[a].erase(it);
-            }else{
-                it++;
-            }
-        }
-    }
+	for(unsigned int a = 0; a < nonZeroElig.size(); a++){
+		int numNonZero = 0;
+		for(unsigned int i = 0; i < nonZeroElig[a].size(); i++){
+			int idx = nonZeroElig[a][i];
+			//To keep the trace sparse, if it is
+			//less than a threshold it is zero-ed.
+			e[a][idx] = gamma * lambda * e[a][idx];
+			if(e[a][idx] < traceThreshold){
+				e[a][idx] = 0;
+			}
+			else{
+				nonZeroElig[a][numNonZero] = idx;
+				numNonZero++;
+			}
+		}
+		nonZeroElig[a].resize(numNonZero);
+	}
+
 	//For all i in Fa:
 	for(unsigned int i = 0; i < F.size(); i++){
-		long long idx = Features[i];
+		int idx = Features[i];
 		//If the trace is zero it is not in the vector
 		//of non-zeros, thus it needs to be added
-        auto got = e[action].find(idx);
-        if (got==e[action].end()){
-            e[action][idx]=1;
-        }else{
-            got->second+=1;
-        }
+		if(e[action][idx] == 0){
+			nonZeroElig[action].push_back(idx);
+		}
+		e[action][idx] += 1;
 	}
 }
 
@@ -166,12 +181,11 @@ void SarsaLearner::saveCheckPoint(int episode, int totalNumberFrames, vector<flo
     checkPointFile << episode<<endl;
     checkPointFile << firstReward<<endl;
     checkPointFile << maxFeatVectorNorm<<endl;
-    for (int a=0;a<w.size();a++){
-        for (auto it=w[a].begin(); it!=w[a].end();it++){
-            checkPointFile<<a<<" "<<it->first<<" "<<it->second<<"\t";
+    for (int a=0;a<featureSeen.size();a++){
+        for (int index=0; index<featureSeen[a].size();index++){
+            checkPointFile<<a<<" "<<featureSeen[a][index]<<" "<<w[a][featureSeen[a][index]]<<"\t";
         }
     }
-    
     checkPointFile << endl;
     checkPointFile.close();
     string previousVersionCheckPoint = checkPointName+"-checkPoint-Frames"+std::to_string((long long int)saveThreshold-saveWeightsEveryXFrames)+"-finished.txt";
@@ -209,12 +223,15 @@ void SarsaLearner::learnPolicy(ALEInterface& ale, Features *features){
 
 	//Repeat (for each episode):
 	//This is going to be interrupted by the ALE code since I set max_num_frames beforehand
-    for(int episode = episodePassed+1; totalNumberFrames < totalNumberOfFramesToLearn; episode++){
+	for(int episode = episodePassed+1; totalNumberFrames < totalNumberOfFramesToLearn; episode++){
 		//We have to clean the traces every episode:
-		for(unsigned int a = 0; a < e.size(); a++){
-            e[a].clear();
-        }
-        
+		for(unsigned int a = 0; a < nonZeroElig.size(); a++){
+			for(unsigned int i = 0; i < nonZeroElig[a].size(); i++){
+				int idx = nonZeroElig[a][i];
+				e[a][idx] = 0.0;
+			}
+			nonZeroElig[a].clear();
+		}
 		F.clear();
 		features->getActiveFeaturesIndices(ale.getScreen(), ale.getRAM(), F);
 		updateQValues(F, Q);
@@ -255,18 +272,13 @@ void SarsaLearner::learnPolicy(ALEInterface& ale, Features *features){
 
 			updateReplTrace(currentAction, F);
 			//Update weights vector:
-			for(unsigned int a = 0; a < e.size(); a++){
-				for(auto it=e[a].begin();it!=e[a].end();it++){
-					long long idx = it->first;
-                    float changeAmount = (alpha/maxFeatVectorNorm)*delta*it->second;
-                    if (changeAmount!=0){
-                        auto got = w[a].find(idx);
-                        if (got==w[a].end()){
-                            w[a][idx]=changeAmount;
-                        }else{
-                            got->second+=changeAmount;
-                        }
+			for(unsigned int a = 0; a < nonZeroElig.size(); a++){
+				for(unsigned int i = 0; i < nonZeroElig[a].size(); i++){
+					int idx = nonZeroElig[a][i];
+                    if (w[a][idx]==0 && delta!=0){
+                        featureSeen[a].push_back(idx);
                     }
+					w[a][idx] = w[a][idx] + (alpha/maxFeatVectorNorm) * delta * e[a][idx];
 				}
 			}
 			F = Fnext;
