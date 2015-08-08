@@ -23,10 +23,8 @@
 #endif
 #ifndef BASIC_H
 #define BASIC_H
-#include "features/BlobTimeFeatures.hpp"
+#include "features/BasicFeatures.hpp"
 #endif
-
-//#include <random>
 
 void printBasicInfo(Parameters param){
 	printf("Seed: %d\n", param.getSeed());
@@ -48,26 +46,23 @@ int main(int argc, char** argv){
 	srand(param.getSeed());
 	
 	//Using Basic features:
-	BlobTimeFeatures features(&param);
+	BasicFeatures features(&param);
 	//Reporting parameters read:
 	printBasicInfo(param);
 	
 	ALEInterface ale(param.getDisplay());
 
-	ale.setFloat("repeat_action_probability", 0.00);
+	ale.setFloat("stochasticity", 0.00);
 	ale.setInt("random_seed", param.getSeed());
 	ale.setFloat("frame_skip", param.getNumStepsPerAction());
 	ale.setInt("max_num_frames_per_episode", param.getEpisodeLength());
-    ale.setBool("color_averaging", true);
 
 	ale.loadROM(param.getRomPath().c_str());
 
-    //mt19937 agentRand(param.getSeed());
 	//Instantiating the learning algorithm:
-	SarsaLearner sarsaLearner(ale, &features, &param, param.getSeed());
+	SarsaLearner sarsaLearner(ale, &features, &param);
     //Learn a policy:
     sarsaLearner.learnPolicy(ale, &features);
-    
 
     printf("\n\n== Evaluation without Learning == \n\n");
     sarsaLearner.evaluatePolicy(ale, &features);

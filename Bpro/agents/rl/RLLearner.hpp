@@ -16,7 +16,7 @@ class RLLearner : public Agent{
 	protected:
 		ActionVect actions;
 
-		float gamma, finalEpsilon;
+		float gamma, epsilon;
 		float firstReward;
 		bool   sawFirstReward;
 
@@ -24,9 +24,7 @@ class RLLearner : public Agent{
 		int    randomActionTaken, numActions;
 		int    episodeLength, numEpisodesEval;
 		int    totalNumberOfFramesToLearn;
-        int epsilonDecay;
-        int finalExplorationFrame;
-        mt19937 agentRand;
+        	std::mt19937 agentRand;
 
 		/**
  		* It acts in the environment and makes the proper operations in the reward signal (normalizing,
@@ -49,8 +47,7 @@ class RLLearner : public Agent{
  		*
  		* @return int action to be taken
  		*/
-		int epsilonGreedy(vector<float> &QValues);
-        int epsilonGreedy(vector<float> &QValues,int episode);
+		int epsilonGreedy(std::vector<float> &QValues);
 
 		/**
 		* Constructor to be used by the RL classes to save the parameters that

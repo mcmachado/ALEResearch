@@ -2,10 +2,10 @@
 #
 # Author: Marlos C. Machado
 
-ALE := /Users/MikeLyt/Desktop/AI/Arcade-Learning-Environment
+ALE := ../../MyALE/
 
 # Set this to 1 to enable SDL and display_screen
-USE_SDL     := 0
+USE_SDL     := 1
 
 # -O3 Optimize code (urns on all optimizations specified by -O2 and also turns on the -finline-functions, -funswitch-loops, -fpredictive-commoning, -fgcse-after-reload, -ftree-loop-vectorize, -ftree-slp-vectorize, -fvect-cost-model, -ftree-partial-pre and -fipa-cp-clone options).
 # -D__USE_SDL Ensures we can use SDL to see the game screen

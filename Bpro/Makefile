@@ -16,20 +16,22 @@ CXX := g++ -std=c++11
 OUT_FILE := learner
 # Search for library 'ale' and library 'z' when linking.
 LDFLAGS := -lale -lz -lm
-HASHFLAG := -I ./sparsehash/include
 
 ifeq ($(strip $(USE_SDL)), 1)
   FLAGS +=  -D__USE_SDL `sdl-config --cflags --libs`
   LDFLAGS += -lSDL -lSDL_gfx -lSDL_image
 endif
 
-all: learnerBlobTime
+all: learnerBpro
 
-learnerBlobTime: bin/mainBlobTime.o bin/Mathematics.o bin/Parameters.o bin/Timer.o bin/Features.o bin/Background.o bin/BlobTimeFeatures.o bin/RLLearner.o bin/SarsaLearner.o
-	$(CXX) $(FLAGS) bin/mainBlobTime.o bin/Mathematics.o bin/Timer.o bin/Parameters.o bin/Features.o bin/Background.o bin/BlobTimeFeatures.o bin/RLLearner.o bin/SarsaLearner.o -o learnerBlobTime
+learnerBpro: bin/mainBpro.o bin/Mathematics.o bin/Parameters.o bin/Timer.o bin/Features.o bin/Background.o bin/BPROFeatures.o bin/RLLearner.o bin/SarsaLearner.o
+	$(CXX) $(FLAGS) bin/mainBpro.o bin/Mathematics.o bin/Timer.o bin/Parameters.o bin/Features.o bin/Background.o bin/BPROFeatures.o bin/RLLearner.o bin/SarsaLearner.o -o learnerBpro
 
-bin/mainBlobTime.o: mainBlobTime.cpp
-	$(CXX) $(FLAGS) -c mainBlobTime.cpp -o bin/mainBlobTime.o
+bin/mainBpro.o: mainBpro.cpp
+	$(CXX) $(FLAGS) -c mainBpro.cpp -o bin/mainBpro.o
+
+bin/mainRedundant.o: mainRedundant.cpp
+	$(CXX) $(FLAGS) -c mainRedundant.cpp -o bin/mainRedundant.o
 
 bin/Mathematics.o: common/Mathematics.cpp
 	$(CXX) $(FLAGS) -c common/Mathematics.cpp -o bin/Mathematics.o
@@ -46,8 +48,8 @@ bin/Features.o: features/Features.cpp
 bin/Background.o: features/Background.cpp
 	$(CXX) $(FLAGS) -c features/Background.cpp -o bin/Background.o
 	
-bin/BlobTimeFeatures.o: features/BlobTimeFeatures.cpp
-	$(CXX) $(FLAGS) -c features/BlobTimeFeatures.cpp -o bin/BlobTimeFeatures.o	
+bin/BPROFeatures.o: features/BPROFeatures.cpp
+	$(CXX) $(FLAGS) -c features/BPROFeatures.cpp -o bin/BPROFeatures.o	
 	
 bin/RLLearner.o: agents/rl/RLLearner.cpp
 	$(CXX) $(FLAGS) -c agents/rl/RLLearner.cpp -o bin/RLLearner.o
@@ -57,7 +59,8 @@ bin/SarsaLearner.o: agents/rl/sarsa/SarsaLearner.cpp
 		
 clean:
 	rm -rf ${OUT_FILE} bin/*.o
-	rm -f learner*	
+	rm -f learner*
+	rm -f *.txt	
 
 
 #This command needs to be executed in a osX before running the code:
