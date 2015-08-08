@@ -8,13 +8,13 @@
 ** Author: Marlos C. Machado
 ***************************************************************************************/
 
-#ifndef BPRO_FEATURES_H
-#define BPRO_FEATURES_H
-#include "BPROFeatures.hpp"
+#ifndef REDUNDANT_BPRO_FEATURES_H
+#define REDUNDANT_BPRO_FEATURES_H
+#include "RedundantBPROFeatures.hpp"
 #endif
 #ifndef BASIC_FEATURES_H
 #define BASIC_FEATURES_H
-#include "BasicFeatures.hpp"
+#include "BasicFeatures.hpp"
 #endif
 
 #include <set>
@@ -23,7 +23,7 @@ using namespace std;
 //#include <tuple>
 //#include <boost/tuple/tuple.hpp> //TODO: I have to remove this to not have to depend on boost
 
-BPROFeatures::BPROFeatures(Parameters *param){
+RedundantBPROFeatures::RedundantBPROFeatures(Parameters *param){
     this->param = param;
     numColumns  = param->getNumColumns();
 	numRows     = param->getNumRows();
@@ -48,13 +48,12 @@ BPROFeatures::BPROFeatures(Parameters *param){
     }
 }
 
-BPROFeatures::~BPROFeatures(){}
+RedundantBPROFeatures::~RedundantBPROFeatures(){}
 
-int BPROFeatures::getBasicFeaturesIndices(const ALEScreen &screen, int blockWidth, int blockHeight, 
-                                          vector<vector<tuple<int,int> > > &whichColors, vector<long long>& features){
+int RedundantBPROFeatures::getBasicFeaturesIndices(const ALEScreen &screen, int blockWidth, int blockHeight,
+	vector<vector<vector<int> > > &whichColors, vector<int>& features){
 	int featureIndex = 0;
 	// For each pixel block
-	for (int by = 0; by < numRows; by++) {
 		for (int bx = 0; bx < numColumns; bx++) {
 			//vector<boost::tuple<int, int, int> > posAndColor;
 			
@@ -94,8 +93,8 @@ int BPROFeatures::getBasicFeaturesIndices(const ALEScreen &screen, int blockWidt
 	return featureIndex;
 }
 
-void BPROFeatures::addRelativeFeaturesIndices(const ALEScreen &screen, long long featureIndex,
-	vector<vector<tuple<int,int> > > &whichColors, vector<long long>& features){
+void RedundantBPROFeatures::addRelativeFeaturesIndices(const ALEScreen &screen, int featureIndex,
+	vector<vector<vector<int> > > &whichColors, vector<int>& features){
 
 	int numRowOffsets = 2*numRows - 1;
 	int numColumnOffsets = 2*numColumns - 1;
@@ -146,7 +145,7 @@ void BPROFeatures::addRelativeFeaturesIndices(const ALEScreen &screen, long long
     }    
 }
 
-void BPROFeatures::getActiveFeaturesIndices(const ALEScreen &screen, const ALERAM &ram, vector<long long>& features){
+void RedundantBPROFeatures::getActiveFeaturesIndices(const ALEScreen &screen, const ALERAM &ram, vector<int>& features){
 	int screenWidth = screen.width();
 	int screenHeight = screen.height();
 	int blockWidth = screenWidth / numColumns;
@@ -170,7 +169,7 @@ void BPROFeatures::getActiveFeaturesIndices(const ALEScreen &screen, const ALERA
 	features.push_back(numBasicFeatures+numRelativeFeatures);
 }
 
-long long BPROFeatures::getNumberOfFeatures(){
+int RedundantBPROFeatures::getNumberOfFeatures(){
     return numBasicFeatures + numRelativeFeatures + 1;
 }
 
