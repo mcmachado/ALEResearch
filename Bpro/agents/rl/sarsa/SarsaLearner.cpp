@@ -63,7 +63,7 @@ SarsaLearner::SarsaLearner(ALEInterface& ale, Features *features, Parameters *pa
         }
         saveThreshold = (totalNumberFrames/saveWeightsEveryXFrames)*saveWeightsEveryXFrames;
         ofstream learningConditionFile;
-        nameForLearningCondition = checkPointName+"-learningCondition-Frames"+to_string(saveThreshold)+"-finished.txt";
+        nameForLearningCondition = checkPointName+"-learningCondition-Frames" + std::to_string((long long int)saveThreshold)+"-finished.txt";
         string previousNameForLearningCondition =checkPointName +"-learningCondition.txt";
         rename(previousNameForLearningCondition.c_str(), nameForLearningCondition.c_str());
         saveThreshold+=saveWeightsEveryXFrames;
@@ -359,7 +359,7 @@ void SarsaLearner::learnPolicy(ALEInterface& ale, Features *features){
         episodeFps.push_back(fps);
 		totalNumberFrames += ale.getEpisodeFrameNumber();
 		prevCumReward = cumReward;
-        features->clearCash();
+        features->clearCache();
 		ale.reset_game();
 		if(toSaveCheckPoint && totalNumberFrames>saveThreshold){
             saveCheckPoint(episode,totalNumberFrames,episodeResults,saveWeightsEveryXFrames,episodeFrames,episodeFps);
@@ -403,7 +403,7 @@ void SarsaLearner::evaluatePolicy(ALEInterface& ale, Features *features){
         resultFile<<"Episode "<<episode<<": "<<cumReward-prevCumReward<<std::endl;
 		printf("episode: %d,\t%.0f points,\tavg. return: %.1f,\t%d frames,\t%.0f fps\n", 
 			episode, (cumReward-prevCumReward), (double)cumReward/(episode), ale.getEpisodeFrameNumber(), fps);
-        features->clearCash();
+        features->clearCache();
 		ale.reset_game();
 		prevCumReward = cumReward;
 	}

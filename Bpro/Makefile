@@ -12,7 +12,7 @@ USE_SDL     := 0
 # -D_GNU_SOURCE=1 means the compiler will use the GNU standard of compilation, the superset of all other standards under GNU C libraries.
 # -D_REENTRANT causes the compiler to use thread safe (i.e. re-entrant) versions of several functions in the C library.
 FLAGS := -O3 -I$(ALE)/src -L$(ALE) -lale -lz
-CXX := g++ -std=c++11
+CXX := g++ -std=c++0x
 OUT_FILE := learner
 # Search for library 'ale' and library 'z' when linking.
 LDFLAGS := -lale -lz -lm

@@ -415,7 +415,7 @@ void BlobTimeFeatures::updateRepresentatiePixel(int& x, int& y, Disjoint_Set_Ele
     root->size += other->size;
 }
 
-void BlobTimeFeatures::clearCash(){
+void BlobTimeFeatures::clearCache(){
     previousBlobs.clear();
     previousBlobActiveColors.clear();
 }
