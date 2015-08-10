@@ -25,10 +25,10 @@ class OptionSarsa : public RLLearner{
 
 		vector<int> F;					//Set of features active
 		vector<int> Fnext;              //Set of features active in next state
-		vector<double> Q;               //Q(a) entries
-		vector<double> Qnext;           //Q(a) entries for next action
-		vector<vector<double> > e;      //Eligibility trace
-		vector<vector<double> > w;      //Theta, weights vector
+		vector<float> Q;               //Q(a) entries
+		vector<float> Qnext;           //Q(a) entries for next action
+		vector<vector<float> > e;      //Eligibility trace
+		vector<vector<float> > w;      //Theta, weights vector
 		vector<vector<int> >nonZeroElig;//To optimize the implementation
 
 		/**
@@ -47,7 +47,7 @@ class OptionSarsa : public RLLearner{
  		* It updates the vector<double> Q assuming that vector<int> F is filled, as it sums just the weights
  		* that are active in F.
  		*/
-		void updateQValues(vector<int> &Features, vector<double> &QValues);
+		void updateQValues(vector<int> &Features, vector<float> &QValues);
 		/**
  		* When using Replacing traces, all values not related to the current action are set to 0, while the
  		* values for the current action that their features are active are set to 1. The traces decay following

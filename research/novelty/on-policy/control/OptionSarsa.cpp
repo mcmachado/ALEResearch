@@ -30,8 +30,8 @@ OptionSarsa::OptionSarsa(ALEInterface& ale, Features *features, Parameters *para
 		Q.push_back(0);
 		Qnext.push_back(0);
 		//Initialize e:
-		e.push_back(vector<double>(numFeatures, 0.0));
-		w.push_back(vector<double>(numFeatures, 0.0));
+		e.push_back(vector<float>(numFeatures, 0.0));
+		w.push_back(vector<float>(numFeatures, 0.0));
 		nonZeroElig.push_back(vector<int>());
 	}
 
@@ -48,7 +48,7 @@ OptionSarsa::OptionSarsa(ALEInterface& ale, Features *features, Parameters *para
 
 OptionSarsa::~OptionSarsa(){}
 
-void OptionSarsa::updateQValues(vector<int> &Features, vector<double> &QValues){
+void OptionSarsa::updateQValues(vector<int> &Features, vector<float> &QValues){
 	for(int a = 0; a < numActions; a++){
 		double sumW = 0;
 		for(unsigned int i = 0; i < Features.size(); i++){

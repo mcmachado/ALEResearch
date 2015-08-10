@@ -50,7 +50,7 @@ RLLearner::RLLearner(ALEInterface& ale, Features *features, Parameters *param){
 	}
 }
 
-int RLLearner::epsilonGreedy(vector<double> &QValues){
+int RLLearner::epsilonGreedy(vector<float> &QValues){
 	randomActionTaken = 0;
 
 	int action = Mathematics::argmax(QValues);
