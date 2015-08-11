@@ -128,11 +128,13 @@ void SarsaExpReplay::loadWeights(){
 int SarsaExpReplay::actionFromOptions(vector<int> &Features, vector<vector<vector<float> > > &learnedOptions){
 	float termProb = 0.0;
 	int nextAction = -1;
+	int numActionsInOption = -1;
 	if(optionBeingPlayed.size() != 0){
 		int currentOption = optionBeingPlayed[optionBeingPlayed.size() - 1];
+		numActionsInOption = learnedOptions[currentOption].size();
 		//printf("playing option %d\n", currentOption);
 		//We need to be epsilon-greedy w.r.t. the argmax:
-		vector<float> Q(learnedOptions[currentOption].size(), 0.0);
+		vector<float> Q(numActionsInOption, 0.0);
 		for(int a = 0; a < Q.size(); a++){
 			float sumW = 0;
 			for(unsigned int i = 0; i < Features.size(); i++){
@@ -151,7 +153,7 @@ int SarsaExpReplay::actionFromOptions(vector<int> &Features, vector<vector<vecto
 		nextAction = actionFromOptions(Features, learnedOptions);
 	}
 
-	if(optionBeingPlayed.size() > 1){
+	if(numActionsInOption > numBasicActions){
 		termProb = 0.20;
 	} else{
 		termProb = 0.05;
@@ -159,7 +161,7 @@ int SarsaExpReplay::actionFromOptions(vector<int> &Features, vector<vector<vecto
 
 	if(rand()%1000 < 1000 * termProb){
 		if(optionBeingPlayed.size() != 0){
-			//int currentOption = optionBeingPlayed[optionBeingPlayed.size() - 1];
+			int currentOption = optionBeingPlayed[optionBeingPlayed.size() - 1];
 			//printf("stopping option %d\n", currentOption);
 			optionBeingPlayed.pop_back();
 		}
@@ -179,7 +181,6 @@ int SarsaExpReplay::getNextAction(vector<int> &Features, vector<float> &QValues,
 	}
 	return nextAction;
 }
-
 
 void SarsaExpReplay::learnPolicy(ALEInterface& ale, Features *features, vector<vector<vector<float> > > &learnedOptions){
 	struct timeval tvBegin, tvEnd, tvDiff;
