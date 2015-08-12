@@ -17,6 +17,7 @@
 
 using namespace Eigen;
 
+int ror;
 SarsaSVD::SarsaSVD(Environment<bool>& env, Parameters *param, unsigned nFlavors) : RLLearner<bool>(env, param) {
     delta = 0.0;
 
@@ -56,6 +57,7 @@ SarsaSVD::SarsaSVD(Environment<bool>& env, Parameters *param, unsigned nFlavors)
     if(param->getToLoadWeights()){
         loadWeights();
     }
+    ror=-1;
 }
 
 SarsaSVD::~SarsaSVD(){}
@@ -127,7 +129,6 @@ void SarsaSVD::loadWeights(){
     loadWeights(pathWeightsFileToLoad.c_str());
 }
 
-int rr;
 void SarsaSVD::learnPolicy(Environment<bool>& env){
 
     struct timeval tvBegin, tvEnd, tvDiff;
@@ -355,7 +356,7 @@ void SarsaSVD::learnPolicy(Environment<bool>& env){
         totalNumberFrames += env.getEpisodeFrameNumber();
         if(rank<numFlavors && totalNumberFrames>(rank*2000000)){
             rankIncreaseNeeded = true;
-            rr=rank;
+            ror=rank;
             evaluatePolicy(env);
             std::cout<<"Switching to rank "<<rank+1<<" on episode "<<episode<<std::endl;
         }
@@ -372,7 +373,7 @@ void SarsaSVD::learnPolicy(Environment<bool>& env){
         ss << episode;
         saveWeightsToFile(ss.str());
     }
-    rr=-1;
+    ror=-1;
 }
 
 double SarsaSVD::evaluatePolicy(Environment<bool>& env){
@@ -421,7 +422,7 @@ double SarsaSVD::evaluatePolicy(Environment<bool>& env,unsigned numSteps, bool e
             if(epsilonAnneal)
                 epsilon-=1/(double)(numSteps);
         }
-        if(rr==-1)
+        if(ror==-1)
             std::cerr<<"flavor "<<curFlavor<<"\t"<<cumReward/(double)(numSteps)<<std::endl;
         else
             std::cerr<<"flavor "<<curFlavor<<"\t"<<cumReward/(double)(numSteps)<<" curRank "<<rr<<std::endl;
