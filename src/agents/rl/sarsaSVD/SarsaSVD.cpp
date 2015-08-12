@@ -127,6 +127,7 @@ void SarsaSVD::loadWeights(){
     loadWeights(pathWeightsFileToLoad.c_str());
 }
 
+int rr;
 void SarsaSVD::learnPolicy(Environment<bool>& env){
 
     struct timeval tvBegin, tvEnd, tvDiff;
@@ -352,8 +353,10 @@ void SarsaSVD::learnPolicy(Environment<bool>& env){
             }
         }*/
         totalNumberFrames += env.getEpisodeFrameNumber();
-        if(rank<numFlavors && totalNumberFrames>(rank*3300000)){
+        if(rank<numFlavors && totalNumberFrames>(rank*2000000)){
             rankIncreaseNeeded = true;
+            rr=rank;
+            evaluatePolicy(env);
             std::cout<<"Switching to rank "<<rank+1<<" on episode "<<episode<<std::endl;
         }
         prevCumReward = cumReward;
@@ -369,6 +372,7 @@ void SarsaSVD::learnPolicy(Environment<bool>& env){
         ss << episode;
         saveWeightsToFile(ss.str());
     }
+    rr=-1;
 }
 
 double SarsaSVD::evaluatePolicy(Environment<bool>& env){
@@ -417,7 +421,10 @@ double SarsaSVD::evaluatePolicy(Environment<bool>& env,unsigned numSteps, bool e
             if(epsilonAnneal)
                 epsilon-=1/(double)(numSteps);
         }
-        std::cerr<<"flavor "<<curFlavor<<"\t"<<cumReward/(double)(numSteps)<<std::endl;
+        if(rr==-1)
+            std::cerr<<"flavor "<<curFlavor<<"\t"<<cumReward/(double)(numSteps)<<std::endl;
+        else
+            std::cerr<<"flavor "<<curFlavor<<"\t"<<cumReward/(double)(numSteps)<<" curRank "<<rr<<std::endl;
         totR += cumReward/(double)(numSteps);
     }
     return totR/(double)(numFlavors);

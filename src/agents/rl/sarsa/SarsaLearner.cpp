@@ -14,9 +14,11 @@
 #include <stdio.h>
 #include <math.h>
 
+int rr;
+
 SarsaLearner::SarsaLearner(Environment<bool>& env, Parameters *param) : RLLearner<bool>(env, param) {
 	delta = 0.0;
-	
+    
 	alpha = param->getAlpha();
 	lambda = param->getLambda();
 	traceThreshold = param->getTraceThreshold();
@@ -43,6 +45,8 @@ SarsaLearner::SarsaLearner(Environment<bool>& env, Parameters *param) : RLLearne
 	if(param->getToLoadWeights()){
 		loadWeights();
 	}
+
+    rr=-1;
 }
 
 SarsaLearner::~SarsaLearner(){}
@@ -180,6 +184,7 @@ void SarsaLearner::learnPolicy(Environment<bool>& env, bool transfering,const st
 	//Repeat (for each episode):
 	int episode, totalNumberFrames = 0;
 	//This is going to be interrupted by the ALE code since I set max_num_frames beforehand
+    rr=1;
 	for(episode = 0; totalNumberFrames < totalNumberOfFramesToLearn; episode++){ 
 		//We have to clean the traces every episode:
 		for(unsigned int a = 0; a < e.size(); a++){
@@ -255,6 +260,11 @@ void SarsaLearner::learnPolicy(Environment<bool>& env, bool transfering,const st
 			episode + 1, cumReward - prevCumReward, (double)cumReward/(episode + 1.0),
 			env.getEpisodeFrameNumber(), fps);
 		totalNumberFrames += env.getEpisodeFrameNumber();
+        if(totalNumberFrames > rr*2000000.0/double(numFlavors)){
+            double perf=evaluatePolicy(env);
+            std::cout<<"rr "<<rr<<" frame "<<totalNumberFrames<<" perf "<<perf<<std::endl;
+            rr++;
+        }
 		prevCumReward = cumReward;
 		env.reset();
 		if(toSaveWeightsAfterLearning && episode%saveWeightsEveryXSteps == 0 && episode > 0){
@@ -268,6 +278,7 @@ void SarsaLearner::learnPolicy(Environment<bool>& env, bool transfering,const st
 		ss << episode;
 		saveWeightsToFile(ss.str());
 	}
+    rr=-1;
 }
 
 double SarsaLearner::evaluatePolicy(Environment<bool>& env){
@@ -309,9 +320,9 @@ double SarsaLearner::evaluatePolicy(Environment<bool>& env,unsigned numSteps, bo
 		timeval_subtract(&tvDiff, &tvEnd, &tvBegin);
 		elapsedTime = double(tvDiff.tv_sec) + double(tvDiff.tv_usec)/1000000.0;
 		double fps = double(env.getEpisodeFrameNumber())/elapsedTime;
-
-		printf("episode: %d,\t%.0f points,\tavg. return: %.1f,\t%d frames,\t%.0f fps epsilon : %f\n", 
-               episode + 1, (cumReward-prevCumReward), (double)cumReward/(episode + 1.0), env.getEpisodeFrameNumber(), fps,epsilon);
+        if(rr==-1)
+            printf("episode: %d,\t%.0f points,\tavg. return: %.1f,\t%d frames,\t%.0f fps epsilon : %f\n", 
+                   episode + 1, (cumReward-prevCumReward), (double)cumReward/(episode + 1.0), env.getEpisodeFrameNumber(), fps,epsilon);
 
 		env.reset();
 		prevCumReward = cumReward;

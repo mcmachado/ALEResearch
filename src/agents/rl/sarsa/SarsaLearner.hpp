@@ -22,7 +22,7 @@ class SarsaLearner : public RLLearner<bool>{
 		float alpha, delta, lambda, traceThreshold;
 		int numFeatures, currentAction, nextAction;
 		int toSaveWeightsAfterLearning, saveWeightsEveryXSteps;
-
+    int numFlavors;
 		std::string nameWeightsFile, pathWeightsFileToLoad;
 
 		std::vector<int> F;					//Set of features active
