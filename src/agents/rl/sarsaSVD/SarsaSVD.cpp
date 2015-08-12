@@ -425,7 +425,7 @@ double SarsaSVD::evaluatePolicy(Environment<bool>& env,unsigned numSteps, bool e
         if(ror==-1)
             std::cerr<<"flavor "<<curFlavor<<"\t"<<cumReward/(double)(numSteps)<<std::endl;
         else
-            std::cerr<<"flavor "<<curFlavor<<"\t"<<cumReward/(double)(numSteps)<<" curRank "<<rr<<std::endl;
+            std::cerr<<"flavor "<<curFlavor<<"\t"<<cumReward/(double)(numSteps)<<" curRank "<<ror<<std::endl;
         totR += cumReward/(double)(numSteps);
     }
     return totR/(double)(numFlavors);
