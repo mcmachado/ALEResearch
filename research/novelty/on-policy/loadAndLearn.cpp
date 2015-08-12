@@ -1,9 +1,3 @@
-/*TODO:
- 1. Implement the Sarsa/Option learning policy
- 2. Make the background to be transparent
- 2. Test my own code...
-*/
-
 /******************************************************************************************
 ** In this code I load all the weights that were learned in the first round (different   **
 ** eigen-events) and then I am going to switch between them as primitive actions. Then I **
