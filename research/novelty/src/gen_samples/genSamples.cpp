@@ -112,6 +112,8 @@ int actUpdatingAvg(ALEInterface& ale, RAMFeatures *ram, BPROFeatures *features, 
 
 int playGame(ALEInterface& ale, RAMFeatures *ram, BPROFeatures *bpro, 
 	vector<vector<vector<float> > > &w, Parameters param, int totalNumFrames, int gameId){
+	ale.reset_game();
+
 	int score = 0;
 	while(!ale.game_over() && totalNumFrames + ale.getEpisodeFrameNumber() < MAX_NUM_FRAMES){
 		int nextAction = getNextAction(ale, param.numOptions);
@@ -145,10 +147,9 @@ int main(int argc, char** argv){
 	}
 
 	int totalNumFrames = 0;
-	int episode = 0;
 	for(int episode = 0; totalNumFrames < MAX_NUM_FRAMES; episode++){
 		totalNumFrames = playGame(ale, &ramFeatures, &bproFeatures, w, param, totalNumFrames, episode);
-		ale.reset_game();
+		totalNumFrames += ale.getEpisodeFrameNumber();
 	}
 
 	return 0;
