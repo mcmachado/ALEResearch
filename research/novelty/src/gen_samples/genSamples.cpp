@@ -67,10 +67,9 @@ void updateAverage(vector<bool> Fprev, vector<bool> F, int frame, Parameters par
 }
 
 int actUpdatingAvg(ALEInterface& ale, RAMFeatures *ram, BPROFeatures *features, int nextAction, 
-	vector<vector<vector<float> > > &w, Parameters param, int totalNumFrames, int gameId){
+	vector<vector<vector<float> > > &w, Parameters param, int totalNumFrames, int gameId,
+	vector<bool> &F, vector<bool> &Fprev){
 
-	vector<bool> F(NUM_BITS, 0); //Set of active features
-	vector<bool> Fprev;
 	int reward = 0;
 
 	//If the selected action was one of the primitive actions
@@ -113,11 +112,13 @@ int actUpdatingAvg(ALEInterface& ale, RAMFeatures *ram, BPROFeatures *features, 
 int playGame(ALEInterface& ale, RAMFeatures *ram, BPROFeatures *bpro, 
 	vector<vector<vector<float> > > &w, Parameters param, int totalNumFrames, int gameId){
 	ale.reset_game();
+	vector<bool> F(NUM_BITS, 0); //Set of active features
+	vector<bool> Fprev;
 
 	int score = 0;
 	while(!ale.game_over() && totalNumFrames + ale.getEpisodeFrameNumber() < MAX_NUM_FRAMES){
 		int nextAction = getNextAction(ale, param.numOptions);
-		score += actUpdatingAvg(ale, ram, bpro, nextAction, w, param, totalNumFrames, gameId);
+		score += actUpdatingAvg(ale, ram, bpro, nextAction, w, param, totalNumFrames, gameId, F, Fprev);
 	}
 	totalNumFrames += ale.getEpisodeFrameNumber();
 	printf("Episode: %d, Final score: %d, Total Num. Frames: %d\n", gameId+1, score, totalNumFrames);
