@@ -105,7 +105,6 @@ int actUpdatingAvg(ALEInterface& ale, RAMFeatures *ram, BPROFeatures *features, 
 			updateAverage(Fprev, F, ale.getEpisodeFrameNumber(), param, gameId);
 		}
 	}
-
 	return reward;
 }
 
@@ -125,6 +124,32 @@ int playGame(ALEInterface& ale, RAMFeatures *ram, BPROFeatures *bpro,
 	return totalNumFrames;
 }
 
+void loadWeights(Parameters param, BPROFeatures *features, vector<vector<vector<float> > > &w){
+	
+	int numFeatures = features->getNumberOfFeatures();
+
+	for(int i = 0; i < param.numOptions; i++){
+		w.push_back(vector< vector<float> >(NUM_ACTIONS, vector<float>(numFeatures, 0.0)));
+	}
+
+	for(int i = 0; i < param.optionsWgts.size(); i++){
+		string line;
+		int nActions, nFeatures;
+		int j, k;
+		float value;
+
+		std::ifstream weightsFile (param.optionsWgts[i].c_str());
+
+		weightsFile >> nActions >> nFeatures;
+		assert(nActions == NUM_ACTIONS);
+		assert(nFeatures == numFeatures);
+
+		while(weightsFile >> j >> k >> value){
+			w[i][j][k] = value;
+		}
+	}
+}
+
 int main(int argc, char** argv){
 	Parameters param(argc, argv);
 	srand(param.seed);
@@ -133,6 +158,8 @@ int main(int argc, char** argv){
 	BPROFeatures bproFeatures(param.gameName);
 
 	vector<vector<vector<float> > > w;
+
+	loadWeights(param, &bproFeatures, w);
 
 	ALEInterface ale(0);
 	ale.setInt  ("random_seed"               , param.seed);

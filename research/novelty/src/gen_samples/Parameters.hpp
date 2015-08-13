@@ -11,6 +11,7 @@ class Parameters{
 		//Parameters:
 		double freqThreshold;
 		int seed, numOptions, toReportAll;
+		std::vector<std::string> optionsWgts;
 
 		std::string romPath, gameName, outputPath;
 
