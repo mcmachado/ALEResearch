@@ -23,20 +23,20 @@ endif
 
 all: genSamples
 
-genSamples:         bin/genSamples.o bin/Mathematics.o bin/Timer.o bin/Background.o bin/BPROFeatures.o bin/RAMFeatures.o 
-	$(CXX) $(FLAGS) bin/genSamples.o bin/Mathematics.o bin/Timer.o bin/Background.o bin/BPROFeatures.o bin/RAMFeatures.o  $(LDFLAGS) -o $(OUT_FILE) 
+genSamples:         bin/genSamples.o bin/control.o bin/Parameters.o bin/Mathematics.o bin/Background.o bin/BPROFeatures.o bin/RAMFeatures.o 
+	$(CXX) $(FLAGS) bin/genSamples.o bin/control.o bin/Parameters.o bin/Mathematics.o bin/Background.o bin/BPROFeatures.o bin/RAMFeatures.o  $(LDFLAGS) -o $(OUT_FILE) 
 
 bin/genSamples.o: genSamples.cpp
 	$(CXX) $(FLAGS) -c genSamples.cpp -o bin/genSamples.o
 
+bin/control.o: control.cpp
+	$(CXX) $(FLAGS) -c control.cpp -o bin/control.o
+
+bin/Parameters.o: Parameters.cpp
+	$(CXX) $(FLAGS) -c Parameters.cpp -o bin/Parameters.o
+
 bin/Mathematics.o: ../common/Mathematics.cpp
 	$(CXX) $(FLAGS) -c ../common/Mathematics.cpp -o bin/Mathematics.o
-
-bin/Timer.o: ../common/Timer.cpp
-	$(CXX) $(FLAGS) -c ../common/Timer.cpp -o bin/Timer.o
-
-bin/Parameters.o: ../common/Parameters.cpp
-	$(CXX) $(FLAGS) -c ../common/Parameters.cpp -o bin/Parameters.o
 
 bin/Background.o: ../features/Background.cpp
 	$(CXX) $(FLAGS) -c ../features/Background.cpp -o bin/Background.o	
