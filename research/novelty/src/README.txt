@@ -12,8 +12,8 @@ As described in the paper, each iteration starts as follows:
 
 
 2. Once the rare events are generated, the output is given as input to the SVD. The SVD will generate
-	N + 1 outputs: the top-N eigenvectors and the vector that contains the information to center future
-	vectors (equivalent to subtracting the mean and dividing by the variance):
+	N + 1 outputs: the top-N eigenvectors and the two vectors required to center future data: the 
+	mean and the variance of each individual coordinate. To obtain it you have to run:
 
 	python SVDonRareEvents.py <input_file> <num_features> <k> <output_file>
 
