@@ -21,3 +21,5 @@ As described in the paper, each iteration starts as follows:
 3. Finally, once we have the eigenvectors that will generate our reward for each of the individual
 	options, we can now learn policies that maximize each of these rewards. I call each of these
 	policies an option:
+
+	./learnOption -s <SEED> -r <ROM> -t <EIGENVECTOR> -i <STATS_SVD> -o <OUTPUT_FILE> -n <NUM_OPTIONS> <OPTION_1> <OPTION_2> ... <OPTION_N>

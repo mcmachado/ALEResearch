@@ -1,0 +1,12 @@
+gen_samples/bin/
+gen_samples/genSamples
+gen_samples/privEye_iter1_bits.csv
+learn_options/bin/
+learn_options/learnOption
+svd/privEye_iter1_0.out
+svd/privEye_iter1_1.out
+svd/privEye_iter1_2.out
+svd/privEye_iter1_3.out
+svd/privEye_iter1_4.out
+svd/privEye_iter1_mean.out
+svd/privEye_iter1_std.out
