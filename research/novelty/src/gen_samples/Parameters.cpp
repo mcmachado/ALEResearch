@@ -4,7 +4,6 @@
 using namespace std;
 
 Parameters::Parameters(int argc, char** argv){
-	seed = 1;
 	numOptions = 0;
 	toReportAll = -1;
 	freqThreshold  = 0.0;
@@ -44,6 +43,9 @@ void Parameters::readParameters(int argc, char** argv){
 			break;
 		}
 		switch(option){
+			case 's': //Seed to be used
+				seed = atoi(optarg);
+				break;
 			case 'r': //Rom to be loaded
 				romPath = optarg;
 				break;
