@@ -8,6 +8,7 @@ class Learner{
 	private:
 		RAMFeatures ramFeatures;
 		BPROFeatures bproFeatures;
+		std::vector<int> F, Fnext;
 		std::vector<bool> FRam, FnextRam;
 		std::vector<float> transitions;
 
@@ -30,10 +31,7 @@ class Learner{
 		std::vector<float> mean;
 		std::vector<float> eigVector;
 
-		std::vector<int> F;						 //Set of features active
-		std::vector<int> Fnext;              	 //Set of features active in next state
-		std::vector<float> Q;               	 //Q(a) entries
-		std::vector<float> Qnext;           	 //Q(a) entries for next action
+		std::vector<float> Q, Qnext;
 		std::vector<std::vector<float> > e;      //Eligibility trace
 		std::vector<std::vector<float> > w;      //Theta, weights vector
 		std::vector<std::vector<int> >nonZeroElig;//To optimize the implementation

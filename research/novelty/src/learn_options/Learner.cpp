@@ -13,7 +13,7 @@ Learner::Learner(ALEInterface& ale, Parameters *param) : bproFeatures(param->gam
 	prevCumIntrReward = 0;
 	maxFeatVectorNorm = 1;
 
-	for(int i = 0; i < (ramFeatures.getNumberOfFeatures() - 1)*2; i++){
+	for(int i = 0; i < (ramFeatures.getNumberOfFeatures() - 1) * 2; i++){
 		transitions.push_back(0);
 	}
 
@@ -108,13 +108,14 @@ void Learner::learnPolicy(ALEInterface& ale, vector<vector<vector<float> > > &le
 			}
 
 			delta = reward[0] + GAMMA * Qnext[nextAction] - Q[currentAction];
-
 			updateReplTrace(currentAction, F);
+
 			//Update weights vector:
+			float stepSize = ALPHA/maxFeatVectorNorm;
 			for(unsigned int a = 0; a < nonZeroElig.size(); a++){
 				for(unsigned int i = 0; i < nonZeroElig[a].size(); i++){
 					int idx = nonZeroElig[a][i];
-					w[a][idx] = w[a][idx] + (ALPHA/maxFeatVectorNorm) * delta * e[a][idx];
+					w[a][idx] = w[a][idx] + stepSize * delta * e[a][idx];
 				}
 			}
 			F = Fnext;
@@ -171,15 +172,11 @@ void Learner::act(ALEInterface& ale, int action, vector<float> &reward, vector<v
 int Learner::playOption(ALEInterface& ale, int option, vector<vector<vector<float> > > &learnedOptions){
 
 	int r_real = 0;
-	float termProb = 0.01;
 	int currentAction;
-	vector<int> Fbpro;	                      //Set of features active
-	vector<float> Q(numBasicActions, 0.0);    //Q(a) entries
+	vector<int> Fbpro;
+	vector<float> Q(numBasicActions, 0.0);
 
-	vector<bool> F(NUM_BITS, 0); //Set of active features
-	vector<bool> Fprev;
-
-	while(rand()%1000 > 1000 * termProb && !ale.game_over()){
+	while(rand()%1000 > 1000 * PROB_TERMINATION && !ale.game_over()){
 		//Get state and features active on that state:		
 		Fbpro.clear();
 		bproFeatures.getActiveFeaturesIndices(ale.getScreen(), Fbpro);
@@ -196,10 +193,6 @@ int Learner::playOption(ALEInterface& ale, int option, vector<vector<vector<floa
 		currentAction = epsilonGreedy(Q);
 		//Take action, observe reward and next state:
 		r_real += ale.act((Action) currentAction);
-		Fprev.swap(F);
-		F.clear();
-		ramFeatures.getCompleteFeatureVector(ale.getRAM(), F);
-		F.pop_back();
 	}
 	return r_real;
 }
