@@ -7,6 +7,7 @@
  *** Author: Marlos C. Machado                                                 **
  ********************************************************************************/
 
+#include "Learner.hpp"
 #include "Parameters.hpp"
 #include "constants.hpp"
 #include "../features/BPROFeatures.hpp"
@@ -57,9 +58,9 @@ int main(int argc, char** argv){
 	ale.loadROM(param.romPath.c_str());
 
 	//Instantiating the learning algorithm:
-	
+	Learner learner(ale, &param);
     //Learn a policy:
-
+	learner.learnPolicy(ale, w);
     //Evaluate the policy:
 	
     return 0;

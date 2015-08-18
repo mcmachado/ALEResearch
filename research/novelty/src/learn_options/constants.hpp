@@ -9,6 +9,7 @@
 //Features:
 #define NUM_BYTE 128
 #define NUM_BITS 1024
+
 //Agent's:
 #define NUM_ACTS        18
 #define FRAME_SKIP      5
