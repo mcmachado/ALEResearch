@@ -23,14 +23,20 @@ endif
 
 all: learnOption
 
-learnOption:        bin/learnOption.o bin/Parameters.o bin/Mathematics.o bin/Background.o bin/BPROFeatures.o bin/RAMFeatures.o
-	$(CXX) $(FLAGS) bin/learnOption.o bin/Parameters.o bin/Mathematics.o bin/Background.o bin/BPROFeatures.o bin/RAMFeatures.o  $(LDFLAGS) -o $(OUT_FILE) 
+learnOption:        bin/learnOption.o bin/Parameters.o bin/Learner.o bin/Timer.o bin/Mathematics.o bin/Background.o bin/BPROFeatures.o bin/RAMFeatures.o
+	$(CXX) $(FLAGS) bin/learnOption.o bin/Parameters.o bin/Learner.o bin/Timer.o bin/Mathematics.o bin/Background.o bin/BPROFeatures.o bin/RAMFeatures.o  $(LDFLAGS) -o $(OUT_FILE) 
 
 bin/learnOption.o: learnOptionsOnPolicy.cpp
 	$(CXX) $(FLAGS) -c learnOptionsOnPolicy.cpp -o bin/learnOption.o
 
 bin/Parameters.o: Parameters.cpp
 	$(CXX) $(FLAGS) -c Parameters.cpp -o bin/Parameters.o
+
+bin/Learner.o:  Learner.cpp
+	$(CXX) $(FLAGS) -c Learner.cpp -o bin/Learner.o
+
+bin/Timer.o: ../common/Timer.cpp
+	$(CXX) $(FLAGS) -c ../common/Timer.cpp -o bin/Timer.o
 
 bin/Mathematics.o: ../common/Mathematics.cpp
 	$(CXX) $(FLAGS) -c ../common/Mathematics.cpp -o bin/Mathematics.o
