@@ -152,7 +152,7 @@ void Learner::act(ALEInterface& ale, int action, vector<float> &reward, vector<v
 	} 
 	else{
 		int option_idx = action - numBasicActions;
-		//r_real = playOption(ale, option_idx, learnedOptions);
+		r_real = playOption(ale, option_idx, learnedOptions);
 	}
 
 	FnextRam.clear();
