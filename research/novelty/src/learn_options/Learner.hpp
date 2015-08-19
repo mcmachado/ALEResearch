@@ -23,8 +23,7 @@ class Learner{
 		float cumIntrReward, prevCumIntrReward;
 		
 		struct timeval tvBegin, tvEnd, tvDiff;
-
-		std::string nameWeightsFile, pathWeightsFileToLoad;
+		std::string pathToSaveLearnedWeights;
 		std::string pathToRewardDescription, pathToStatsDescription;
 
 		std::vector<float> std;

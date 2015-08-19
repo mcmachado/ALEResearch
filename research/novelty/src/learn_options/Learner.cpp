@@ -12,6 +12,7 @@ Learner::Learner(ALEInterface& ale, Parameters *param) : bproFeatures(param->gam
 	cumIntrReward = 0;
 	prevCumIntrReward = 0;
 	maxFeatVectorNorm = 1;
+	pathToSaveLearnedWeights = param->outputPath;
 
 	for(int i = 0; i < (ramFeatures.getNumberOfFeatures() - 1) * 2; i++){
 		transitions.push_back(0);
@@ -198,9 +199,9 @@ int Learner::playOption(ALEInterface& ale, int option, vector<vector<vector<floa
 }
 
 void Learner::updateTransitionVector(vector<bool> F, vector<bool> Fnext){
-	int numTransitionFeatures = F.size();
+	int numTransitionFeatures = F.size() - 1;
 	
-	for(int i = 0; i < F.size(); i++){
+	for(int i = 0; i < numTransitionFeatures; i++){
 		if(!F[i] && Fnext[i]){ //0->1
 			transitions[i] = 1;
 		}
@@ -208,10 +209,10 @@ void Learner::updateTransitionVector(vector<bool> F, vector<bool> Fnext){
 			transitions[i] = 0;	
 		}
 		if(F[i] && !Fnext[i]){ //1->0
-			transitions[i + numTransitionFeatures - 1] = 1;
+			transitions[i + numTransitionFeatures] = 1;
 		}
 		else{
-			transitions[i + numTransitionFeatures - 1] = 0;	
+			transitions[i + numTransitionFeatures] = 0;
 		}
 	}
 }
@@ -279,7 +280,8 @@ void Learner::updateReplTrace(int action, vector<int> &Features){
 }
 
 void Learner::saveWeightsToFile(string suffix){
-	std::ofstream weightsFile ((nameWeightsFile + suffix).c_str());
+	std::ofstream weightsFile ((pathToSaveLearnedWeights + suffix + ".wgt").c_str());
+	printf("Saving weights to file: %s\n", (pathToSaveLearnedWeights + suffix + ".wgt").c_str());
 	if(weightsFile.is_open()){
 		weightsFile << w.size() << " " << w[0].size() << std::endl;
 		for(unsigned int i = 0; i < w.size(); i++){
