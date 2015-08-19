@@ -1,5 +1,5 @@
 #include <sstream>
-#include "parameters.hpp"
+#include "Parameters.hpp"
 
 using namespace std;
 

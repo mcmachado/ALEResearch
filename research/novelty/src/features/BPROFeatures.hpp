@@ -13,6 +13,7 @@
 
 #include <ale_interface.hpp>
 #include "Background.hpp"
+#include <vector>
 #include <tuple>
 
 class BPROFeatures{
@@ -23,21 +24,21 @@ class BPROFeatures{
     	int numRelativeFeatures;
     	int rowLess0Shift, row0Shift, rowMore0Shift;
         int numColumns, numRows, numColors;
-        vector<vector<bool> > bproExistence;
-        vector<tuple<int,int> > changed;
+        std::vector<std::vector<bool> > bproExistence;
+        std::vector<std::tuple<int,int> > changed;
     
         int getBasicFeaturesIndices(const ALEScreen &screen, int blockWidth, int blockHeight,
-            vector<vector<tuple<int,int> > > &whichColors, vector<int>& features);
+            std::vector<std::vector<std::tuple<int,int> > > &whichColors, std::vector<int>& features);
 		void addRelativeFeaturesIndices(const ALEScreen &screen, int featureIndex,
-            vector<vector<tuple<int,int> > > &whichColors, vector<int>& features);
-    void resetBproExistence(vector<vector<bool> >& bproExistence, vector<tuple<int, int> >& changed);
+            std::vector<std::vector<std::tuple<int,int> > > &whichColors, std::vector<int>& features);
+    void resetBproExistence(std::vector<std::vector<bool> >& bproExistence, std::vector<std::tuple<int, int> >& changed);
 	
 	public:
 		BPROFeatures(std::string gameName);
 		~BPROFeatures();
 		
 		int getNumberOfFeatures();
-		void getActiveFeaturesIndices(const ALEScreen &screen, vector<int>& features);	
+		void getActiveFeaturesIndices(const ALEScreen &screen, std::vector<int>& features);
 };
 
 #endif

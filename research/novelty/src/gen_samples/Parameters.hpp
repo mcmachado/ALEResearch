@@ -1,6 +1,7 @@
 #ifndef PARAMETERS_HPP
 #define PARAMETERS_HPP
 
+#include <string>
 #include <vector>
 #include <getopt.h>
 

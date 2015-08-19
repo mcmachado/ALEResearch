@@ -17,6 +17,8 @@
 #include "../features/BPROFeatures.hpp"
 #include "../features/RAMFeatures.hpp"
 
+#using namespace std;
+
 vector<double> frequency;         //[0:1023] transitions 0->1; [1024:2048] transitions 1->0
 
 void updateAverage(vector<bool> Fprev, vector<bool> F, int frame, Parameters param, int gameId){

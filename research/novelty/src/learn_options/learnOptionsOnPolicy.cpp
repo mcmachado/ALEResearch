@@ -7,10 +7,14 @@
  *** Author: Marlos C. Machado                                                 **
  ********************************************************************************/
 
+#include <vector>
+
 #include "Learner.hpp"
 #include "Parameters.hpp"
 #include "constants.hpp"
 #include "../features/BPROFeatures.hpp"
+
+using namespace std;
 
 void loadWeights(BPROFeatures *features, Parameters *param, vector<vector<vector<float> > > &w){
 	int numFeatures = features->getNumberOfFeatures();

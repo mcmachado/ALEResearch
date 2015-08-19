@@ -206,7 +206,7 @@ void Learner::updateTransitionVector(vector<bool> F, vector<bool> Fnext){
 			transitions[i] = 1;
 		}
 		else{
-			transitions[i] = 0;	
+			transitions[i] = 0;
 		}
 		if(F[i] && !Fnext[i]){ //1->0
 			transitions[i + numTransitionFeatures] = 1;

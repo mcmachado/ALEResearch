@@ -13,6 +13,7 @@
 #define RAM_FEATURES_H
 
 #include <ale_interface.hpp>
+#include <vector>
 
 class RAMFeatures{
 	private:
@@ -22,7 +23,7 @@ class RAMFeatures{
 		int getNumberOfFeatures();
 
 		void getActiveFeaturesIndices(const ALERAM &ram, std::vector<int>& features);	
-		void getCompleteFeatureVector(const ALERAM &ram, vector<bool>& features);
+		void getCompleteFeatureVector(const ALERAM &ram, std::vector<bool>& features);
 };
 
 #endif

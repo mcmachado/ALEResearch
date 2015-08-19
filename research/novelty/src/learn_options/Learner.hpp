@@ -39,7 +39,7 @@ class Learner{
 		void saveWeightsToFile(std::string suffix);
 		int epsilonGreedy(std::vector<float> &QValues);
 		void updateReplTrace(int action, std::vector<int> &Features);
-		void updateTransitionVector(vector<bool> F, vector<bool> Fnext);
+		void updateTransitionVector(std::vector<bool> F, std::vector<bool> Fnext);
 		void updateQValues(std::vector<int> &Features, std::vector<float> &QValues);
 		void act(ALEInterface& ale, int action, std::vector<float> &reward, 
 			std::vector<std::vector<std::vector<float> > > &learnedOptions);
