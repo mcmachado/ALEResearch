@@ -9,10 +9,10 @@ int takeAction(ALEInterface& ale, BPROFeatures features, int actionToTake,
 	//If the selected action was one of the primitive actions
 	if(actionToTake < NUM_ACTIONS){
 		accumulatedScore += ale.act(actions[actionToTake]);
-	} 
+	}
 	else{
 		int option = actionToTake - NUM_ACTIONS;
-		//accumulatedScore = playOption(ale, features, option, actions, primitiveOptions);
+		accumulatedScore = playOption(ale, features, option, actions, primitiveOptions);
 	}
 	return accumulatedScore;
 }

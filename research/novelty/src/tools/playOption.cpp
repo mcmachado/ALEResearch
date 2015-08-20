@@ -81,7 +81,7 @@ int main(int argc, char** argv){
 	ale.setInt  ("random_seed"               , param.seed);
 	ale.setInt  ("max_num_frames_per_episode", 18000     );
 	ale.setBool ("color_averaging"           , true      );
-	ale.setFloat("frame_skip"                , 1         );
+	ale.setFloat("frame_skip"                , FRAME_SKIP);
 	ale.setFloat("repeat_action_probability" , 0.00      );
 
 	ale.loadROM(param.romPath.c_str());

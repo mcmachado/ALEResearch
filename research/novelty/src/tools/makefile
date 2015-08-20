@@ -5,7 +5,7 @@
 ALE := ../../../../../MyALE
 
 # Set this to 1 to enable SDL and display_screen
-USE_SDL     := 0
+USE_SDL     := 1
 
 # -O3 Optimize code
 # -D_GNU_SOURCE=1 means the compiler will use the GNU standard of compilation (superset of all other standards under GNU C libraries).
