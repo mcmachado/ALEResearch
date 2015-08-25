@@ -23,7 +23,7 @@ int epsilonGreedy(vector<float> &QValues, int numTotalActions){
 
 	int action = Mathematics::argmax(QValues);
 	//With probability epsilon: a <- random action in A(s)
-	if(rand()%1000 > 1000 * epsilon) {
+	if(rand()%1000 < 1000 * epsilon) {
 		randomActionTaken = 1;
 		action = rand() % numTotalActions;
 	}
@@ -31,7 +31,7 @@ int epsilonGreedy(vector<float> &QValues, int numTotalActions){
 }
 
 void updateQValues(vector<int> &Features, vector<float> &QValues, vector<vector<float> > &w){
-
+	//TODO: This will probably break, because I need numTotalActions here
 	for(int a = 0; a < NUM_ACTIONS; a++){
 		float sumW = 0;
 		for(unsigned int i = 0; i < Features.size(); i++){
