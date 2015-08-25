@@ -82,7 +82,8 @@ void Parameters::readParameters(int argc, char** argv){
 	vector<string> splitPath2 = split(splitPath[splitPath.size()-2], '/');
 	gameName = splitPath2[splitPath2.size()-1];
 
+	int shift = recordPath.compare("") == 0 ? NUM_MIN_ARGS : NUM_MIN_ARGS + 2;
 	for(int i = 0; i < numOptions; i++){
-		optionsWgts.push_back(argv[ NUM_MIN_ARGS + i ]);
+		optionsWgts.push_back(argv[ shift + i ]);
 	}
 }
