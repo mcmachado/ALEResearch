@@ -13,7 +13,8 @@ class Parameters{
 		int seed, numOptions;
 		std::vector<std::string> optionsWgts;
 
-		std::string romPath, gameName, pathOptionToPlay;
+		std::string romPath, gameName, recordPath;
+		std::string pathOptionToPlay;
 
 		Parameters(int argc, char** argv);
 

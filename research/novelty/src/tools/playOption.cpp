@@ -77,12 +77,25 @@ int main(int argc, char** argv){
 	loadOptionToBePlayed(param, &bproFeatures, optionBeingPlayed);
 	loadPrimitiveOptions(param, &bproFeatures, primitiveOptions);
 
-	ALEInterface ale(1);
+	ALEInterface ale;
 	ale.setInt  ("random_seed"               , param.seed);
 	ale.setInt  ("max_num_frames_per_episode", 18000     );
+	ale.setBool ("sound"                     , true      );
+	ale.setBool ("display_screen"            , true      );
 	ale.setBool ("color_averaging"           , true      );
 	ale.setFloat("frame_skip"                , FRAME_SKIP);
 	ale.setFloat("repeat_action_probability" , 0.00      );
+
+	if(param.recordPath.compare("") != 0){
+		ale.setInt   ("fragsize"             , 64);
+		ale.setString("record_screen_dir"    , param.recordPath.c_str());
+	    ale.setString("record_sound_filename", (param.recordPath + "/sound.wav").c_str());
+
+	    // Not completely portable, but will work in most cases
+	    std::string cmd = "mkdir ";
+	    cmd += param.recordPath;
+	    system(cmd.c_str());
+    }
 
 	ale.loadROM(param.romPath.c_str());
 

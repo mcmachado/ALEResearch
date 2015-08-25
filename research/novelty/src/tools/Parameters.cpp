@@ -6,6 +6,7 @@ using namespace std;
 Parameters::Parameters(int argc, char** argv){
 	seed = -1;
 	numOptions = 0;
+	recordPath = "";
 	readParameters(argc, argv);
 }
 
@@ -27,6 +28,7 @@ void Parameters::printHelp(char** argv){
 	printf("   -r     [REQUIRED] path to the rom to be played by the agent.\n");
 	printf("   -w     [REQUIRED] option to be loaded (it will be one being played).\n");
 	printf("   -n     [REQUIRED] number of weights to be loaded.\n");
+	printf("   -p     [REQUIRED] path to be used when recording a video\n");
 	printf("   -h     print this help and exit\n");
 	printf("\n");
 }
@@ -34,7 +36,7 @@ void Parameters::printHelp(char** argv){
 void Parameters::readParameters(int argc, char** argv){
 
 	int option = 0;
-	while ((option = getopt(argc, argv, "s:r:w:n:h")) != -1)
+	while ((option = getopt(argc, argv, "s:r:w:n:p:h")) != -1)
 	{
 		if (option == -1){
 			break;
@@ -52,6 +54,9 @@ void Parameters::readParameters(int argc, char** argv){
 			case 'n':
 				numOptions = atoi(optarg);
 				break;
+			case 'p':
+				recordPath = optarg;
+				break;
 			case 'h': //Asking for help about the parameters
 				printHelp(argv);
 				exit(-1);
@@ -68,8 +73,9 @@ void Parameters::readParameters(int argc, char** argv){
 	}
 
 	//Check whether all required information is available in the command line:
-	if(seed < 0 || romPath.compare("") == 0 
-		|| numOptions < 0 || argc != NUM_MIN_ARGS + numOptions){
+	if(seed < 0 || romPath.compare("") == 0
+		|| numOptions < 0  || argc != NUM_MIN_ARGS + numOptions + 2
+		|| (recordPath.compare("") == 0 && argc != NUM_MIN_ARGS + numOptions)){
 			printHelp(argv);
 			exit(1);
 	}
