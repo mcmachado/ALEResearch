@@ -31,8 +31,7 @@ int epsilonGreedy(vector<float> &QValues, int numTotalActions){
 }
 
 void updateQValues(vector<int> &Features, vector<float> &QValues, vector<vector<float> > &w){
-	//TODO: This will probably break, because I need numTotalActions here
-	for(int a = 0; a < NUM_ACTIONS; a++){
+	for(int a = 0; a < QValues.size(); a++){
 		float sumW = 0;
 		for(unsigned int i = 0; i < Features.size(); i++){
 			sumW += w[a][Features[i]];

@@ -6,7 +6,6 @@ using namespace std;
 Parameters::Parameters(int argc, char** argv){
 	seed = -1;
 	numOptions = 0;
-	recordPath = "";
 	readParameters(argc, argv);
 }
 
@@ -23,7 +22,7 @@ vector<string> Parameters::split(string str, char delimiter) {
 }
 
 void Parameters::printHelp(char** argv){
-	printf("Usage:    %s -s <SEED> -r <ROM> -n <NUM_WEIGHTS_LOAD> <WEIGHT_1> <WEIGHT_2> ... <WEIGHT_N>\n", argv[0]);
+	printf("Usage:    %s -s <SEED> -r <ROM> -w <OPTION> -n <NUM_WEIGHTS_LOAD> <WEIGHT_1> <WEIGHT_2> ... <WEIGHT_N>\n", argv[0]);
 	printf("   -s     [REQUIRED] seed to be used.\n");
 	printf("   -r     [REQUIRED] path to the rom to be played by the agent.\n");
 	printf("   -w     [REQUIRED] option to be loaded (it will be one being played).\n");
@@ -73,9 +72,9 @@ void Parameters::readParameters(int argc, char** argv){
 	}
 
 	//Check whether all required information is available in the command line:
-	if(seed < 0 || romPath.compare("") == 0
-		|| numOptions < 0  || argc != NUM_MIN_ARGS + numOptions + 2
-		|| (recordPath.compare("") == 0 && argc != NUM_MIN_ARGS + numOptions)){
+	if(seed < 0 || romPath.compare("") == 0 || numOptions < 0
+		|| (recordPath.compare("") == 0 && argc != NUM_MIN_ARGS + numOptions)
+		|| (recordPath.compare("") != 0 && argc != NUM_MIN_ARGS + numOptions + 2)){
 			printHelp(argv);
 			exit(1);
 	}
