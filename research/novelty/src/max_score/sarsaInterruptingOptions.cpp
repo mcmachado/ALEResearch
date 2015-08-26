@@ -20,7 +20,7 @@
 void loadWeights(BPROFeatures *features, Parameters *param, vector<vector<vector<float> > > &w){
 	int numFeatures = features->getNumberOfFeatures();
 
-	for(int i = param->numOptions - 1; i >= 0; i--){
+	for(int i = 0; i < param->numOptions; i++){
 		string line;
 		int nActions, nFeatures;
 		int j, k;
@@ -38,10 +38,12 @@ void loadWeights(BPROFeatures *features, Parameters *param, vector<vector<vector
 		*/
 		assert(nFeatures == numFeatures);
 
-		int idx = param->numOptions - 1 - i;
 		w.push_back(vector< vector<float> >(nActions, vector<float>(numFeatures, 0.0)));
+
+		//int idx = param->numOptions - 1 - i;
+		printf("w[%d]: %s\n", i, param->optionsWgts[i].c_str());
 		while(weightsFile >> j >> k >> value){
-			w[idx][j][k] = value;
+			w[i][j][k] = value;
 		}
 	}
 }

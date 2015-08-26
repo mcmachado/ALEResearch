@@ -5,7 +5,7 @@
 #include <vector>
 #include <getopt.h>
 
-#define NUM_MIN_ARGS 13
+#define NUM_MIN_ARGS 9
 
 class Parameters{
 	public:

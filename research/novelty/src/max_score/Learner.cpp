@@ -37,7 +37,6 @@ void Learner::learnPolicy(ALEInterface& ale, vector<vector<vector<float> > > &le
 	
 	//Repeat (for each episode):
 	int episode, totalNumberFrames = 0;
-	//This is going to be interrupted by the ALE code since I set max_num_frames beforehand
 	for(episode = 0; totalNumberFrames < MAX_NUM_FRAMES; episode++){ 
 		//We have to clean the traces every episode:
 		for(unsigned int a = 0; a < nonZeroElig.size(); a++){
@@ -180,6 +179,8 @@ void Learner::playOption(ALEInterface& ale, int option, vector<vector<vector<flo
 			}
 			Q[a] = sumW;
 		}
+
+		currentAction = epsilonGreedy(Q);
 
 		if(toInterruptOption(currentAction, Fbpro)){
 			return;
