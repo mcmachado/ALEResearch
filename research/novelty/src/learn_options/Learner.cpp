@@ -82,8 +82,7 @@ void Learner::learnPolicy(ALEInterface& ale, vector<vector<vector<float> > > &le
 			reward.clear();
 			reward.push_back(0.0);
 			reward.push_back(0.0);
-			updateQValues(F, Q);			
-
+			updateQValues(F, Q);
 			sanityCheck();
 			//Take action, observe reward and next state:
 			act(ale, currentAction, reward, learnedOptions);
@@ -297,3 +296,4 @@ void Learner::saveWeightsToFile(string suffix){
 		printf("Unable to open file to write weights.\n");
 	}
 }
+

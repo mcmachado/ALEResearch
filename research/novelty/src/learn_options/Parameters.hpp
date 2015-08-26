@@ -13,7 +13,6 @@ class Parameters{
 		int seed, numOptions;
 		std::vector<std::string> optionsWgts;
 
-		std::string fileToLoadWeights;
 		std::string romPath, gameName, outputPath;
 		std::string statEigVectorPath, eigVectorPath;
 
