@@ -39,9 +39,6 @@ void Learner::learnPolicy(ALEInterface& ale, vector<vector<vector<float> > > &le
 	int episode, totalNumberFrames = 0;
 	//This is going to be interrupted by the ALE code since I set max_num_frames beforehand
 	for(episode = 0; totalNumberFrames < MAX_NUM_FRAMES; episode++){ 
-		if(episode == 3){
-			srand(1);
-		}
 		//We have to clean the traces every episode:
 		for(unsigned int a = 0; a < nonZeroElig.size(); a++){
 			for(unsigned int i = 0; i < nonZeroElig[a].size(); i++){
