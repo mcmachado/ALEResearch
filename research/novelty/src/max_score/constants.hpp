@@ -10,7 +10,7 @@
 //Agent's:
 #define NUM_ACTS        18
 #define FRAME_SKIP      5
-#define ALPHA           0.10
+#define ALPHA           0.50
 #define GAMMA           0.99
 #define EPSILON         0.05
 #define LAMBDA          0.90

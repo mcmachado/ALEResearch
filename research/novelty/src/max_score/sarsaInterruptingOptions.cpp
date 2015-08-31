@@ -57,7 +57,7 @@ void loadWeights(BPROFeatures *features, Parameters *param, vector<vector<vector
 	vector<vector<vector<float> > > w;
 	loadWeights(&bproFeatures, &param, w);
 
-	ALEInterface ale(0);
+	ALEInterface ale;
 	ale.setInt  ("random_seed"               , param.seed);
 	ale.setInt  ("max_num_frames_per_episode", 18000     );
 	ale.setBool ("color_averaging"           , true      );

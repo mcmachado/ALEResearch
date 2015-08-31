@@ -12,6 +12,7 @@ class Learner{
 		ActionVect actions;
 
 		unsigned int maxFeatVectorNorm;
+		int actionBeingPlayed;
 		int numFeatures, currentAction, nextAction;
 		int numBasicActions, numTotalActions, numOptions;
 		float firstReward;
@@ -34,9 +35,10 @@ class Learner{
 		void updateReplTrace(int action, std::vector<int> &Features);
 		void updateTransitionVector(std::vector<bool> F, std::vector<bool> Fnext);
 		void updateQValues(std::vector<int> &Features, std::vector<float> &QValues);
-		bool toInterruptOption(int currentOption, vector<int> &Features);
 		void act(ALEInterface& ale, int action, std::vector<std::vector<std::vector<float> > > &learnedOptions);
 		void playOption(ALEInterface& ale, int option, std::vector<std::vector<std::vector<float> > > &learnedOptions);
+		bool toInterruptOption(ALEInterface& ale, int currentOption, std::vector<int> &Features, 
+			std::vector<std::vector<std::vector<float> > > &learnedOptions);
 	public:
 		Learner(ALEInterface& ale, Parameters *param);
 		void learnPolicy(ALEInterface& ale, std::vector<std::vector<std::vector<float> > > &learnedOptions);

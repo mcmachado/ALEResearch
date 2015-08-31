@@ -12,6 +12,7 @@ Learner::Learner(ALEInterface& ale, Parameters *param) : bproFeatures(param->gam
 	prevCumReward = 0;
 	sawFirstReward = 0;
 	maxFeatVectorNorm = 1;
+	actionBeingPlayed = -1;
 	pathToSaveLearnedWeights = param->outputPath;
 
 	actions = ale.getLegalActionSet();
@@ -59,6 +60,8 @@ void Learner::learnPolicy(ALEInterface& ale, vector<vector<vector<float> > > &le
 
 			sanityCheck();
 			//Take action, observe reward and next state:
+			r_alg = 0.0, r_real = 0.0;
+			actionBeingPlayed = currentAction;
 			act(ale, currentAction, learnedOptions);
 			cumReward  += r_real;
 			if(!ale.game_over()){
@@ -118,10 +121,8 @@ void Learner::evaluatePolicy(ALEInterface& ale, vector<vector<vector<float> > > 
 
 void Learner::act(ALEInterface& ale, int action, vector<vector<vector<float> > > &learnedOptions){
 
-	r_alg = 0.0, r_real = 0.0;
-
 	if(action < numBasicActions){
-		r_real = ale.act(actions[action]);
+		r_real += ale.act(actions[action]);
 	} 
 	else{
 		int option_idx = action - numBasicActions;
@@ -160,10 +161,10 @@ void Learner::playOption(ALEInterface& ale, int option, vector<vector<vector<flo
 	   because if they call a low-level option they will have a termination
 	   probability of 0.2 * 0.05 in fact (100 steps x 5 ~ 8.3s). */
 	if(numActionsInOption > actions.size()){
-		termProb = 0.2;
+		termProb = PROB_TERMINATION_L2;
 	}
 	else{
-		termProb = 0.05;
+		termProb = PROB_TERMINATION_L1;
 	}
 
 	while(rand() % 1000 > 1000 * termProb && !ale.game_over()){
@@ -182,7 +183,7 @@ void Learner::playOption(ALEInterface& ale, int option, vector<vector<vector<flo
 
 		currentAction = epsilonGreedy(Q);
 
-		if(toInterruptOption(currentAction, Fbpro)){
+		if(toInterruptOption(ale, actionBeingPlayed, Fbpro, learnedOptions)){
 			return;
 		}
 		/* Now things get nasty. We need to do it recursively because one 
@@ -191,7 +192,8 @@ void Learner::playOption(ALEInterface& ale, int option, vector<vector<vector<flo
 	}
 }
 
-bool Learner::toInterruptOption(int currentOption, vector<int> &Features){
+bool Learner::toInterruptOption(ALEInterface& ale, int currentOption, vector<int> &Features, 
+	vector<vector<vector<float> > > &learnedOptions){
 
 	vector<float> Q(w.size(), 0.0);    //Q(a) entries
 	//Update Q-values for each possible action
@@ -208,6 +210,7 @@ bool Learner::toInterruptOption(int currentOption, vector<int> &Features){
 	if(Q[bestAction] - Q[currentOption] < 10e-3){
 		return false;
 	} else {
+		//this->act(ale, bestAction, learnedOptions);
 		return true;
 	}
 }
@@ -225,7 +228,7 @@ int Learner::epsilonGreedy(vector<float> &QValues){
 
 void Learner::sanityCheck(){
 	for(int i = 0; i < numTotalActions; i++){
-		if(fabs(Q[i]) > 10e7 || Q[i] != Q[i] /*NaN*/){
+		if(fabs(Q[i]) > 10e6 || Q[i] != Q[i] /*NaN*/){
 			printf("It seems your algorithm diverged!\n");
 			exit(0);
 		}
