@@ -14,9 +14,12 @@
 #include "../RLLearner.hpp"
 #endif
 #include <vector>
+#include <fstream>
 
 class SarsaLearner : public RLLearner{
 	private:
+		ofstream myfile;
+
 		float alpha, delta, lambda, traceThreshold;
 		int numFeatures, currentAction, nextAction;
 		int toSaveWeightsAfterLearning, saveWeightsEveryXSteps, toSaveCheckPoint;

@@ -19,6 +19,12 @@
 
 using namespace std;
 
+#define TO_REPORT_EXPL  1
+#define BYTE_TO_CAPTURE 0x8E
+
+//Freeway: Chicken height: 0x8E
+//Private Eye: Screen number: 0xBE
+
 SarsaLearner::SarsaLearner(ALEInterface& ale, Features *features, Parameters *param, int seed) : RLLearner(ale, param, seed) {
     totalNumberFrames = 0.0;
     maxFeatVectorNorm = 1;
@@ -60,6 +66,10 @@ SarsaLearner::SarsaLearner(ALEInterface& ale, Features *features, Parameters *pa
         rename(previousNameForLearningCondition.c_str(), nameForLearningCondition.c_str());
         learningConditionFile.open(nameForLearningCondition, ios_base::app);
         learningConditionFile.close();
+    }
+
+    if(TO_REPORT_EXPL){
+		myfile.open ("exploration_data.txt");
 
     }
 }
@@ -233,6 +243,7 @@ void SarsaLearner::learnPolicy(ALEInterface& ale, Features *features){
 		features->getActiveFeaturesIndices(ale.getScreen(), ale.getRAM(), F);
 		updateQValues(F, Q);
 		currentAction = epsilonGreedy(Q);
+
 		//Repeat(for each step of episode) until game is over:
 		gettimeofday(&tvBegin, NULL);
 
@@ -252,6 +263,13 @@ void SarsaLearner::learnPolicy(ALEInterface& ale, Features *features){
 				//Obtain active features in the new state:
 				Fnext.clear();
 				features->getActiveFeaturesIndices(ale.getScreen(), ale.getRAM(), Fnext);
+
+				if(TO_REPORT_EXPL){
+					ALERAM ram = ale.getRAM();
+					unsigned int byte = ram.get(BYTE_TO_CAPTURE);
+					myfile << byte << endl;
+				}
+
 				updateQValues(Fnext, Qnext);     //Update Q-values for the new active features
 				nextAction = epsilonGreedy(Qnext);
 			}
@@ -268,6 +286,7 @@ void SarsaLearner::learnPolicy(ALEInterface& ale, Features *features){
 			}
 
 			delta = reward[0] + gamma * Qnext[nextAction] - Q[currentAction];
+			//printf("%f = %f + %f * %f - %f   **** %lu\n", delta, reward[0], gamma, Qnext[nextAction], Q[currentAction], F.size());
 
 			updateReplTrace(currentAction, F);
 			//Update weights vector:
@@ -289,7 +308,7 @@ void SarsaLearner::learnPolicy(ALEInterface& ale, Features *features){
 		
 		float fps = float(ale.getEpisodeFrameNumber())/elapsedTime;
 		printf("episode: %d,\t%.0f points,\tavg. return: %.1f,\t%d frames,\t%.0f fps\n",
-			episode + 1, cumReward - prevCumReward, (float)cumReward/(episode + 1.0),
+			episode, cumReward - prevCumReward, (float)cumReward/(episode + 1.0),
 			ale.getEpisodeFrameNumber(), fps);
         episodeResults.push_back(cumReward-prevCumReward);
         episodeFrames.push_back(ale.getEpisodeFrameNumber());
@@ -300,6 +319,9 @@ void SarsaLearner::learnPolicy(ALEInterface& ale, Features *features){
 		if(toSaveCheckPoint && episode%saveWeightsEveryXSteps == 0){
             saveCheckPoint(episode,totalNumberFrames,episodeResults,saveWeightsEveryXSteps,episodeFrames,episodeFps);
         }
+	}
+	if(TO_REPORT_EXPL){
+		myfile.close();
 	}
 }
 
