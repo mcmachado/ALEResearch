@@ -16,18 +16,18 @@
 
 class QLearner : public RLLearner<bool>{
 	private:
-		double alpha, delta, lambda, traceThreshold;
+		float alpha, delta, lambda, traceThreshold;
 		int numFeatures, currentAction, nextAction;
 
 		std::string nameWeightsFile;
 
-		vector<int> F;					//Set of features active
-		vector<int> Fnext;              //Set of features active in next state
-		vector<double> Q;               //Q(a) entries
-		vector<double> Qnext;           //Q(a) entries for next action
-		vector<vector<double> > e;      //Eligibility trace
-		vector<vector<double> > w;      //Theta, weights vector
-		vector<vector<int> >nonZeroElig;//To optimize the implementation
+		std::vector<int> F;					//Set of features active
+		std::vector<int> Fnext;              //Set of features active in next state
+		std::vector<float> Q;               //Q(a) entries
+		std::vector<float> Qnext;           //Q(a) entries for next action
+		std::vector<std::vector<float> > e;      //Eligibility trace
+		std::vector<std::vector<float> > w;      //Theta, weights std::vector
+		std::vector<std::vector<int> >nonZeroElig;//To optimize the implementation
 		
 		/**
  		* Constructor declared as private to force the user to instantiate QLearner
@@ -44,10 +44,10 @@ class QLearner : public RLLearner<bool>{
 		/**
  		* In Q-Learning the Q-values (one per action) are updated as the sum of weights for that given action.
  		* To avoid writing it more than once on the code, its update was extracted to a separate function.
- 		* It updates the vector<double> Q assuming that vector<int> F is filled, as it sums just the weights
+ 		* It updates the vector<float> Q assuming that vector<int> F is filled, as it sums just the weights
  		* that are active in F.
  		*/
-		void updateQValues(vector<int> &Features, vector<double> &QValues);
+		void updateQValues(std::vector<int> &Features, std::vector<float> &QValues);
 		
 		/**
  		* When using Replacing traces, all values not related to the current action are set to 0, while the
@@ -75,7 +75,7 @@ class QLearner : public RLLearner<bool>{
  		*        actions, obtain simulator's screen, RAM, etc.
  		* @param Features *features object that defines what feature function that will be used.
  		*/
-		void evaluatePolicy(Environment<bool>& env);
+		double evaluatePolicy(Environment<bool>& env);
 		/**
 		* Destructor, not necessary in this class.
 		*/

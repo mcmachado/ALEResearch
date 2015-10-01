@@ -167,6 +167,7 @@ void Parameters::parseParametersFromConfigFile(std::string cfgFileName){
 	}
 
 	this->setAlpha(atof(parameters["ALPHA"].c_str()));
+	this->setBeta(atof(parameters["BETA"].c_str()));
 	this->setGamma(atof(parameters["GAMMA"].c_str()));
 	this->setEpsilon(atof(parameters["EPSILON"].c_str()));
 	this->setLambda(atof(parameters["LAMBDA"].c_str()));
@@ -187,7 +188,8 @@ void Parameters::parseParametersFromConfigFile(std::string cfgFileName){
 
 	this->setFrequencySavingWeights(atoi(parameters["FREQUENCY_SAVING"].c_str()));
 	this->setLearningLength(atoi(parameters["TOTAL_FRAMES_LEARN"].c_str()));
-
+    this->difficultyLevel=atoi(parameters["DIFFICULTY_LEVEL"].c_str());
+    this->gameMode=atoi(parameters["GAME_MODE"].c_str());
 	if(this->getSubtractBackground()){
 		std::string folderWithBackgrounds = parameters["PATH_TO_BACKGROUND"];
 		setPathToBackground(folderWithBackgrounds, this->gameBeingPlayed);

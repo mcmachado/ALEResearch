@@ -5,32 +5,70 @@
 ** 
 ** Author: Marlos C. Machado
 ***************************************************************************************/
-
-#ifndef MATHEMATICS_H
-#define MATHEMATICS_H
-#include "Mathematics.hpp"
-#endif
 #include <assert.h>
 #include <cstdlib>
+#include <vector>
+#include <numeric>
+#include <iostream>
+namespace Mathematics
+{
 
-int Mathematics::argmax(std::vector<double> array){
+template<typename T>
+int argmax(const T& array){
 	assert(array.size() > 0);
-	//Discover max value of the array:
-	double max = array[0];
-	for (unsigned int i = 0; i < array.size(); i++){
-		if(max < array[i]){
-			max = array[i];
-		}
-	}
+
 	//We need to break ties, thus we save all  
 	//indices that hold the same max value:
 	std::vector<int> indices;
+    auto cur_max = array[0];
 	for(unsigned int i = 0; i < array.size(); i++){
-		if(fabs(array[i] - max) < 1e-10){
-			indices.push_back(i);
-		}
+        if(fabs(array[i]- cur_max)<1e-10){
+            indices.push_back(i);            
+        }else{
+            if(array[i] > cur_max){
+                cur_max = array[i];
+                indices.clear();
+                indices.push_back(i);
+            }
+        }
 	}
 	assert(indices.size() > 0);
 	//Now we randomly pick one of the best
 	return indices[rand()%indices.size()];
+}
+
+#ifdef ARRAYFIRE
+template<>
+inline int argmax<af::array>(const af::array& in){
+    af::array indices = af::where(in == af::max<float>(in));
+    unsigned chosen = rand()%indices.dims(0);
+    unsigned* ret = new unsigned[1];
+    ret = indices(chosen).host<unsigned>();
+    return ret[0];
+}
+
+
+template<>
+inline void fill<af::array>(af::array& array, float value){
+    array = af::constant(value,array.dims(),f32);
+}
+#endif
+    
+template<typename T>
+void fill(T& array, float value)
+{
+    std::fill(array.begin(),array.end(),value);
+}
+
+
+template<typename T>
+float weighted_sparse_dotprod(const T& vec,const std::vector<int>& mask, float weight)
+{
+    return std::accumulate(mask.begin(),mask.end(), 0.0,
+                           [&weight,&vec](const float& elem, const int& id){
+                               return elem + weight*vec[id];
+                           });
+}
+       
+
 }

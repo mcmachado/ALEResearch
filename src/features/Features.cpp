@@ -14,7 +14,7 @@
 ***************************************************************************************/
 
 #include "Features.hpp"
-
+using namespace std;
 void Features::getCompleteFeatureVector(const ALEScreen &screen, const ALERAM &ram, vector<bool>& features){	
 	assert(features.size() == 0); //If the vector is not empty this can be a mess
 	//Get vector with active features:

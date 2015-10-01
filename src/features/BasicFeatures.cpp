@@ -14,7 +14,7 @@
 #define BASIC_FEATURES_H
 #include "BasicFeatures.hpp"
 #endif
-
+using namespace std;
 BasicFeatures::BasicFeatures(Parameters *param){
     this->param = param;
     numberOfFeatures = this->param->getNumColumns() * this->param->getNumRows() * this->param->getNumColors();

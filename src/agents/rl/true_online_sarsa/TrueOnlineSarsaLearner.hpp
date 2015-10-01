@@ -14,20 +14,20 @@
 #include "../RLLearner.hpp"
 #include <vector>
 
-class TrueOnlineSarsaLearner : public RLLearner{
+template<typename FeatureType>
+class TrueOnlineSarsaLearner : public RLLearner<FeatureType>{
 	private:
 		double alpha, delta, lambda, traceThreshold;
 		int numFeatures, currentAction, nextAction;
 
 		std::string nameWeightsFile;
 
-		vector<int> F;					//Set of features active
-		vector<int> Fnext;              //Set of features active in next state
-		vector<double> Q;               //Q(a) entries
-		vector<double> Qnext;           //Q(a) entries for next action
-		vector<vector<double> > e;      //Eligibility trace
-		vector<vector<double> > w;      //Theta, weights vector
-		vector<vector<int> >nonZeroElig;//To optimize the implementation   
+        std::vector<std::pair<int,FeatureType> > F;					//Set of features active (along with their values)
+        std::vector<std::pair<int,FeatureType> > Fnext;              //Set of features active in next state
+		std::vector<double> Q;               //Q(a) entries
+		std::vector<double> Qnext;           //Q(a) entries for next action
+        std::vector<std::unordered_map<int,double> > e;      //Eligibility trace
+		std::vector<std::vector<double> > w;      //Theta, weights vector
 
 		/**
  		* Constructor declared as private to force the user to instantiate TrueOnlineSarsaLearner
@@ -45,7 +45,7 @@ class TrueOnlineSarsaLearner : public RLLearner{
  		* It updates the vector<double> Q assuming that vector<int> F is filled, as it sums just the weights
  		* that are active in F.
  		*/
-		void updateQValues(vector<int> &Features, vector<double> &QValues);
+    void updateQValues(std::vector<std::pair<int,FeatureType> > &Features, std::vector<double> &QValues);
 		/**
  		* When using Replacing traces, all values not related to the current action are set to 0, while the
  		* values for the current action that their features are active are set to 1. The traces decay following
@@ -65,31 +65,30 @@ class TrueOnlineSarsaLearner : public RLLearner{
  		*/		
 		void loadWeights();
 	public:
-		TrueOnlineSarsaLearner(ALEInterface& ale, Features *features, Parameters *param);
+		TrueOnlineSarsaLearner(Environment<FeatureType>& env, Parameters *param);
 		/**
  		* Implementation of an agent controller. This implementation is Sarsa(lambda).
  		*
  		* TODO it may be useful to return something for the caller, as the total reward or policy. 
  		*
- 		* @param ALEInterface& ale Arcade Learning Environment interface: object used to define agents'
+ 		* @param Environment<FeatureType>& env Arcade Learning Environment interface: object used to define agents'
  		*        actions, obtain simulator's screen, RAM, etc.
- 		* @param Features *features object that defines what feature function that will be used.
  		*/
-		void learnPolicy(ALEInterface& ale, Features *features);
+    void learnPolicy(Environment<FeatureType>& env);
 		/**
  		* After the policy was learned it is necessary to evaluate its quality. Therefore, a given number
  		* of episodes is run without learning (the vector of weights and the trace are not updated).
  		*
- 		* @param ALEInterface& ale Arcade Learning Environment interface: object used to define agents'
+ 		* @param Environment<FeatureType>& env Arcade Learning Environment interface: object used to define agents'
  		*        actions, obtain simulator's screen, RAM, etc.
- 		* @param Features *features object that defines what feature function that will be used.
  		*/
-		void evaluatePolicy(ALEInterface& ale, Features *features);
+		double evaluatePolicy(Environment<FeatureType>& env);
 		/**
 		* Destructor, not necessary in this class.
 		*/
 		~TrueOnlineSarsaLearner();
 };
 
+#include "TrueOnlineSarsaLearner.cpp"
 
 #endif

@@ -23,17 +23,19 @@ RLLearner<FeatureType>::RLLearner(Environment<FeatureType>& env, Parameters *par
 
 
 template<typename FeatureType>
-int RLLearner<FeatureType>::epsilonGreedy(vector<double> &QValues){
+int RLLearner<FeatureType>::epsilonGreedy(std::vector<float> &QValues){
 	randomActionTaken = 0;
 
-	int action = Mathematics::argmax(QValues);
+	int action;
 	//With probability epsilon: a <- random action in A(s)
 	int random = rand();
 	if((random % int(nearbyint(1.0/epsilon))) == 0) {
 	//if((rand()%int(1.0/epsilon)) == 0){
 		randomActionTaken = 1;
 		action = rand() % numActions;
-	}
+	}else{
+        action = Mathematics::argmax(QValues);
+    }
 	return action;
 }
 
@@ -43,10 +45,13 @@ int RLLearner<FeatureType>::epsilonGreedy(vector<double> &QValues){
  * is using a surrogate reward function).
  */
 template<typename FeatureType>
-void RLLearner<FeatureType>::act(Environment<FeatureType>& env, int action, vector<double> &reward){
+void RLLearner<FeatureType>::act(Environment<FeatureType>& env, int action, std::vector<double> &reward){
 	double r_alg = 0.0, r_real = 0.0;
-	
-	r_real = env.act(actions[action]);
+
+    //compute proba of taking current action
+    double proba_action = epsilon/double(numActions) + (randomActionTaken ? 0 : 1.0 - epsilon);
+
+	r_real = env.act(actions[action],proba_action);
 	if(toUseOnlyRewardSign){
 		if(r_real > 0){ 
 			r_alg = 1.0;

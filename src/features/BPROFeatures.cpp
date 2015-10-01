@@ -20,7 +20,7 @@
 #include <set>
 #include <assert.h>
 #include <boost/tuple/tuple.hpp> //TODO: I have to remove this to not have to depend on boost
-
+using namespace std;
 BPROFeatures::BPROFeatures(Parameters *param){
     this->param = param;
     numColumns  = param->getNumColumns();

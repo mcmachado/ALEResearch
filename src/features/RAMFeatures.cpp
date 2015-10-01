@@ -19,8 +19,10 @@
 #define BITS_RAM     1024
 
 typedef unsigned char byte_t;
-
+using namespace std;
 RAMFeatures::RAMFeatures(){
+}
+RAMFeatures::RAMFeatures(Parameters* param){
 }
 
 void RAMFeatures::getActiveFeaturesIndices(

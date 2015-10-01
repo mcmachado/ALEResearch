@@ -36,7 +36,7 @@ HumanAgent::HumanAgent(Parameters *param){
 #ifdef __USE_SDL
 
 void HumanAgent::saveTrajectory(int takenAction){
-    ofstream myfile (this->trajectoryFile, ios::app);
+    std::ofstream myfile (this->trajectoryFile, std::ios::app);
     
     if (myfile.is_open()){
         //Print action taken in the time step:
@@ -52,12 +52,12 @@ void HumanAgent::saveTrajectory(int takenAction){
 void HumanAgent::learnPolicy(Environment<bool>& env){
 }
 		
-void HumanAgent::evaluatePolicy(Environment<bool>& env){
+double HumanAgent::evaluatePolicy(Environment<bool>& env){
 #ifdef __USE_SDL
 	Action action;
 	int reward = 0;
 	int cumulativeReward = 0;
-	
+	double totReward = 0;
 	//Repeat (for each episode):
 	for(int episode = 0; episode < numEpisodesToEval; episode++){
 		int step = 0;
@@ -72,9 +72,11 @@ void HumanAgent::evaluatePolicy(Environment<bool>& env){
 			step++;
 		}
 		printf("Episode %d, Cumulative Reward: %d\n", episode + 1, cumulativeReward);
+        totReward += cumulativeReward;
 		cumulativeReward = 0;
 		env.reset_game(); //Start the game again when the episode is over
 	}
+    return totReward/double(numEpisodesToEval);
 }
 
 

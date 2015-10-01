@@ -46,7 +46,7 @@ class ConstantAgent : public Agent<bool>{
  		* @param Environment<bool>& env Arcade Learning Environment interface: object used to define agents'
  		*        actions, obtain simulator screen, RAM, etc.
  		*/
-		void evaluatePolicy(Environment<bool>& env);
+		double evaluatePolicy(Environment<bool>& env);
 		/**
 		* Destructor, not necessary in this class.
 		*/

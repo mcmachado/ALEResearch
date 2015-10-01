@@ -62,7 +62,7 @@ public:
     {
         std::vector<int> temp;
         getActiveFeaturesIndices(temp);
-        active_feat = std::vector<pair<int,bool> >(temp.size());
+        active_feat = std::vector<std::pair<int,bool> >(temp.size());
         for(unsigned i=0;i<temp.size();i++){
             active_feat[i] = {temp[i], true};
         }
@@ -129,14 +129,11 @@ public:
     
     /** @brief This function is used to simulate one step in the environment 
      * 
-     * 
      * @param action an integer describing the action taken by the agent
-     * @param score a return parameter corresponding to the raw score obtained in the environment
-     * @param reward a return parameter which tells the corresponding reward.
      */
-    virtual double act(Action action){
-        std::vector<double> r;
-        return this->m_ale->act(action);
+    virtual double doAct(Action action){
+        double reward = this->m_ale->act(action);
+        return reward;
     }
 
     
@@ -173,6 +170,18 @@ public:
     virtual int getNumberOfFeatures()
     {
         return this->m_feat->getNumberOfFeatures();
+    }
+
+    virtual void setFlavor(unsigned f)
+    {
+        auto diff = this->m_ale->getAvailableDifficulties();
+        auto modes = this->m_ale->getAvailableModes();
+        auto target_d = f % diff.size();
+        auto target_m = (f - (f%diff.size())) / diff.size();
+        std::cout<<"Setting difficulty "<<diff[target_d]<<std::endl;
+        std::cout<<"Setting mode "<<modes[target_m]<<std::endl;
+        this->m_ale->setDifficulty(diff[target_d]);
+        this->m_ale->setMode(modes[target_m]);
     }
 protected:
 };
