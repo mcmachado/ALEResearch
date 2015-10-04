@@ -20,10 +20,9 @@
 using namespace std;
 
 #define TO_REPORT_EXPL  1
-#define BYTE_TO_CAPTURE 0x8E
-
+#define BYTE_TO_CAPTURE 0xDC
 //Freeway: Chicken height: 0x8E
-//Private Eye: Screen number: 0xBE
+//Private Eye: Screen number: 0xDC
 
 SarsaLearner::SarsaLearner(ALEInterface& ale, Features *features, Parameters *param, int seed) : RLLearner(ale, param, seed) {
     totalNumberFrames = 0.0;
@@ -286,7 +285,6 @@ void SarsaLearner::learnPolicy(ALEInterface& ale, Features *features){
 			}
 
 			delta = reward[0] + gamma * Qnext[nextAction] - Q[currentAction];
-			//printf("%f = %f + %f * %f - %f   **** %lu\n", delta, reward[0], gamma, Qnext[nextAction], Q[currentAction], F.size());
 
 			updateReplTrace(currentAction, F);
 			//Update weights vector:

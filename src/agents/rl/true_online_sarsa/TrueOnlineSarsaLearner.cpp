@@ -17,6 +17,8 @@
 #include <stdio.h>
 #include <math.h>
 
+using namespace std;
+
 TrueOnlineSarsaLearner::TrueOnlineSarsaLearner(ALEInterface& ale, Features *features, Parameters *param, int seed) : RLLearner(ale, param, seed) {
 	delta = 0.0;
 	

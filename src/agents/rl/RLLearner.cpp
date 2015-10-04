@@ -9,6 +9,8 @@
 #include <random>
 #endif
 
+using namespace std;
+
 RLLearner::RLLearner(ALEInterface& ale, Parameters *param, int seed){
 	randomActionTaken   = 0;
 

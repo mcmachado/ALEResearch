@@ -22,13 +22,13 @@ class TrueOnlineSarsaLearner : public RLLearner{
 
 		std::string nameWeightsFile;
 
-		vector<int> F;					//Set of features active
-		vector<int> Fnext;              //Set of features active in next state
-		vector<float> Q;               //Q(a) entries
-		vector<float> Qnext;           //Q(a) entries for next action
-		vector<vector<float> > e;      //Eligibility trace
-		vector<vector<float> > w;      //Theta, weights vector
-		vector<vector<int> >nonZeroElig;//To optimize the implementation   
+		std::vector<int> F;					//Set of features active
+		std::vector<int> Fnext;              //Set of features active in next state
+		std::vector<float> Q;               //Q(a) entries
+		std::vector<float> Qnext;           //Q(a) entries for next action
+		std::vector<std::vector<float> > e;      //Eligibility trace
+		std::vector<std::vector<float> > w;      //Theta, weights vector
+		std::vector<std::vector<int> >nonZeroElig;//To optimize the implementation 
 
 		/**
  		* Constructor declared as private to force the user to instantiate TrueOnlineSarsaLearner
@@ -46,7 +46,7 @@ class TrueOnlineSarsaLearner : public RLLearner{
  		* It updates the vector<float> Q assuming that vector<int> F is filled, as it sums just the weights
  		* that are active in F.
  		*/
-		void updateQValues(vector<int> &Features, vector<float> &QValues);
+		void updateQValues(std::vector<int> &Features, std::vector<float> &QValues);
 		/**
  		* When using Replacing traces, all values not related to the current action are set to 0, while the
  		* values for the current action that their features are active are set to 1. The traces decay following
