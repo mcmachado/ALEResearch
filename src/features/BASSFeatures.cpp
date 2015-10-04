@@ -18,6 +18,7 @@
 
 #include "BasicFeatures.hpp"
 
+using namespace std;
 BASSFeatures::BASSFeatures(Parameters *param){
     this->param = param;
     numPureFeatures = this->param->getNumColumns() * this->param->getNumRows() * this->param->getNumColors();
