@@ -2,7 +2,7 @@
 #
 # Author: Marlos C. Machado
 
-ALE := ../../Arcade-Learning-Environment-0.5.0
+ALE := ../../MyALE
 
 # Set this to 1 to enable SDL and display_screen
 USE_SDL     := 1
