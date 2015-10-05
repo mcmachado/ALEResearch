@@ -8,10 +8,10 @@
 ** Author: Marlos C. Machado
 ***************************************************************************************/
 
-#ifndef AGENT_H
-#define AGENT_H
+#ifndef CONSTANTAGENT_H
+#define CONSTANTAGENT_H
+
 #include "../Agent.hpp"
-#endif
 
 class ConstantAgent : public Agent{
 	private:
@@ -57,3 +57,5 @@ class ConstantAgent : public Agent{
 		*/
 		~ConstantAgent();
 };
+
+#endif

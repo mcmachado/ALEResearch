@@ -11,6 +11,9 @@
 ** Author: Marlos C. Machado
 ***************************************************************************************/
 
+#ifndef PARAMETERS_H
+#define PARAMETERS_H
+
 #include <getopt.h>
 #include <string>
 #include <vector>
@@ -351,3 +354,5 @@ class Parameters{
         int getToSaveCheckPoint();
         std::string getCheckPointName();
 };
+
+#endif

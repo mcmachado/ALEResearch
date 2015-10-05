@@ -6,6 +6,9 @@
 ** Author: Marlos C. Machado
 ***************************************************************************************/
 
+#ifndef MATHEMATICS_H
+#define MATHEMATICS_H
+
 #include <vector>
 #include <math.h>
 
@@ -24,3 +27,5 @@ class Mathematics{
  		*/
 		static int argmax(std::vector<float> array);
 };
+
+#endif

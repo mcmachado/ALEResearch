@@ -11,14 +11,8 @@
 ** Author: Marlos C. Machado
 ***************************************************************************************/
 
-#ifndef GRAPHICS_H
-#define GRAPHICS_H
 #include "Graphics.hpp"
-#endif
-#ifndef PARAMETERS_H
-#define PARAMETERS_H
 #include "Parameters.hpp"
-#endif
 #include <getopt.h>
 #include <string>
 #include <map>

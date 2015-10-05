@@ -8,10 +8,9 @@
 ** Author: Marlos C. Machado
 ***************************************************************************************/
 
-#ifndef AGENT_H
-#define AGENT_H
+#ifndef RANDOMAGENT_H
+#define RANDOMAGENT_H
 #include "../Agent.hpp"
-#endif
 
 class RandomAgent : public Agent{
 	private:
@@ -52,3 +51,5 @@ class RandomAgent : public Agent{
 		*/
 		~RandomAgent();
 };
+
+#endif

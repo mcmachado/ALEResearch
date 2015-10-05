@@ -6,17 +6,17 @@
 ** Author: Marlos C. Machado
 ***************************************************************************************/
 
-#ifndef PARAMETERS_H
-#define PARAMETERS_H
+#ifndef BACKGROUND_H
+#define BACKGROUND_H
+
 #include "../common/Parameters.hpp"
-#endif
 
 class Background{
 	private:
 		int width;
 		int height;
-		int down_width;
-		int down_height;
+		//int down_width;
+		//int down_height;
 		std::vector<std::vector<int> > background;
 
 		/**
@@ -53,3 +53,5 @@ class Background{
 		*/
 		int getHeight();
 };
+
+#endif

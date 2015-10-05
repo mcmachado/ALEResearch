@@ -9,14 +9,8 @@
 ** Author: Marlos C. Machado
 ***************************************************************************************/
 
-#ifndef MATHEMATICS_H
-#define MATHEMATICS_H
 #include "../../../common/Mathematics.hpp"
-#endif
-#ifndef TIMER_H
-#define TIMER_H
 #include "../../../common/Timer.hpp"
-#endif
 #include "QLearner.hpp"
 #include <stdio.h>
 #include <math.h>

@@ -9,10 +9,7 @@
 ** Author: Marlos C. Machado
 ***************************************************************************************/
 
-#ifndef TIMER_H
-#define TIMER_H
 #include "../../../common/Timer.hpp"
-#endif
 #include "TrueOnlineSarsaLearner.hpp"
 #include <stdio.h>
 #include <math.h>
@@ -75,7 +72,7 @@ void TrueOnlineSarsaLearner::updateTrace(int action, float alpha){
 		int idx = F[i];
 		dot_e_phi += e[action][idx];
 	}
-	int numNonZero = 0;
+
 	if((1 - alpha * dot_e_phi) > traceThreshold){
 		for(unsigned int i = 0; i < F.size(); i++){
 			int idx = F[i];

@@ -9,10 +9,10 @@
 ** Author: Marlos C. Machado
 ***************************************************************************************/
 
-#ifndef AGENT_H
-#define AGENT_H
+#ifndef PERTURBAGENT_H
+#define PERTURBAGENT_H
+
 #include "../Agent.hpp"
-#endif
 
 class PerturbAgent : public Agent{
 	private:
@@ -59,3 +59,5 @@ class PerturbAgent : public Agent{
 		*/
 		~PerturbAgent();
 };
+
+#endif

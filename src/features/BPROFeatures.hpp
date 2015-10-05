@@ -8,18 +8,13 @@
 ** Author: Marlos C. Machado
 ***************************************************************************************/
 
-#ifndef FEATURES_H
-#define FEATURES_H
+#ifndef BPROFEATURES_H
+#define BPROFEATURES_H
+
 #include "Features.hpp"
-#endif
-#ifndef BACKGROUND_H
-#define BACKGROUND_H
 #include "Background.hpp"
-#endif
 
 #include<tuple>
-
-using namespace std;
 
 class BPROFeatures : public Features::Features{
 	private:
@@ -28,7 +23,7 @@ class BPROFeatures : public Features::Features{
 		
 		int numBasicFeatures;
     	int numRelativeFeatures;
-    	int rowLess0Shift, row0Shift, rowMore0Shift;
+		//int rowLess0Shift, row0Shift, rowMore0Shift;
         int numColumns, numRows, numColors;
         std::vector<std::vector<bool> > bproExistence;
         std::vector<tuple<int,int> > changed;
@@ -81,3 +76,5 @@ class BPROFeatures : public Features::Features{
  		*/
 		int getNumberOfFeatures();
 };
+
+#endif

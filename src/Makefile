@@ -1,6 +1,8 @@
 # Makefile
 #
-# Author: Marlos C. Machado
+# Author: Marlos C. Machado, Nicolas Carion
+
+CXX := g++
 
 ALE := ../../MyALE
 
@@ -11,9 +13,9 @@ USE_SDL     := 1
 # -D__USE_SDL Ensures we can use SDL to see the game screen
 # -D_GNU_SOURCE=1 means the compiler will use the GNU standard of compilation, the superset of all other standards under GNU C libraries.
 # -D_REENTRANT causes the compiler to use thread safe (i.e. re-entrant) versions of several functions in the C library.
-FLAGS := -O3 -I$(ALE)/src -D_GNU_SOURCE=1 -D_REENTRANT
-CXX := g++ -std=c++11
-OUT_FILE := learner
+FLAGS := -O3 -I$(ALE)/src -D_GNU_SOURCE=1 -D_REENTRANT -std=c++11 -Wno-deprecated-declarations -Wall -g -MMD
+
+EXE := learner
 # Search for library 'ale' and library 'z' when linking.
 LDFLAGS := -L$(ALE) -lale -lz -lm
 
@@ -22,10 +24,10 @@ ifeq ($(strip $(USE_SDL)), 1)
   LDFLAGS += -lSDL -lSDL_gfx -lSDL_image `sdl-config --cflags --libs`
 endif
 
-all: learner
+all: $(EXE)
 
 learner: bin/main.o bin/Mathematics.o bin/Parameters.o bin/Timer.o bin/Features.o bin/Background.o bin/BasicFeatures.o bin/BASSFeatures.o bin/BPROFeatures.o bin/RAMFeatures.o bin/RLLearner.o bin/SarsaLearner.o bin/QLearner.o bin/TRSarsaLearner.o bin/RandomAgent.o bin/ConstantAgent.o bin/PerturbAgent.o bin/HumanAgent.o
-	$(CXX) $(FLAGS) bin/main.o bin/Mathematics.o bin/Timer.o bin/Parameters.o bin/Features.o bin/Background.o bin/BasicFeatures.o bin/BASSFeatures.o bin/BPROFeatures.o bin/RAMFeatures.o bin/RLLearner.o bin/SarsaLearner.o bin/QLearner.o bin/TRSarsaLearner.o bin/RandomAgent.o bin/ConstantAgent.o bin/PerturbAgent.o bin/HumanAgent.o $(LDFLAGS) -o $(OUT_FILE) 
+	$(CXX) $(FLAGS) bin/main.o bin/Mathematics.o bin/Timer.o bin/Parameters.o bin/Features.o bin/Background.o bin/BasicFeatures.o bin/BASSFeatures.o bin/BPROFeatures.o bin/RAMFeatures.o bin/RLLearner.o bin/SarsaLearner.o bin/QLearner.o bin/TRSarsaLearner.o bin/RandomAgent.o bin/ConstantAgent.o bin/PerturbAgent.o bin/HumanAgent.o $(LDFLAGS) -o $(EXE)
 
 bin/main.o: main.cpp
 	$(CXX) $(FLAGS) -c main.cpp -o bin/main.o
@@ -79,11 +81,10 @@ bin/PerturbAgent.o: agents/baseline/PerturbAgent.cpp
 	$(CXX) $(FLAGS) -c agents/baseline/PerturbAgent.cpp -o bin/PerturbAgent.o		
 
 bin/HumanAgent.o: agents/human/HumanAgent.cpp
-	$(CXX) $(FLAGS) -c agents/human/HumanAgent.cpp -o bin/HumanAgent.o		
+	$(CXX) $(FLAGS) -c agents/human/HumanAgent.cpp -o bin/HumanAgent.o
 
 clean:
-	rm -rf ${OUT_FILE} bin/*.o	
-
+	rm -rf $(OBJS) $(EXE) bin/*
 
 #This command needs to be executed in a osX before running the code:
 #export DYLD_LIBRARY_PATH="${DYLD_LIBRARY_PATH}:../lib/ale_0_4"

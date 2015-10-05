@@ -1,13 +1,6 @@
-#ifndef MATHEMATICS_H
-#define MATHEMATICS_H
-#include "../../common/Mathematics.hpp"
-#endif
 
-#ifndef RL_LEARNER_H
-#define RL_LEARNER_H
+#include "../../common/Mathematics.hpp"
 #include "RLLearner.hpp"
-#include <random>
-#endif
 
 using namespace std;
 

@@ -11,14 +11,12 @@
 ** Author: Marlos C. Machado
 ***************************************************************************************/
 
-#ifndef BASS_FEATURES_H
-#define BASS_FEATURES_H
-#include "BASSFeatures.hpp"
-#endif
 
+#include "BASSFeatures.hpp"
 #include "BasicFeatures.hpp"
 
 using namespace std;
+
 BASSFeatures::BASSFeatures(Parameters *param){
     this->param = param;
     numPureFeatures = this->param->getNumColumns() * this->param->getNumRows() * this->param->getNumColors();

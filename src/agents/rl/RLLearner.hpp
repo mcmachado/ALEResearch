@@ -6,10 +6,10 @@
 ** Author: Marlos C. Machado
 ***************************************************************************************/
 
-#ifndef AGENT_H
-#define AGENT_H
+#ifndef RLAGENT_H
+#define RLAGENT_H
+
 #include "../Agent.hpp"
-#endif
 #include <random>
 
 class RLLearner : public Agent{
@@ -95,3 +95,5 @@ class RLLearner : public Agent{
 		*/
 		virtual ~RLLearner(){};
 };
+
+#endif

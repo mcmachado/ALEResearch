@@ -10,10 +10,7 @@
 ** Author: Marlos C. Machado
 ***************************************************************************************/
 
-#ifndef BASIC_FEATURES_H
-#define BASIC_FEATURES_H
 #include "BasicFeatures.hpp"
-#endif
 
 using namespace std;
 

@@ -6,10 +6,7 @@
 ** Author: Marlos C. Machado
 ***************************************************************************************/
 
-#ifndef MATHEMATICS_H
-#define MATHEMATICS_H
 #include "Mathematics.hpp"
-#endif
 #include <assert.h>
 #include <cstdlib>
 

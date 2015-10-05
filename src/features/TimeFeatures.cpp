@@ -8,14 +8,8 @@
 ** Author: Marlos C. Machado
 ***************************************************************************************/
 
-#ifndef TIME_FEATURES_H
-#define TIME_FEATURES_H
 #include "TimeFeatures.hpp"
-#endif
-#ifndef BASIC_FEATURES_H
-#define BASIC_FEATURES_H
 #include "BasicFeatures.hpp"
-#endif
 
 #include <set>
 #include <assert.h>

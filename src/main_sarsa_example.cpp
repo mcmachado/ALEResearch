@@ -9,22 +9,10 @@
 ** Author: Marlos C. Machado
 ***************************************************************************************/
 
-#ifndef ALE_INTERFACE_H
-#define ALE_INTERFACE_H
 #include <ale_interface.hpp>
-#endif
-#ifndef PARAMETERS_H
-#define PARAMETERS_H
 #include "common/Parameters.hpp"
-#endif
-#ifndef SARSA_H
-#define SARSA_H
 #include "agents/rl/sarsa/SarsaLearner.hpp"
-#endif
-#ifndef BASIC_H
-#define BASIC_H
 #include "features/BasicFeatures.hpp"
-#endif
 
 void printBasicInfo(Parameters param){
 	printf("Seed: %d\n", param.getSeed());

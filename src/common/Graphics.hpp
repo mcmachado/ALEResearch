@@ -5,5 +5,10 @@
 ** Author: Marlos C. Machado
 ***************************************************************************************/
 
+#ifndef GRAPHICS_H
+#define GRAPHICS_H
+
 #define ANSI_COLOR_RED     "\x1b[31m"
 #define ANSI_COLOR_RESET   "\x1b[0m"
+
+#endif

@@ -6,18 +6,12 @@
 ** Author: Marlos C. Machado
 ***************************************************************************************/
 
-#ifndef ALE_INTERFACE_H
-#define ALE_INTERFACE_H
+#ifndef AGENT_H
+#define AGENT_H
+
 #include <ale_interface.hpp>
-#endif
-#ifndef PARAMETERS_H
-#define PARAMETERS_H
 #include "../common/Parameters.hpp"
-#endif
-#ifndef FEATURES_H
-#define FEATURES_H
 #include "../features/Features.hpp"
-#endif
 
 class Agent{
 	public:
@@ -54,3 +48,5 @@ class Agent{
 		*/
 		virtual ~Agent(){};
 };
+
+#endif

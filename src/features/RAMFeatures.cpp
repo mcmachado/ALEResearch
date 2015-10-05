@@ -9,10 +9,7 @@
 ** Author: Marlos C. Machado
 ***************************************************************************************/
 
-#ifndef RAM_FEATURES_H
-#define RAM_FEATURES_H
 #include "RAMFeatures.hpp"
-#endif
 
 #define BITS_IN_BYTE    8
 #define BYTES_RAM     128
@@ -23,6 +20,9 @@ typedef unsigned char byte_t;
 using namespace std;
 
 RAMFeatures::RAMFeatures(){
+}
+
+RAMFeatures::RAMFeatures(Parameters* param){
 }
 
 void RAMFeatures::getActiveFeaturesIndices(

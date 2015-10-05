@@ -4,10 +4,7 @@
 ** Author: Marlos C. Machado
 ***************************************************************************************/
 
-#ifndef BACKGROUND_H
-#define BACKGROUND_H
 #include "Background.hpp"
-#endif
 #include <fstream>
 #include <stdlib.h>
 
@@ -20,7 +17,7 @@ Background::Background(Parameters *param){
 	int row = 0;
 	int col = 0;
 	//TODO: Make this code more robust
-	int ratio = 2;
+	//int ratio = 2;
 
 	//Open background file
 	std::ifstream backgroundFile(param->getPathToBackground().c_str());

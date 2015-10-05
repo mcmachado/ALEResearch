@@ -8,20 +8,13 @@
 ** Author: Marlos C. Machado
 ***************************************************************************************/
 
-#ifndef BPRO_FEATURES_H
-#define BPRO_FEATURES_H
 #include "BPROFeatures.hpp"
-#endif
-#ifndef BASIC_FEATURES_H
-#define BASIC_FEATURES_H
 #include "BasicFeatures.hpp"
-#endif
 
 #include <set>
 #include <assert.h>
+
 using namespace std;
-//#include <tuple>
-//#include <boost/tuple/tuple.hpp> //TODO: I have to remove this to not have to depend on boost
 
 BPROFeatures::BPROFeatures(Parameters *param){
     this->param = param;
@@ -39,10 +32,10 @@ BPROFeatures::BPROFeatures(Parameters *param){
 	numRelativeFeatures = (2 * this->param->getNumColumns() - 1) * (2 * this->param->getNumRows() - 1) 
 							* (1+this->param->getNumColors()) * this->param->getNumColors()/2;
     changed.clear();
-    bproExistence.resize(2*numRows-1);
-    for (int i=0;i<2*numRows-1;i++){
-        bproExistence[i].resize(2*numColumns-1);
-        for (int j=0;j<2*numColumns-1;j++){
+    bproExistence.resize(2 * numRows - 1);
+    for (int i=0; i < 2 * numRows - 1; i++){
+        bproExistence[i].resize(2 * numColumns - 1);
+        for (int j = 0; j < 2 * numColumns - 1; j++){
             bproExistence[i][j]=true;
         }
     }
@@ -99,8 +92,8 @@ void BPROFeatures::addRelativeFeaturesIndices(const ALEScreen &screen, int featu
 
 	int numRowOffsets = 2*numRows - 1;
 	int numColumnOffsets = 2*numColumns - 1;
-	int numOffsets = numRowOffsets*numColumnOffsets;
-	int numColorPairs = (1+numColors)*numColors/2;
+	//int numOffsets = numRowOffsets*numColumnOffsets;
+	//int numColorPairs = (1+numColors)*numColors/2;
     
     for (int c1=0;c1<numColors;c1++){
         for (int k=0;k<whichColors[c1].size();k++){
