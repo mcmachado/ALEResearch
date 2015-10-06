@@ -17,8 +17,6 @@
 
 using namespace std;
 
-#define TO_REPORT_EXPL  1
-#define BYTE_TO_CAPTURE 0xDC
 //Freeway: Chicken height: 0x8E
 //Private Eye: Screen number: 0xDC
 
@@ -64,11 +62,6 @@ SarsaLearner::SarsaLearner(Environment<bool>& env, Parameters *param, int seed) 
         rename(previousNameForLearningCondition.c_str(), nameForLearningCondition.c_str());
         learningConditionFile.open(nameForLearningCondition, ios_base::app);
         learningConditionFile.close();
-    }
-
-    if(TO_REPORT_EXPL){
-		myfile.open ("exploration_data.txt");
-
     }
 }
 
@@ -310,9 +303,6 @@ void SarsaLearner::learnPolicy(Environment<bool>& env){
 		if(toSaveCheckPoint && episode%saveWeightsEveryXSteps == 0){
             saveCheckPoint(episode,totalNumberFrames,episodeResults,saveWeightsEveryXSteps,episodeFrames,episodeFps);
         }
-	}
-	if(TO_REPORT_EXPL){
-		myfile.close();
 	}
 }
 

@@ -23,7 +23,7 @@ public:
 
     /**@brief This function puts back the environment in its original state
      */
-    virtual void reset()=0;
+    virtual void reset() = 0;
     /**@brief Same as reset ; provided for compatibility 
      */
     void reset_game(){reset();}
@@ -59,16 +59,17 @@ public:
      *
      * @return a vector of integers representing the actions
      */
-    virtual std::vector<Action> getLegalActionSet() = 0;
+    virtual std::vector<Action> getLegalActionSet(){
+        return getLegalActionSet();
+    }
 
 
     /** @brief Return the minimal set of actions that can be taken in this environment
      * In some cases, some actions are legal but not usefull. This actions are not returned by this function
      * @return a vector of integers representing the actions
      */
-    virtual std::vector<Action> getMinimalActionSet()
-    {
-        return getLegalActionSet();
+    virtual std::vector<Action> getMinimalActionSet(){
+        return getMinimalActionSet();
     }
 
     /** @brief Return all the features, as computed by the featurecomputer
@@ -104,7 +105,7 @@ public:
     }
 
 
-    virtual void setFlavor(unsigned f){};
+    //virtual void setFlavor(unsigned f){};
 protected:
     std::shared_ptr<OffPolicyLearner> m_offPolicyLearner;
 
@@ -115,7 +116,7 @@ class t_Environment : public Environment<typename FeatureComputer::FeatureType>{
 public:
     t_Environment(FeatureComputer* feat) : m_feat(feat) {}
 
-    virtual double act(Action action, double proba_action = 1.0) final
+    virtual double act(Action action, double prob_action = 1.0) final
     {
         if(this->m_offPolicyLearner == nullptr){
             return this->doAct(action);
@@ -124,7 +125,7 @@ public:
         this->getActiveFeaturesIndices(curState);
         double reward = this->doAct(action);
         this->getActiveFeaturesIndices(nextState);
-        this->m_offPolicyLearner->receiveSample(curState,action,reward,nextState,proba_action);
+        this->m_offPolicyLearner->receiveSample(curState, action, reward, nextState, prob_action);
         return reward;
     }
 protected:

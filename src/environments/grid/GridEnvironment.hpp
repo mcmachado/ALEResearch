@@ -28,6 +28,13 @@ public:
         m_frame=0;
     }
 
+    std::vector<Action> getMinimalActionSet(){
+        return {PLAYER_A_NOOP, PLAYER_A_FIRE, PLAYER_A_UP, PLAYER_A_RIGHT, PLAYER_A_LEFT,
+            PLAYER_A_DOWN, PLAYER_A_UPRIGHT, PLAYER_A_UPLEFT, PLAYER_A_DOWNRIGHT, PLAYER_A_DOWNLEFT,
+            PLAYER_A_UPFIRE, PLAYER_A_RIGHTFIRE, PLAYER_A_LEFTFIRE, PLAYER_A_DOWNFIRE,
+            PLAYER_A_UPRIGHTFIRE, PLAYER_A_UPLEFTFIRE, PLAYER_A_DOWNRIGHTFIRE, PLAYER_A_DOWNLEFTFIRE};
+    }
+
     std::vector<Action> getLegalActionSet(){
         return {PLAYER_A_UP, PLAYER_A_DOWN, PLAYER_A_LEFT, PLAYER_A_RIGHT};
     }
@@ -37,7 +44,7 @@ public:
     }
 
     void getActiveFeaturesIndices(std::vector<std::pair<int,FeatureType> >& active_feat){
-        return this->m_feat->getActiveFeaturesIndices(this,active_feat);
+        this->m_feat->getActiveFeaturesIndices(this,active_feat);
     }
 
     void getActiveFeaturesIndices(std::vector<int>& active_feat){
@@ -70,27 +77,20 @@ public:
         default:
             throw std::runtime_error("illegal action taken by the agent");
         }
-        double reward = -0.05;
+        double reward = -1;
         if(m_posx<0){
             m_posx = 0;
-            reward = -1;
         }
         if(m_posy<0){
             m_posy = 0;
-            reward = -1;
         }
         if(m_posx>m_width){
             m_posx = m_width;
-            reward = -1;
         }
         if(m_posy>m_height){
             m_posy = m_height;
-            reward = -1;
         }
-        if(m_posx==m_width&&m_posy==m_height){
-            //reward = 10 + m_width + m_height;
-            reward = 1000;
-        }
+
         m_frame++;
         return reward;
     }
@@ -104,15 +104,15 @@ public:
     }
 
     std::pair<int,int> getGridSize(){
-        return {m_width,m_height};
+        return {m_width, m_height};
     }
 
     std::pair<int,int> getPos(){
-        return {m_posx,m_posy};
+        return {m_posx, m_posy};
     }
  protected:
-    int m_posx,m_posy;
-    int m_width,m_height;
+    int m_posx, m_posy;
+    int m_width, m_height;
     int m_frame;
 };
 

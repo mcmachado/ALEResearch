@@ -18,7 +18,6 @@
 
 class SarsaLearner : public RLLearner<bool>{
 	private:
-		std::ofstream myfile;
 
 		float alpha, delta, lambda, traceThreshold;
 		int numFeatures, currentAction, nextAction;
