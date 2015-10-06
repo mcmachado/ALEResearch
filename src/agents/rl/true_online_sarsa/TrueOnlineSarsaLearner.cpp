@@ -16,13 +16,13 @@
 
 using namespace std;
 
-TrueOnlineSarsaLearner::TrueOnlineSarsaLearner(ALEInterface& ale, Features *features, Parameters *param, int seed) : RLLearner(ale, param, seed) {
+TrueOnlineSarsaLearner::TrueOnlineSarsaLearner(Environment<bool>& env, Parameters *param, int seed) : RLLearner<bool>(env, param, seed) {
 	delta = 0.0;
 	
 	alpha = param->getAlpha();
 	lambda = param->getLambda();
 	traceThreshold = param->getTraceThreshold();
-	numFeatures = features->getNumberOfFeatures();
+	numFeatures = env.getNumberOfFeatures();
 
 	for(int i = 0; i < numActions; i++){
 		//Initialize Q;
@@ -143,7 +143,7 @@ void TrueOnlineSarsaLearner::loadWeights(){
 }
 
 
-void TrueOnlineSarsaLearner::learnPolicy(ALEInterface& ale, Features *features){
+void TrueOnlineSarsaLearner::learnPolicy(Environment<bool>& env){
 	
 	struct timeval tvBegin, tvEnd, tvDiff;
 	vector<float> reward;
@@ -172,7 +172,7 @@ void TrueOnlineSarsaLearner::learnPolicy(ALEInterface& ale, Features *features){
 			}
 		}
 		F.clear();
-		features->getActiveFeaturesIndices(ale.getScreen(), ale.getRAM(), F);
+		env.getActiveFeaturesIndices(F);
 		updateQValues(F, Q);
 		currentAction = epsilonGreedy(Q);
 		
@@ -181,7 +181,7 @@ void TrueOnlineSarsaLearner::learnPolicy(ALEInterface& ale, Features *features){
 		//Repeat(for each step of episode) until game is over:
 		gettimeofday(&tvBegin, NULL);
 		//This also stops when the maximum number of steps per episode is reached
-		while(!ale.game_over()){
+		while(!env.game_over()){
 			reward.clear();
 			reward.push_back(0.0);
 			reward.push_back(0.0);
@@ -189,12 +189,12 @@ void TrueOnlineSarsaLearner::learnPolicy(ALEInterface& ale, Features *features){
 			sanityCheck();
 
 			//Take action, observe reward and next state:
-			act(ale, currentAction, reward);
+			act(env, currentAction, reward);
 			cumReward  += reward[1];
-			if(!ale.game_over()){
+			if(!env.game_over()){
 				//Obtain active features in the new state:
 				Fnext.clear();
-				features->getActiveFeaturesIndices(ale.getScreen(), ale.getRAM(), Fnext);
+				env.getActiveFeaturesIndices(Fnext);
 				updateQValues(Fnext, Qnext);     //Update Q-values for the new active features
 				nextAction = epsilonGreedy(Qnext);
 			}
@@ -228,17 +228,17 @@ void TrueOnlineSarsaLearner::learnPolicy(ALEInterface& ale, Features *features){
 		timeval_subtract(&tvDiff, &tvEnd, &tvBegin);
 		elapsedTime = float(tvDiff.tv_sec) + float(tvDiff.tv_usec)/1000000.0;
 		
-		float fps = float(ale.getEpisodeFrameNumber())/elapsedTime;
+		float fps = float(env.getEpisodeFrameNumber())/elapsedTime;
 		printf("episode: %d,\t%.0f points,\tavg. return: %.1f,\t%d frames,\t%.0f fps\n",
 			episode + 1, cumReward - prevCumReward, (float)cumReward/(episode + 1.0),
-			ale.getEpisodeFrameNumber(), fps);
-		totalNumberFrames += ale.getEpisodeFrameNumber();
+			env.getEpisodeFrameNumber(), fps);
+		totalNumberFrames += env.getEpisodeFrameNumber();
 		prevCumReward = cumReward;
-		ale.reset_game();
+		env.reset_game();
 	}
 }
 
-void TrueOnlineSarsaLearner::evaluatePolicy(ALEInterface& ale, Features *features){
+double TrueOnlineSarsaLearner::evaluatePolicy(Environment<bool>& env){
 	float reward = 0;
 	float cumReward = 0; 
 	float prevCumReward = 0;
@@ -246,17 +246,17 @@ void TrueOnlineSarsaLearner::evaluatePolicy(ALEInterface& ale, Features *feature
 	//Repeat (for each episode):
 	for(int episode = 0; episode < numEpisodesEval; episode++){
 		//Repeat(for each step of episode) until game is over:
-		for(int step = 0; !ale.game_over() && step < episodeLength; step++){
+		for(int step = 0; !env.game_over() && step < episodeLength; step++){
 			//Get state and features active on that state:		
 			F.clear();
-			features->getActiveFeaturesIndices(ale.getScreen(), ale.getRAM(), F);
+			env.getActiveFeaturesIndices(F);
 			updateQValues(F, Q);       //Update Q-values for each possible action
 			currentAction = epsilonGreedy(Q);
 			//Take action, observe reward and next state:
-			reward = ale.act(actions[currentAction]);
+			reward = env.act(actions[currentAction]);
 			cumReward  += reward;
 		}
-		ale.reset_game();
+		env.reset_game();
 		sanityCheck();
 		
 		printf("%d, %f, %f \n", episode + 1, (float)cumReward/(episode + 1.0), cumReward-prevCumReward);

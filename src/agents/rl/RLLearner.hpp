@@ -9,10 +9,13 @@
 #ifndef RLAGENT_H
 #define RLAGENT_H
 
-#include "../Agent.hpp"
 #include <random>
+#include "../Agent.hpp"
+#include "../../environments/Environment.hpp"
+#include "../../common/Mathematics.hpp"
 
-class RLLearner : public Agent{
+template<typename FeatureType>
+class RLLearner : public Agent<FeatureType>{
 	protected:
 		ActionVect actions;
 
@@ -39,7 +42,7 @@ class RLLearner : public Agent{
  		* the reward to be used by the RL algorithm is returned; in the second position, the game score is
  		* returned.
  		*/
-		void act(ALEInterface& ale, int action, std::vector<float> &reward);
+		void act(Environment<FeatureType>& env, int action, std::vector<float> &reward);
 
 		/**
  		* Implementation of an epsilon-greedy function. Epsilon is defined in the constructor,
@@ -59,7 +62,7 @@ class RLLearner : public Agent{
  		*        file and command line.
  		*
 		*/
-		RLLearner(ALEInterface& ale, Parameters *param, int seed);
+		RLLearner(Environment<FeatureType>& env, Parameters *param, int seed);
 
 	public:
 	   /**
@@ -71,10 +74,8 @@ class RLLearner : public Agent{
  		*
  		* @param ALEInterface& ale Arcade Learning Environment interface: object used to define agents'
  		*        actions, obtain simulator's screen, RAM, etc.
- 		* @param Features *features object that defines what feature function that will be used by the RL
- 		*        agents.
  		*/
-		virtual void learnPolicy(ALEInterface& ale, Features *features) = 0;
+		virtual void learnPolicy(Environment<FeatureType>& env) = 0;
 
 		/**
  		* Pure virtual method that needs to be implemented by any agent. Once the agent learned a
@@ -85,15 +86,15 @@ class RLLearner : public Agent{
  		*
  		* @param ALEInterface& ale Arcade Learning Environment interface: object used to define agents'
  		*        actions, obtain simulator screen, RAM, etc.
- 		* @param Features *features object that defines what feature function that will be used by the RL
- 		*        agents. It may be null for other approaches as in Planning.
  		*/
-		virtual void evaluatePolicy(ALEInterface& ale, Features *features) = 0;
+		virtual double evaluatePolicy(Environment<FeatureType>& env) = 0;
 
 		/**
 		* Destructor, not necessary in this class.
 		*/
 		virtual ~RLLearner(){};
 };
+
+#include "RLLearner.cpp"
 
 #endif

@@ -49,10 +49,10 @@ void HumanAgent::saveTrajectory(int takenAction){
 }
 #endif
 
-void HumanAgent::learnPolicy(ALEInterface& ale, Features *features){
+void HumanAgent::learnPolicy(Environment<bool>& env){
 }
-		
-void HumanAgent::evaluatePolicy(ALEInterface& ale, Features *features){
+
+double HumanAgent::evaluatePolicy(Environment<bool>& env){
 #ifdef __USE_SDL
 	Action action;
 	int reward = 0;
@@ -61,19 +61,19 @@ void HumanAgent::evaluatePolicy(ALEInterface& ale, Features *features){
 	//Repeat (for each episode):
 	for(int episode = 0; episode < numEpisodesToEval; episode++){
 		int step = 0;
-		while(!ale.game_over() && step < maxStepsInEpisode) {
+		while(!env.game_over() && step < maxStepsInEpisode) {
 			action = receiveAction();
             //If one wants to save trajectories, this is where the trajectory is saved:
             if(toSaveTrajectory){
                 saveTrajectory(action);
             }
-			reward = ale.act(action);
+			reward = env.act(action);
 			cumulativeReward += reward;
 			step++;
 		}
 		printf("Episode %d, Cumulative Reward: %d\n", episode + 1, cumulativeReward);
 		cumulativeReward = 0;
-		ale.reset_game(); //Start the game again when the episode is over
+		env.reset_game(); //Start the game again when the episode is over
 	}
 }
 

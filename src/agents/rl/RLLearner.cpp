@@ -1,10 +1,5 @@
-
-#include "../../common/Mathematics.hpp"
-#include "RLLearner.hpp"
-
-using namespace std;
-
-RLLearner::RLLearner(ALEInterface& ale, Parameters *param, int seed){
+template<typename FeatureType>
+RLLearner<FeatureType>::RLLearner(Environment<FeatureType>& env, Parameters *param, int seed){
 	randomActionTaken   = 0;
 
 	gamma               = param->getGamma();
@@ -18,16 +13,17 @@ RLLearner::RLLearner(ALEInterface& ale, Parameters *param, int seed){
 
 	//Get the number of effective actions:
 	if(param->isMinimalAction()){
-		actions = ale.getMinimalActionSet();
+		actions = env.getMinimalActionSet();
 	}
 	else{
-		actions = ale.getLegalActionSet();
+		actions = env.getLegalActionSet();
 	}
 	numActions = actions.size();
     agentRand.seed(seed);
 }
 
-int RLLearner::epsilonGreedy(vector<float> &QValues){
+template<typename FeatureType>
+int RLLearner<FeatureType>::epsilonGreedy(std::vector<float> &QValues){
 	randomActionTaken = 0;
 
 	int action = Mathematics::argmax(QValues);
@@ -45,10 +41,14 @@ int RLLearner::epsilonGreedy(vector<float> &QValues){
  * pass aditional information to the running algorithm (like 'real score' if one
  * is using a surrogate reward function).
  */
-void RLLearner::act(ALEInterface& ale, int action, vector<float> &reward){
-	double r_alg = 0.0, r_real = 0.0;
-	
-	r_real = ale.act(actions[action]);
+template<typename FeatureType>
+void RLLearner<FeatureType>::act(Environment<FeatureType>& env, int action, std::vector<float> &reward){
+	float r_alg = 0.0, r_real = 0.0;
+
+    //compute probability of taking current action
+    double prob_action = epsilon/double(numActions) + (randomActionTaken ? 0 : 1.0 - epsilon);
+
+	r_real = env.act(actions[action], prob_action);
 	if(toUseOnlyRewardSign){
 		if(r_real > 0){ 
 			r_alg = 1.0;
@@ -85,8 +85,8 @@ void RLLearner::act(ALEInterface& ale, int action, vector<float> &reward){
 	//to "die" soon to avoid -1 as reward at each step, when
 	//the agent dies we give him -1 for each time step remaining,
 	//this would be the worst case ever...
-	if(ale.game_over() && toBeOptimistic){
-		int missedSteps = episodeLength - ale.getEpisodeFrameNumber() + 1;
+	if(env.isTerminal() && toBeOptimistic){
+		int missedSteps = episodeLength - env.getEpisodeFrameNumber() + 1;
 		double penalty = pow(gamma, missedSteps) - 1;
 		reward[0] -= penalty;
 	}

@@ -15,7 +15,7 @@
 #include "../RLLearner.hpp"
 #include <vector>
 
-class QLearner : public RLLearner{
+class QLearner : public RLLearner<bool>{
 	private:
 		float alpha, delta, lambda, traceThreshold;
 		int numFeatures, currentAction, nextAction;
@@ -57,7 +57,7 @@ class QLearner : public RLLearner{
  		*/
 		void updateReplTrace(int action);
 	public:
-		QLearner(ALEInterface& ale, Features *features, Parameters *param, int seed);
+		QLearner(Environment<bool>& env, Parameters *param, int seed);
 		/**
  		* Implementation of an agent controller. This implementation is Q(lambda).
  		*
@@ -67,7 +67,7 @@ class QLearner : public RLLearner{
  		*        actions, obtain simulator's screen, RAM, etc.
  		* @param Features *features object that defines what feature function that will be used.
  		*/
-		void learnPolicy(ALEInterface& ale, Features *features);
+		void learnPolicy(Environment<bool>& env);
 		/**
  		* After the policy was learned it is necessary to evaluate its quality. Therefore, a given number
  		* of episodes is run without learning (the vector of weights and the trace are not updated).
@@ -76,7 +76,7 @@ class QLearner : public RLLearner{
  		*        actions, obtain simulator's screen, RAM, etc.
  		* @param Features *features object that defines what feature function that will be used.
  		*/
-		void evaluatePolicy(ALEInterface& ale, Features *features);
+		double evaluatePolicy(Environment<bool>& env);
 		/**
 		* Destructor, not necessary in this class.
 		*/

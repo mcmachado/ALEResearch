@@ -22,7 +22,7 @@ using namespace std;
 //Freeway: Chicken height: 0x8E
 //Private Eye: Screen number: 0xDC
 
-SarsaLearner::SarsaLearner(ALEInterface& ale, Features *features, Parameters *param, int seed) : RLLearner(ale, param, seed) {
+SarsaLearner::SarsaLearner(Environment<bool>& env, Parameters *param, int seed) : RLLearner<bool>(env, param, seed) {
     totalNumberFrames = 0.0;
     maxFeatVectorNorm = 1;
 	
@@ -30,11 +30,12 @@ SarsaLearner::SarsaLearner(ALEInterface& ale, Features *features, Parameters *pa
 	alpha = param->getAlpha();
 	lambda = param->getLambda();
 	traceThreshold = param->getTraceThreshold();
-	numFeatures = features->getNumberOfFeatures();
+	numFeatures = env.getNumberOfFeatures();
 	toSaveCheckPoint = param->getToSaveCheckPoint();
 	saveWeightsEveryXSteps = param->getFrequencySavingWeights();
 	pathWeightsFileToLoad = param->getPathToWeightsFiles();
 	featureSeen.resize(numActions);
+	numEpisodesEval = param->getNumEpisodesEval();
 	
 	for(int i = 0; i < numActions; i++){
 		//Initialize Q;
@@ -215,7 +216,7 @@ void SarsaLearner::loadCheckPoint(ifstream& checkPointToLoad){
     checkPointToLoad.close();
 }
 
-void SarsaLearner::learnPolicy(ALEInterface& ale, Features *features){
+void SarsaLearner::learnPolicy(Environment<bool>& env){
 	
 	struct timeval tvBegin, tvEnd, tvDiff;
 	vector<float> reward;
@@ -237,7 +238,7 @@ void SarsaLearner::learnPolicy(ALEInterface& ale, Features *features){
 			nonZeroElig[a].clear();
 		}
 		F.clear();
-		features->getActiveFeaturesIndices(ale.getScreen(), ale.getRAM(), F);
+		env.getActiveFeaturesIndices(F);
 		updateQValues(F, Q);
 		currentAction = epsilonGreedy(Q);
 
@@ -245,7 +246,7 @@ void SarsaLearner::learnPolicy(ALEInterface& ale, Features *features){
 		gettimeofday(&tvBegin, NULL);
 
 		//This also stops when the maximum number of steps per episode is reached
-		while(!ale.game_over()){
+		while(!env.isTerminal()){
 			reward.clear();
 			reward.push_back(0.0);
 			reward.push_back(0.0);
@@ -253,19 +254,13 @@ void SarsaLearner::learnPolicy(ALEInterface& ale, Features *features){
 			sanityCheck();
 
 			//Take action, observe reward and next state:
-			act(ale, currentAction, reward);
+			act(env, currentAction, reward);
 			cumReward  += reward[1];
 
-			if(!ale.game_over()){
+			if(!env.isTerminal()){
 				//Obtain active features in the new state:
 				Fnext.clear();
-				features->getActiveFeaturesIndices(ale.getScreen(), ale.getRAM(), Fnext);
-
-				if(TO_REPORT_EXPL){
-					ALERAM ram = ale.getRAM();
-					unsigned int byte = ram.get(BYTE_TO_CAPTURE);
-					myfile << byte << endl;
-				}
+				env.getActiveFeaturesIndices(Fnext);
 
 				updateQValues(Fnext, Qnext);     //Update Q-values for the new active features
 				nextAction = epsilonGreedy(Qnext);
@@ -302,16 +297,16 @@ void SarsaLearner::learnPolicy(ALEInterface& ale, Features *features){
 		timeval_subtract(&tvDiff, &tvEnd, &tvBegin);
 		elapsedTime = float(tvDiff.tv_sec) + float(tvDiff.tv_usec)/1000000.0;
 		
-		float fps = float(ale.getEpisodeFrameNumber())/elapsedTime;
+		float fps = float(env.getEpisodeFrameNumber())/elapsedTime;
 		printf("episode: %d,\t%.0f points,\tavg. return: %.1f,\t%d frames,\t%.0f fps\n",
 			episode, cumReward - prevCumReward, (float)cumReward/(episode + 1.0),
-			ale.getEpisodeFrameNumber(), fps);
+			env.getEpisodeFrameNumber(), fps);
         episodeResults.push_back(cumReward-prevCumReward);
-        episodeFrames.push_back(ale.getEpisodeFrameNumber());
+        episodeFrames.push_back(env.getEpisodeFrameNumber());
         episodeFps.push_back(fps);
-		totalNumberFrames += ale.getEpisodeFrameNumber();
+		totalNumberFrames += env.getEpisodeFrameNumber();
 		prevCumReward = cumReward;
-		ale.reset_game();
+		env.reset_game();
 		if(toSaveCheckPoint && episode%saveWeightsEveryXSteps == 0){
             saveCheckPoint(episode,totalNumberFrames,episodeResults,saveWeightsEveryXSteps,episodeFrames,episodeFps);
         }
@@ -321,7 +316,7 @@ void SarsaLearner::learnPolicy(ALEInterface& ale, Features *features){
 	}
 }
 
-void SarsaLearner::evaluatePolicy(ALEInterface& ale, Features *features){
+double SarsaLearner::evaluatePolicy(Environment<bool>& env){
 	float reward = 0;
 	float cumReward = 0; 
 	float prevCumReward = 0;
@@ -336,26 +331,26 @@ void SarsaLearner::evaluatePolicy(ALEInterface& ale, Features *features){
 	//Repeat (for each episode):
 	for(int episode = 1; episode < numEpisodesEval; episode++){
 		//Repeat(for each step of episode) until game is over:
-		for(int step = 0; !ale.game_over() && step < episodeLength; step++){
+		for(int step = 0; !env.isTerminal() && step < episodeLength; step++){
 			//Get state and features active on that state:		
 			F.clear();
-			features->getActiveFeaturesIndices(ale.getScreen(), ale.getRAM(), F);
+			env.getActiveFeaturesIndices(F);
 			updateQValues(F, Q);       //Update Q-values for each possible action
 			currentAction = epsilonGreedy(Q);
 			//Take action, observe reward and next state:
-			reward = ale.act(actions[currentAction]);
+			reward = env.act(actions[currentAction]);
 			cumReward  += reward;
 		}
 		gettimeofday(&tvEnd, NULL);
 		timeval_subtract(&tvDiff, &tvEnd, &tvBegin);
 		elapsedTime = float(tvDiff.tv_sec) + float(tvDiff.tv_usec)/1000000.0;
-		float fps = float(ale.getEpisodeFrameNumber())/elapsedTime;
+		float fps = float(env.getEpisodeFrameNumber())/elapsedTime;
 
 		resultFile << "Episode " << episode << ": " << cumReward - prevCumReward << std::endl;
 		printf("episode: %d,\t%.0f points,\tavg. return: %.1f,\t%d frames,\t%.0f fps\n", 
-			episode, (cumReward-prevCumReward), (float)cumReward/(episode + 1.0), ale.getEpisodeFrameNumber(), fps);
+			episode, (cumReward-prevCumReward), (float)cumReward/(episode + 1.0), env.getEpisodeFrameNumber(), fps);
 
-		ale.reset_game();
+		env.reset();
 		prevCumReward = cumReward;
 	}
 	resultFile << "Average: " << (double)cumReward/500 << std::endl;

@@ -13,7 +13,7 @@
 
 #include "../Agent.hpp"
 
-class HumanAgent : public Agent{
+class HumanAgent : public Agent<bool>{
 	private:
 		int maxStepsInEpisode;
 		int numEpisodesToEval;
@@ -38,12 +38,10 @@ class HumanAgent : public Agent{
 		* TODO: This method may be very slow according to the feature representation selected.
 		*       Is there any optimization that can be done?
 		*
- 		* @param ALEInterface& ale Arcade Learning Environment interface: object used to define agents'
+		* @param Environment<bool>& env Arcade Learning Environment interface: object used to define agents'
  		*        actions, obtain simulator screen, RAM, etc. 
- 		* @param Features *features object that defines what feature function that will be used by the RL
- 		*        agents. Since no features are relevant here this parameter is set to null by default.		
 		*/
-		void saveFeatureRepr(ALEInterface& ale, Features *features);
+		void saveFeatureRepr(Environment<bool>& env);
 		/**
 		* This method saves in a file specified in trajectoryFile the agent's
 		* trajectory (state, action, reward). It is only called if the variable
@@ -61,11 +59,11 @@ class HumanAgent : public Agent{
 		*
 		* TODO: This method is extremely slow. Is there any optimization that makes it feasible?
 		*
- 		* @param ALEInterface& ale Arcade Learning Environment interface: object used to define agents'
+		* @param Environment<bool>& env Arcade Learning Environment interface: object used to define agents'
  		*        actions, obtain simulator screen, RAM, etc. 
  		* @param int takenAction the code for the actiont taken		
 		*/
-		void saveTrajectory(ALEInterface& ale, int takenAction);
+		void saveTrajectory(Environment<bool>& env, int takenAction);
 #endif		
 	public:
 		/**
@@ -78,21 +76,17 @@ class HumanAgent : public Agent{
  		* This method should be implemented due to the superclass Agent, however it is useless for human
  		* controlled agents.
  		*
- 		* @param ALEInterface& ale Arcade Learning Environment interface: object used to define agents'
+		* @param Environment<bool>& env Arcade Learning Environment interface: object used to define agents'
  		*        actions, obtain simulator screen, RAM, etc. 
- 		* @param Features *features object that defines what feature function that will be used by the RL
- 		*        agents. Since no features are relevant here this parameter is set to null by default.
  		*/
-		void learnPolicy(ALEInterface& ale, Features *features = NULL);
+		void learnPolicy(Environment<bool>& env);
 		/**
  		* Implementation of an agent that is controlled by a human player.
  		*
- 		* @param ALEInterface& ale Arcade Learning Environment interface: object used to define agents'
+		* @param Environment<bool>& env Arcade Learning Environment interface: object used to define agents'
  		*        actions, obtain simulator screen, RAM, etc.
- 		* @param Features *features object that defines what feature function that will be used by the RL
- 		*        agents. Since no features are relevant here this parameter is set to null by default.
  		*/
-		void evaluatePolicy(ALEInterface& ale, Features *features = NULL);
+		double evaluatePolicy(Environment<bool>& env);
 		/**
 		* Destructor, not necessary in this class.
 		*/

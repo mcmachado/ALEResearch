@@ -13,7 +13,7 @@
 
 #include "../Agent.hpp"
 
-class ConstantAgent : public Agent{
+class ConstantAgent : public Agent<bool>{
 	private:
 		int bestAction;
 		int maxStepsInEpisode;
@@ -36,22 +36,18 @@ class ConstantAgent : public Agent{
  		* therefore each action is tried for one complete episode and the action with maximum
  		* return is returned.
  		*
- 		* @param ALEInterface& ale Arcade Learning Environment interface: object used to define agents'
+		* @param Environment<bool>& env Arcade Learning Environment interface: object used to define agents'
  		*        actions, obtain simulator screen, RAM, etc.
- 		* @param Features *features object that defines what feature function that will be used by the RL
- 		*        agents. Since no features are relevant here this parameter is set to null by default.
  		*/
-		void learnPolicy(ALEInterface& ale, Features *features = NULL);
+		void learnPolicy(Environment<bool>& env);
 		/**
  		* Implementation of an agent that selects the action that obtains a higher return every time.
  		* It is run for a given number of episodes.
  		*
- 		* @param ALEInterface& ale Arcade Learning Environment interface: object used to define agents'
+		* @param Environment<bool>& env Arcade Learning Environment interface: object used to define agents'
  		*        actions, obtain simulator screen, RAM, etc.
- 		* @param Features *features object that defines what feature function that will be used by the RL
- 		*        agents. Since no features are relevant here this parameter is set to null by default.
  		*/
-		void evaluatePolicy(ALEInterface& ale, Features *features = NULL);
+		double evaluatePolicy(Environment<bool>& env);
 		/**
 		* Destructor, not necessary in this class.
 		*/
