@@ -1,11 +1,5 @@
 #include "common/Parameters.hpp"
-#include "agents/rl/qlearning/QLearner.hpp"
 #include "agents/rl/sarsa/SarsaLearner.hpp"
-#include "agents/rl/true_online_sarsa/TrueOnlineSarsaLearner.hpp"
-#include "agents/baseline/ConstantAgent.hpp"
-#include "agents/baseline/PerturbAgent.hpp"
-#include "agents/baseline/RandomAgent.hpp"
-#include "agents/human/HumanAgent.hpp"
 #include "environments/grid/GridEnvironment.hpp"
 #include "features/GridFeatures.hpp"
 

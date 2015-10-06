@@ -329,7 +329,8 @@ double SarsaLearner::evaluatePolicy(Environment<bool>& env){
     resultFile.open(oldName.c_str());
 
 	//Repeat (for each episode):
-	for(int episode = 1; episode < numEpisodesEval; episode++){
+	int episode;
+	for(episode = 1; episode < numEpisodesEval; episode++){
 		//Repeat(for each step of episode) until game is over:
 		for(int step = 0; !env.isTerminal() && step < episodeLength; step++){
 			//Get state and features active on that state:		
@@ -353,9 +354,11 @@ double SarsaLearner::evaluatePolicy(Environment<bool>& env){
 		env.reset();
 		prevCumReward = cumReward;
 	}
-	resultFile << "Average: " << (double)cumReward/500 << std::endl;
+	resultFile << "Average: " << (double)cumReward/numEpisodesEval << std::endl;
     resultFile.close();
     rename(oldName.c_str(),newName.c_str());
+
+    return double(cumReward)/double(episode);
 }
 
 void SarsaLearner::saveWeightsToFile(string suffix){

@@ -52,6 +52,7 @@ void PerturbAgent::learnPolicy(Environment<bool>& env){
 
 double PerturbAgent::evaluatePolicy(Environment<bool>& env){
 	int reward = 0;
+	int totalReward = 0;
 	int cumulativeReward = 0;
 	//It makes no sense to try ilegal actions:
 	ActionVect actions;
@@ -75,9 +76,11 @@ double PerturbAgent::evaluatePolicy(Environment<bool>& env){
 			step++;
 		}
 		printf("Episode %d, Best Cumulative Reward: %d\n", episode + 1, cumulativeReward);
+		totalReward += cumulativeReward;
 		cumulativeReward = 0;
 		env.reset_game(); //Start the game again when the episode is over
 	}
+	return double(totalReward)/numEpisodesToEval;
 }
 
 PerturbAgent::~PerturbAgent(){}

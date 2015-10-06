@@ -56,6 +56,7 @@ double HumanAgent::evaluatePolicy(Environment<bool>& env){
 #ifdef __USE_SDL
 	Action action;
 	int reward = 0;
+    int totalReward = 0;
 	int cumulativeReward = 0;
 	
 	//Repeat (for each episode):
@@ -72,9 +73,11 @@ double HumanAgent::evaluatePolicy(Environment<bool>& env){
 			step++;
 		}
 		printf("Episode %d, Cumulative Reward: %d\n", episode + 1, cumulativeReward);
+        totalReward += cumulativeReward;
 		cumulativeReward = 0;
 		env.reset_game(); //Start the game again when the episode is over
 	}
+    return double(totalReward)/numEpisodesToEval;
 }
 
 

@@ -204,7 +204,8 @@ double QLearner::evaluatePolicy(Environment<bool>& env){
 	float prevCumReward = 0;
 
 	//Repeat (for each episode):
-	for(int episode = 0; episode < numEpisodesEval; episode++){
+	int episode;
+	for(episode = 0; episode < numEpisodesEval; episode++){
 		//Repeat(for each step of episode) until game is over:
 		for(int step = 0; !env.game_over() && step < episodeLength; step++){
 			//Get state and features active on that state:		
@@ -225,4 +226,5 @@ double QLearner::evaluatePolicy(Environment<bool>& env){
 		
 		prevCumReward = cumReward;
 	}
+	return double(cumReward)/double(episode);
 }
