@@ -88,7 +88,7 @@ public:
         if(m_pos == m_min_pos)
             m_vel = std::max(m_vel,float(0.0));
         */
-        m_vel = m_vel + accel*m_coeff - 0.0025*cos(3.0*m_pos);
+        m_vel = m_vel + accel * m_coeff - 0.0025 * cos(3.0 * m_pos);
         if(m_vel > 0.07){
             m_vel = 0.07;
         }
@@ -116,7 +116,7 @@ public:
     }
 
     int getEpisodeFrameNumber(){
-        return 1;
+        return m_frame;
     }
 
     float getVel(){

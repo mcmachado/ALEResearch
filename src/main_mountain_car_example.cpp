@@ -29,20 +29,22 @@ int main(int argc, char** argv){
 	printBasicInfo(param);
 	
     MountainCarEnvironment<MountainCarFeatures> env(&features);
-    float scores[5];
-    
-    for(int i = 0; i < 5; i++){
-        cout<<endl<<"FLAVOR "<<i<<endl;
-        env.setFlavor(i);
+    //float scores[5];
+    float scores;
+    //for(int i = 0; i < 5; i++){
+    //    cout<<endl<<"FLAVOR "<<i<<endl;
+    //    env.setFlavor(i);
+    env.setFlavor(0);
         //Instantiating the learning algorithm:
         SarsaLearner sarsaLearner(env, &param, param.getSeed());
         //Learn a policy:
         sarsaLearner.learnPolicy(env);
         //sarsaLearner.showGreedyPol();
         printf("\n\n== Evaluation without Learning == \n\n");
-        scores[i] = sarsaLearner.evaluatePolicy(env);
-    }
-    cout<<"Final Scores "<<endl;
+        //scores[i] = sarsaLearner.evaluatePolicy(env);
+        scores = sarsaLearner.evaluatePolicy(env);
+    //}
+    //cout<<"Final Scores "<<endl;
     
     return 0;
 }
