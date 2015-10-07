@@ -15,6 +15,7 @@ USE_SDL     := 1
 # -D_REENTRANT causes the compiler to use thread safe (i.e. re-entrant) versions of several functions in the C library.
 FLAGS := -O3 -I$(ALE)/src -D_GNU_SOURCE=1 -D_REENTRANT -std=c++11 -Wno-deprecated-declarations -Wall -g -MMD
 
+MC := learnerMountainCar
 EXE := learnerALE
 GRID := learnerGridWorld
 
@@ -26,7 +27,9 @@ ifeq ($(strip $(USE_SDL)), 1)
   LDFLAGS += -lSDL -lSDL_gfx -lSDL_image `sdl-config --cflags --libs`
 endif
 
-all: $(EXE) $(GRID)
+all: $(EXE) $(GRID) $(MC)
+
+mc: $(MC)
 ale: $(EXE)
 grid: $(GRID)
 
@@ -36,11 +39,17 @@ learnerALE: bin/main.o bin/Mathematics.o bin/Parameters.o bin/Timer.o bin/Featur
 learnerGridWorld: bin/main_grid_example.o bin/Mathematics.o bin/Parameters.o bin/Timer.o bin/Features.o bin/Background.o bin/BasicFeatures.o bin/BASSFeatures.o bin/BPROFeatures.o bin/RAMFeatures.o bin/SarsaLearner.o #bin/QLearner.o bin/TRSarsaLearner.o bin/RandomAgent.o bin/ConstantAgent.o bin/PerturbAgent.o bin/HumanAgent.o
 	$(CXX) $(FLAGS) bin/main_grid_example.o bin/Mathematics.o bin/Timer.o bin/Parameters.o bin/Features.o bin/Background.o bin/BasicFeatures.o bin/BASSFeatures.o bin/BPROFeatures.o bin/RAMFeatures.o bin/SarsaLearner.o bin/QLearner.o bin/TRSarsaLearner.o bin/RandomAgent.o bin/ConstantAgent.o bin/PerturbAgent.o bin/HumanAgent.o $(LDFLAGS) -o $(GRID)
 
+learnerMountainCar: bin/main_mountain_car_example.o bin/Mathematics.o bin/Parameters.o bin/Timer.o bin/Features.o bin/Background.o bin/BasicFeatures.o bin/BASSFeatures.o bin/BPROFeatures.o bin/RAMFeatures.o bin/SarsaLearner.o #bin/QLearner.o bin/TRSarsaLearner.o bin/RandomAgent.o bin/ConstantAgent.o bin/PerturbAgent.o bin/HumanAgent.o
+	$(CXX) $(FLAGS) bin/main_mountain_car_example.o bin/Mathematics.o bin/Timer.o bin/Parameters.o bin/Features.o bin/Background.o bin/BasicFeatures.o bin/BASSFeatures.o bin/BPROFeatures.o bin/RAMFeatures.o bin/SarsaLearner.o bin/QLearner.o bin/TRSarsaLearner.o bin/RandomAgent.o bin/ConstantAgent.o bin/PerturbAgent.o bin/HumanAgent.o $(LDFLAGS) -o $(MC)
+
 bin/main.o: main.cpp
 	$(CXX) $(FLAGS) -c main.cpp -o bin/main.o
 
 bin/main_grid_example.o: main_grid_example.cpp
 	$(CXX) $(FLAGS) -c main_grid_example.cpp -o bin/main_grid_example.o
+
+bin/main_mountain_car_example.o: main_mountain_car_example.cpp
+	$(CXX) $(FLAGS) -c main_mountain_car_example.cpp -o bin/main_mountain_car_example.o
 
 bin/Mathematics.o: common/Mathematics.cpp
 	$(CXX) $(FLAGS) -c common/Mathematics.cpp -o bin/Mathematics.o

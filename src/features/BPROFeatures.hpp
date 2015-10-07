@@ -26,13 +26,14 @@ class BPROFeatures : public Features::Features{
 		//int rowLess0Shift, row0Shift, rowMore0Shift;
         int numColumns, numRows, numColors;
         std::vector<std::vector<bool> > bproExistence;
-        std::vector<tuple<int,int> > changed;
+        std::vector<std::tuple<int,int> > changed;
     
         int getBasicFeaturesIndices(const ALEScreen &screen, int blockWidth, int blockHeight,
-            std::vector<std::vector<tuple<int,int> > > &whichColors, std::vector<int>& features);
+            std::vector<std::vector<std::tuple<int,int> > > &whichColors, std::vector<int>& features);
 		void addRelativeFeaturesIndices(const ALEScreen &screen, int featureIndex,
-            std::vector<std::vector<tuple<int,int> > > &whichColors, std::vector<int>& features);
-    void resetBproExistence(vector<vector<bool> >& bproExistence, std::vector<tuple<int,int> >& changed);
+            std::vector<std::vector<std::tuple<int,int> > > &whichColors, std::vector<int>& features);
+    	void resetBproExistence(std::vector<std::vector<bool> >& bproExistence, std::vector<std::tuple<int,int> >& changed);
+    	
 	public:
 	typedef bool FeatureType;
 		/**
