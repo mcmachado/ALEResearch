@@ -6,7 +6,7 @@ RLLearner<FeatureType>::RLLearner(Environment<FeatureType>& env, Parameters *par
 	epsilon             = param->getEpsilon();
 	toUseOnlyRewardSign = param->getUseRewardSign();
 	degreeOfOptimism    = param->getDegreeOfOptimism();
-	toBeOptimistic      = fabs(degreeOfOptimism - 0.0) < 10e4 ? 0 : 1;
+	toBeOptimistic      = fabs(degreeOfOptimism - 0.0) < 10e-4 ? 0 : 1;
 	
 	episodeLength       = param->getEpisodeLength();
 	numEpisodesEval     = param->getNumEpisodesEval();

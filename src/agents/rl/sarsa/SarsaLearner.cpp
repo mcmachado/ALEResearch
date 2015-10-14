@@ -282,7 +282,7 @@ void SarsaLearner::learnPolicy(Environment<bool>& env){
 		
 		float fps = float(env.getEpisodeFrameNumber())/elapsedTime;
 		printf("episode: %d,\t%.0f points,\tavg. return: %.1f,\t%d frames,\t%.0f fps\n",
-			episode, cumReward - prevCumReward, (float)cumReward/(episode + 1.0),
+			episode, cumReward - prevCumReward, (float)cumReward/(float) episode,
 			env.getEpisodeFrameNumber(), fps);
         episodeResults.push_back(cumReward-prevCumReward);
         episodeFrames.push_back(env.getEpisodeFrameNumber());
@@ -329,7 +329,7 @@ double SarsaLearner::evaluatePolicy(Environment<bool>& env){
 
 		resultFile << "Episode " << episode << ": " << cumReward - prevCumReward << std::endl;
 		printf("episode: %d,\t%.0f points,\tavg. return: %.1f,\t%d frames,\t%.0f fps\n", 
-			episode, (cumReward-prevCumReward), (float)cumReward/(episode + 1.0), env.getEpisodeFrameNumber(), fps);
+			episode, (cumReward-prevCumReward), (float)cumReward/(float) episode, env.getEpisodeFrameNumber(), fps);
 
 		env.reset();
 		prevCumReward = cumReward;
