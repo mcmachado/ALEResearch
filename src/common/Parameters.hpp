@@ -35,6 +35,7 @@ class Parameters{
 		float epsilon;                 //exploration probability
 		float lambda;                  //trace
 		float traceThreshold;          //threshold to make the trace zero, to avoid very small values
+		float degreeOfOptimism;         //how much optimism we want to have (0 is none, 1 is the expectation of a reward at each step, gamma - 1 is one reward in the whole episode) 
 		int seed;                       //seed to be used by the random number generator
 		int display;                    //if it should display screen
 		int numEpisodesLearn;           //number of episodes to learn
@@ -48,7 +49,6 @@ class Parameters{
 		int useRewardSign;              //if set the rewards are defined as -1 and +1, ignoring scale
 		int subtractBackground;         //whether the background should be removed when generating screen-based features
 		int toSaveTrajectory;           //whether we will store a human player trajectory while he is playing a game
-		int toUseOptimisticInit;        //whether the algorithm should use optimistic initialization
 		int toSaveWeightsAfterLearning; //whether we are going to save the weights learned after the whole process
 		int frequencySavingWeights;     //If we are asked to save the weights, We need to know how many frames to wait until saving them again
 		int toLoadWeights;              //whether we are going to load an already learned set of weights or not
@@ -200,7 +200,7 @@ class Parameters{
 		/**
  		* @param int value that represents OPTIMISTIC_INIT in the config file.
  		*/		
-		void setOptimisticInitialization(int a);
+		void setDegreeOfOptimism(float a);
 		/**
 		* @param int value which means we are going to save the weights at each 'value' episodes
 		*/
@@ -334,7 +334,7 @@ class Parameters{
 		/**
 		* @return int value read for OPTIMISTIC_INIT parameter
  		*/
-		int getOptimisticInitialization();
+		float getDegreeOfOptimism();
 		/**
 		* @return int value which means we are going to save the weights at each 'value' episodes
 		*/

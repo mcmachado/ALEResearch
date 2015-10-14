@@ -30,7 +30,7 @@ void Parameters::printHelp(char** argv){
 	printf("   -t     %s[REQUIRED IF SAVE_TRAJECTORY = 1]%s path to file that will store the agent's trajectory.\n", ANSI_COLOR_RED, ANSI_COLOR_RESET);
 	printf("   -w     If one wants to save intermediate weights, this is prefix to files that will store the agent's learned weights every FREQUENCY_SAVING episodes.\n");
 	printf("   -l     If one wants to load an stored set of weights, this should contain the path to such file.\n");
-    printf("   -n    If one wants to save temporary intermediate weights locally, and then let the server to grab check points from local hosts, then this is required. Please provide the name of the job.\n");
+    printf("   -n     If one wants to save temporary intermediate weights locally, and then let the server to grab check points from local hosts, then this is required. Please provide the name of the job.\n");
 	printf("   -h     Print this help and exit\n");
 	printf("\n");
 }
@@ -181,7 +181,7 @@ void Parameters::parseParametersFromConfigFile(std::string cfgFileName){
 	this->setUseRewardSign(atoi(parameters["USE_REWARD_SIGN"].c_str()));
 	this->setSubtractBackground(atoi(parameters["SUBTRACT_BACKGROUND"].c_str()));
 	this->setToSaveTrajectory(atoi(parameters["SAVE_TRAJECTORY"].c_str()));
-	this->setOptimisticInitialization(atoi(parameters["OPTIMISTIC_INIT"].c_str()));
+	this->setDegreeOfOptimism(atof(parameters["OPTIMISTIC_INIT"].c_str()));
 
 	this->setFrequencySavingWeights(atoi(parameters["FREQUENCY_SAVING"].c_str()));
 	this->setLearningLength(atoi(parameters["TOTAL_FRAMES_LEARN"].c_str()));
@@ -368,12 +368,12 @@ int Parameters::getToSaveTrajectory(){
 	return this->toSaveTrajectory;
 }
 
-void Parameters::setOptimisticInitialization(int a){
-	this->toUseOptimisticInit = a;
+void Parameters::setDegreeOfOptimism(float a){
+	this->degreeOfOptimism = a;
 }
 
-int Parameters::getOptimisticInitialization(){
-	return this->toUseOptimisticInit;
+float Parameters::getDegreeOfOptimism(){
+	return this->degreeOfOptimism;
 }
 
 void Parameters::setToSaveWeightsAfterLearning(int a){
