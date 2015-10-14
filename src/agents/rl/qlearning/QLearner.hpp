@@ -41,14 +41,6 @@ class QLearner : public RLLearner<bool>{
  		* or NaN values. If so, it finishes the execution informing the algorithm has diverged. 
  		*/
 		void sanityCheck();
-
-		/**
- 		* In Q-Learning the Q-values (one per action) are updated as the sum of weights for that given action.
- 		* To avoid writing it more than once on the code, its update was extracted to a separate function.
- 		* It updates the vector<float> Q assuming that vector<int> F is filled, as it sums just the weights
- 		* that are active in F.
- 		*/
-		void updateQValues(std::vector<int> &Features, std::vector<float> &QValues);
 		
 		/**
  		* When using Replacing traces, all values not related to the current action are set to 0, while the

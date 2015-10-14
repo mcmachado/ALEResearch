@@ -42,16 +42,6 @@ TrueOnlineSarsaLearner::TrueOnlineSarsaLearner(Environment<bool>& env, Parameter
 
 TrueOnlineSarsaLearner::~TrueOnlineSarsaLearner(){}
 
-void TrueOnlineSarsaLearner::updateQValues(vector<int> &Features, vector<float> &QValues){
-	for(int a = 0; a < numActions; a++){
-		float sumW = 0;
-		for(unsigned int i = 0; i < Features.size(); i++){
-			sumW += w[a][Features[i]];
-		}
-		QValues[a] = sumW;
-	}
-}
-
 void TrueOnlineSarsaLearner::updateWeights(int action, float alpha, float delta_q){
 	for(unsigned int a = 0; a < nonZeroElig.size(); a++){
 		for(unsigned int i = 0; i < nonZeroElig[a].size(); i++){
@@ -173,7 +163,7 @@ void TrueOnlineSarsaLearner::learnPolicy(Environment<bool>& env){
 		}
 		F.clear();
 		env.getActiveFeaturesIndices(F);
-		updateQValues(F, Q);
+		updateQValues(F, w, Q);
 		currentAction = epsilonGreedy(Q);
 		
 		q_old = Q[currentAction];
@@ -185,7 +175,7 @@ void TrueOnlineSarsaLearner::learnPolicy(Environment<bool>& env){
 			reward.clear();
 			reward.push_back(0.0);
 			reward.push_back(0.0);
-			updateQValues(F, Q);
+			updateQValues(F, w, Q);
 			sanityCheck();
 
 			//Take action, observe reward and next state:
@@ -195,7 +185,7 @@ void TrueOnlineSarsaLearner::learnPolicy(Environment<bool>& env){
 				//Obtain active features in the new state:
 				Fnext.clear();
 				env.getActiveFeaturesIndices(Fnext);
-				updateQValues(Fnext, Qnext);     //Update Q-values for the new active features
+				updateQValues(Fnext, w, Qnext);     //Update Q-values for the new active features
 				nextAction = epsilonGreedy(Qnext);
 			}
 			else{
@@ -251,7 +241,7 @@ double TrueOnlineSarsaLearner::evaluatePolicy(Environment<bool>& env){
 			//Get state and features active on that state:		
 			F.clear();
 			env.getActiveFeaturesIndices(F);
-			updateQValues(F, Q);       //Update Q-values for each possible action
+			updateQValues(F, w, Q);       //Update Q-values for each possible action
 			currentAction = epsilonGreedy(Q);
 			//Take action, observe reward and next state:
 			reward = env.act(actions[currentAction]);

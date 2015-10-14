@@ -21,6 +21,7 @@ class RLLearner : public Agent<FeatureType>{
 
 		float gamma, epsilon;
 		float firstReward;
+		float degreeOfOptimism;
 		bool   sawFirstReward;
 
 		int    toUseOnlyRewardSign, toBeOptimistic;
@@ -51,6 +52,14 @@ class RLLearner : public Agent<FeatureType>{
  		* @return int action to be taken
  		*/
 		int epsilonGreedy(std::vector<float> &QValues);
+
+		/**
+ 		* In RL the Q-values (one per action) are generally updated as the sum of weights for that given action.
+ 		* To avoid writing it more than once on the code, its update was extracted to a separate function.
+ 		* It updates the vector<float> Q assuming that vector<int> F is filled, as it sums just the weights
+ 		* that are active in F.
+ 		*/
+		void updateQValues(std::vector<int> &Features, std::vector<std::vector<float> > &w, std::vector<float> &QValues);
 
 		/**
 		* Constructor to be used by the RL classes to save the parameters that

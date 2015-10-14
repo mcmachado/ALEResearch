@@ -50,13 +50,6 @@ class SarsaLearner : public RLLearner<bool>{
  		*/
 		void sanityCheck();
 		/**
- 		* In Sarsa the Q-values (one per action) are updated as the sum of weights for that given action.
- 		* To avoid writing it more than once on the code, its update was extracted to a separate function.
- 		* It updates the vector<float> Q assuming that vector<int> F is filled, as it sums just the weights
- 		* that are active in F.
- 		*/
-		void updateQValues(std::vector<int> &Features, std::vector<float> &QValues);
-		/**
  		* When using Replacing traces, all values not related to the current action are set to 0, while the
  		* values for the current action that their features are active are set to 1. The traces decay following
  		* the rule: e[action][i] = gamma * lambda * e[action][i]. It is possible to also define thresholding.

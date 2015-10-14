@@ -6,6 +6,7 @@ RLLearner<FeatureType>::RLLearner(Environment<FeatureType>& env, Parameters *par
 	epsilon             = param->getEpsilon();
 	toUseOnlyRewardSign = param->getUseRewardSign();
 	toBeOptimistic      = param->getOptimisticInitialization();
+	degreeOfOptimism    = 0.0;
 	
 	episodeLength       = param->getEpisodeLength();
 	numEpisodesEval     = param->getNumEpisodesEval();
@@ -34,6 +35,24 @@ int RLLearner<FeatureType>::epsilonGreedy(std::vector<float> &QValues){
 		action = agentRand() % numActions;
 	}
 	return action;
+}
+
+template<typename FeatureType>
+void RLLearner<FeatureType>::updateQValues(std::vector<int> &Features, std::vector<std::vector<float> > &w, std::vector<float> &QValues){
+	for(int a = 0; a < numActions; a++){
+		float sumW = 0;
+		for(unsigned int i = 0; i < Features.size(); i++){
+			sumW += w[a][Features[i]];
+		}
+		QValues[a] = sumW;
+	}
+
+	if(toBeOptimistic){
+		float optimism = degreeOfOptimism / (1.0 - gamma);
+		for(int a = 0; a < numActions; a++){
+			QValues[a] += optimism;
+		}
+	}
 }
 
 /**
@@ -66,28 +85,9 @@ void RLLearner<FeatureType>::act(Environment<FeatureType>& env, int action, std:
 			}
 		}
 		if(sawFirstReward){
-			if(toBeOptimistic){
-				r_alg = (r_real - firstReward)/firstReward + gamma;
-			}
-			else{
-				r_alg = r_real/firstReward;	
-			}
-		}
-		else{
-			if(toBeOptimistic){
-				r_alg = gamma - 1.0;
-			}
+			r_alg = r_real/firstReward;	
 		}
 	}
 	reward[0] = r_alg;
 	reward[1] = r_real;
-	//If doing optimistic initialization, to avoid the agent
-	//to "die" soon to avoid -1 as reward at each step, when
-	//the agent dies we give him -1 for each time step remaining,
-	//this would be the worst case ever...
-	if(env.isTerminal() && toBeOptimistic){
-		int missedSteps = episodeLength - env.getEpisodeFrameNumber() + 1;
-		double penalty = pow(gamma, missedSteps) - 1;
-		reward[0] -= penalty;
-	}
 }

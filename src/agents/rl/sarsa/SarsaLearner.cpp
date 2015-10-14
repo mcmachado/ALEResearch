@@ -67,16 +67,6 @@ SarsaLearner::SarsaLearner(Environment<bool>& env, Parameters *param, int seed) 
 
 SarsaLearner::~SarsaLearner(){}
 
-void SarsaLearner::updateQValues(vector<int> &Features, vector<float> &QValues){
-	for(int a = 0; a < numActions; a++){
-		float sumW = 0;
-		for(unsigned int i = 0; i < Features.size(); i++){
-			sumW += w[a][Features[i]];
-		}
-		QValues[a] = sumW;
-	}
-}
-
 void SarsaLearner::updateReplTrace(int action, vector<int> &Features){
 	//e <- gamma * lambda * e
 	for(unsigned int a = 0; a < nonZeroElig.size(); a++){
@@ -232,7 +222,7 @@ void SarsaLearner::learnPolicy(Environment<bool>& env){
 		}
 		F.clear();
 		env.getActiveFeaturesIndices(F);
-		updateQValues(F, Q);
+		updateQValues(F, w, Q);
 		currentAction = epsilonGreedy(Q);
 
 		//Repeat(for each step of episode) until game is over:
@@ -243,7 +233,7 @@ void SarsaLearner::learnPolicy(Environment<bool>& env){
 			reward.clear();
 			reward.push_back(0.0);
 			reward.push_back(0.0);
-			updateQValues(F, Q);
+			updateQValues(F, w, Q);
 			sanityCheck();
 
 			//Take action, observe reward and next state:
@@ -255,7 +245,7 @@ void SarsaLearner::learnPolicy(Environment<bool>& env){
 				Fnext.clear();
 				env.getActiveFeaturesIndices(Fnext);
 
-				updateQValues(Fnext, Qnext);     //Update Q-values for the new active features
+				updateQValues(Fnext, w, Qnext);     //Update Q-values for the new active features
 				nextAction = epsilonGreedy(Qnext);
 			}
 			else{
@@ -326,7 +316,7 @@ double SarsaLearner::evaluatePolicy(Environment<bool>& env){
 			//Get state and features active on that state:		
 			F.clear();
 			env.getActiveFeaturesIndices(F);
-			updateQValues(F, Q);       //Update Q-values for each possible action
+			updateQValues(F, w, Q);       //Update Q-values for each possible action
 			currentAction = epsilonGreedy(Q);
 			//Take action, observe reward and next state:
 			reward = env.act(actions[currentAction]);

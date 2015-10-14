@@ -68,16 +68,6 @@ void QLearner::updateReplTrace(int action){
 	}
 }
 
-void QLearner::updateQValues(vector<int> &Features, vector<float> &QValues){
-	for(int a = 0; a < numActions; a++){
-		float sumW = 0;
-		for(unsigned int i = 0; i < Features.size(); i++){
-			sumW += w[a][Features[i]];
-		}
-		QValues[a] = sumW;
-	}
-}
-
 void QLearner::sanityCheck(){
 	for(int i = 0; i < numActions; i++){
 		if(Q[i] > 10e7 || Q[i] != Q[i] /*NaN*/){
@@ -123,7 +113,7 @@ void QLearner::learnPolicy(Environment<bool>& env){
 			reward.clear();
 			reward.push_back(0.0);
 			reward.push_back(0.0);
-			updateQValues(F, Q);
+			updateQValues(F, w, Q);
 			sanityCheck();
 
 			//Take action, observe reward and next state:
@@ -135,7 +125,7 @@ void QLearner::learnPolicy(Environment<bool>& env){
 				//Obtain active features in the new state:
 				Fnext.clear();
 				env.getActiveFeaturesIndices(Fnext);
-				updateQValues(Fnext, Qnext);     //Update Q-values for the new active features
+				updateQValues(Fnext, w, Qnext);     //Update Q-values for the new active features
 				nextAction = Mathematics::argmax(Qnext);
 			}
 			else{
@@ -211,7 +201,7 @@ double QLearner::evaluatePolicy(Environment<bool>& env){
 			//Get state and features active on that state:		
 			F.clear();
 			env.getActiveFeaturesIndices(F);
-			updateQValues(F, Q);       //Update Q-values for each possible action
+			updateQValues(F, w, Q);       //Update Q-values for each possible action
 			currentAction = epsilonGreedy(Q);
 			//compute probability of taking current action
             double prob_action = epsilon/double(numActions) + (randomActionTaken ? 0 : 1.0 - epsilon);
