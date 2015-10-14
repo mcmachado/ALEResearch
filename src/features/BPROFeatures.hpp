@@ -35,7 +35,7 @@ class BPROFeatures : public Features::Features{
     	void resetBproExistence(std::vector<std::vector<bool> >& bproExistence, std::vector<std::tuple<int,int> >& changed);
     	
 	public:
-	typedef bool FeatureType;
+		typedef bool FeatureType;
 		/**
 		* Destructor, used to delete the background, which is allocated dynamically.
 		*/

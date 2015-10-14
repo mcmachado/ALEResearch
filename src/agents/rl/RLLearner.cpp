@@ -85,7 +85,7 @@ void RLLearner<FeatureType>::act(Environment<FeatureType>& env, int action, std:
 			}
 		}
 		if(sawFirstReward){
-			r_alg = r_real/firstReward;	
+			r_alg = r_real/firstReward;
 		}
 	}
 	reward[0] = r_alg;

@@ -14,9 +14,8 @@
 #include <stdio.h>
 #include <math.h>
 
-using namespace std;
-
-TrueOnlineSarsaLearner::TrueOnlineSarsaLearner(Environment<bool>& env, Parameters *param, int seed) : RLLearner<bool>(env, param, seed) {
+template<typename FeatureType>
+TrueOnlineSarsaLearner<FeatureType>::TrueOnlineSarsaLearner(Environment<FeatureType>& env, Parameters *param) : RLLearner<FeatureType>(env, param) {
 	delta = 0.0;
 	
 	alpha = param->getAlpha();
@@ -24,15 +23,15 @@ TrueOnlineSarsaLearner::TrueOnlineSarsaLearner(Environment<bool>& env, Parameter
 	traceThreshold = param->getTraceThreshold();
 	numFeatures = env.getNumberOfFeatures();
 
-	for(int i = 0; i < numActions; i++){
+	for(int i = 0; i < this->numActions; i++){
 		//Initialize Q;
 		Q.push_back(0);
 		Qnext.push_back(0);
 		//Initialize e:
-		e.push_back(vector<float>(numFeatures, 0.0));
-		w.push_back(vector<float>(numFeatures, 0.0));
+		e.push_back(std::vector<float>(numFeatures, 0.0));
+		w.push_back(std::vector<float>(numFeatures, 0.0));
 
-		nonZeroElig.push_back(vector<int>());
+		nonZeroElig.push_back(std::vector<int>());
 	}
 
 	std::stringstream ss;
@@ -40,9 +39,11 @@ TrueOnlineSarsaLearner::TrueOnlineSarsaLearner(Environment<bool>& env, Parameter
 	nameWeightsFile =  ss.str();
 }
 
-TrueOnlineSarsaLearner::~TrueOnlineSarsaLearner(){}
+template<typename FeatureType>
+TrueOnlineSarsaLearner<FeatureType>::~TrueOnlineSarsaLearner(){}
 
-void TrueOnlineSarsaLearner::updateWeights(int action, float alpha, float delta_q){
+template<typename FeatureType>
+void TrueOnlineSarsaLearner<FeatureType>::updateWeights(int action, float alpha, float delta_q){
 	for(unsigned int a = 0; a < nonZeroElig.size(); a++){
 		for(unsigned int i = 0; i < nonZeroElig[a].size(); i++){
 			int idx = nonZeroElig[a][i];
@@ -56,7 +57,8 @@ void TrueOnlineSarsaLearner::updateWeights(int action, float alpha, float delta_
 	}
 }
 
-void TrueOnlineSarsaLearner::updateTrace(int action, float alpha){
+template<typename FeatureType>
+void TrueOnlineSarsaLearner<FeatureType>::updateTrace(int action, float alpha){
 	float dot_e_phi = 0;
 	for(unsigned int i = 0; i < F.size(); i++){
 		int idx = F[i];
@@ -74,7 +76,8 @@ void TrueOnlineSarsaLearner::updateTrace(int action, float alpha){
 	}
 }
 
-void TrueOnlineSarsaLearner::decayTrace(){
+template<typename FeatureType>
+void TrueOnlineSarsaLearner<FeatureType>::decayTrace(){
 	//e <- gamma * lambda * e
 	for(unsigned int a = 0; a < nonZeroElig.size(); a++){
 		int numNonZero = 0;
@@ -95,8 +98,9 @@ void TrueOnlineSarsaLearner::decayTrace(){
 	}
 }
 
-void TrueOnlineSarsaLearner::sanityCheck(){
-	for(int i = 0; i < numActions; i++){
+template<typename FeatureType>
+void TrueOnlineSarsaLearner<FeatureType>::sanityCheck(){
+	for(int i = 0; i < this->numActions; i++){
 		if(fabs(Q[i]) > 10e7 || Q[i] != Q[i] /*NaN*/){
 			printf("It seems your algorithm diverged!\n");
 			exit(0);
@@ -104,7 +108,8 @@ void TrueOnlineSarsaLearner::sanityCheck(){
 	}
 }
 
-void TrueOnlineSarsaLearner::dumpWeights(){
+template<typename FeatureType>
+void TrueOnlineSarsaLearner<FeatureType>::dumpWeights(){
 	std::ofstream weightsFile (nameWeightsFile.c_str());
 	if(weightsFile.is_open()){
 		weightsFile << w.size() << "," << w[0].size() << std::endl;
@@ -121,8 +126,9 @@ void TrueOnlineSarsaLearner::dumpWeights(){
 	}
 }
 
-void TrueOnlineSarsaLearner::loadWeights(){
-	string line;
+template<typename FeatureType>
+void TrueOnlineSarsaLearner<FeatureType>::loadWeights(){
+	std::string line;
 	std::ifstream weightsFile (nameWeightsFile.c_str());
 	if(weightsFile.is_open()){
 		//TODO!!!!
@@ -133,21 +139,22 @@ void TrueOnlineSarsaLearner::loadWeights(){
 }
 
 
-void TrueOnlineSarsaLearner::learnPolicy(Environment<bool>& env){
+template<typename FeatureType>
+void TrueOnlineSarsaLearner<FeatureType>::learnPolicy(Environment<FeatureType>& env){
 	
 	struct timeval tvBegin, tvEnd, tvDiff;
-	vector<float> reward;
+	std::vector<float> reward;
 	float elapsedTime;
 	float norm_a;
 	float q_old, delta_q;
 	float cumReward = 0, prevCumReward = 0;
 	unsigned int maxFeatVectorNorm = 1;
-	sawFirstReward = 0; firstReward = 1.0;
+	this->sawFirstReward = 0; this->firstReward = 1.0;
 
 	//Repeat (for each episode):
 	int episode, totalNumberFrames = 0;
 	//This is going to be interrupted by the ALE code since I set max_num_frames beforehand
-	for(episode = 0; totalNumberFrames < totalNumberOfFramesToLearn; episode++){ 
+	for(episode = 0; totalNumberFrames < this->totalNumberOfFramesToLearn; episode++){ 
 		for(unsigned int a = 0; a < nonZeroElig.size(); a++){
 			for(unsigned int i = 0; i < nonZeroElig[a].size(); i++){
 				int idx = nonZeroElig[a][i];
@@ -228,23 +235,24 @@ void TrueOnlineSarsaLearner::learnPolicy(Environment<bool>& env){
 	}
 }
 
-double TrueOnlineSarsaLearner::evaluatePolicy(Environment<bool>& env){
+template<typename FeatureType>
+double TrueOnlineSarsaLearner<FeatureType>::evaluatePolicy(Environment<FeatureType>& env){
 	float reward = 0;
 	float cumReward = 0; 
 	float prevCumReward = 0;
 
 	//Repeat (for each episode):
 	int episode;
-	for(episode = 0; episode < numEpisodesEval; episode++){
+	for(episode = 0; episode < this->numEpisodesEval; episode++){
 		//Repeat(for each step of episode) until game is over:
-		for(int step = 0; !env.game_over() && step < episodeLength; step++){
+		for(int step = 0; !env.game_over() && step < this->episodeLength; step++){
 			//Get state and features active on that state:		
 			F.clear();
 			env.getActiveFeaturesIndices(F);
 			updateQValues(F, w, Q);       //Update Q-values for each possible action
 			currentAction = epsilonGreedy(Q);
 			//Take action, observe reward and next state:
-			reward = env.act(actions[currentAction]);
+			reward = env.act(this->actions[currentAction]);
 			cumReward  += reward;
 		}
 		env.reset_game();

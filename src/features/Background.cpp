@@ -7,6 +7,7 @@
 #include "Background.hpp"
 #include <fstream>
 #include <stdlib.h>
+#include <stdexcept>
 
 Background::Background(){}
 
@@ -53,7 +54,9 @@ Background::Background(Parameters *param){
 			}
 		}
 		backgroundFile.close();
-	}
+	} else{
+        throw std::runtime_error("The background file for this game could not be opened. Please check paths and permissions");
+    }
 }
 
 int Background::getPixel(int x, int y){

@@ -23,6 +23,7 @@ class BasicFeatures : public Features::Features{
 
 		int numberOfFeatures;
 	public:
+		typedef bool FeatureType;
 		/**
 		* Destructor, used to delete the background, which is allocated dynamically.
 		*/

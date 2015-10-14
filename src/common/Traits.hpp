@@ -2,7 +2,9 @@
  * @file   Traits.hpp
  * @date   Mon Oct 13 11:31:38 2014
  * @author Nicolas Carion
- * @brief  This file contains useful traits to check some properties of class (namely the implementation of static members and attributes). Some macros to help the user do that are defined here.
+ * @brief  This file contains useful traits to check some properties of class 
+ * (namely the implementation of static members and attributes). Some macros
+ * to help the user do that are defined here.
  *
  *
  */
@@ -104,7 +106,7 @@ namespace function_traits{
  * "static_assert(has_foo<foo,bool(float,int)>::value,"error")
  */
 #define CREATE_MEMBER_DETECTOR(X)                                       \
-   namespace function_traits{template<typename C,typename F>                                     \
+   namespace function_traits{template<typename C,typename F>            \
     class has_##X;                                                      \
                                                                         \
     template<typename C, typename Ret, typename... Args>                \

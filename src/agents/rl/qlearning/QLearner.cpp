@@ -126,6 +126,11 @@ void QLearner::learnPolicy(Environment<bool>& env){
 				Fnext.clear();
 				env.getActiveFeaturesIndices(Fnext);
 				updateQValues(Fnext, w, Qnext);     //Update Q-values for the new active features
+				//To ensure the learning rate will never increase along
+				//the time, Marc used such approach in his JAIR paper
+				if (Fnext.size() > maxFeatVectorNorm){
+					maxFeatVectorNorm = Fnext.size();
+				}
 				nextAction = Mathematics::argmax(Qnext);
 			}
 			else{
@@ -133,11 +138,6 @@ void QLearner::learnPolicy(Environment<bool>& env){
 				for(unsigned int i = 0; i < Qnext.size(); i++){
 					Qnext[i] = 0;
 				}
-			}
-			//To ensure the learning rate will never increase along
-			//the time, Marc used such approach in his JAIR paper
-			if (Fnext.size() > maxFeatVectorNorm){
-				maxFeatVectorNorm = Fnext.size();
 			}
 
 			delta = reward[0] + gamma * Qnext[nextAction] - Q[currentAction];

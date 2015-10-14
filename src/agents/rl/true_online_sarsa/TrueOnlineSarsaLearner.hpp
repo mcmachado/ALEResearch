@@ -15,7 +15,8 @@
 #include "../RLLearner.hpp"
 #include <vector>
 
-class TrueOnlineSarsaLearner : public RLLearner<bool>{
+template<typename FeatureType>
+class TrueOnlineSarsaLearner : public RLLearner<FeatureType>{
 	private:
 		float alpha, delta, lambda, traceThreshold;
 		int numFeatures, currentAction, nextAction;
@@ -60,7 +61,7 @@ class TrueOnlineSarsaLearner : public RLLearner<bool>{
  		*/		
 		void loadWeights();
 	public:
-		TrueOnlineSarsaLearner(Environment<bool>& env, Parameters *param, int seed);
+		TrueOnlineSarsaLearner(Environment<FeatureType>& env, Parameters *param);
 		/**
 		* Implementation of an agent controller. This implementation is True Online Sarsa(lambda).
  		*
@@ -68,7 +69,7 @@ class TrueOnlineSarsaLearner : public RLLearner<bool>{
  		*        actions, obtain simulator's screen, RAM, etc.
  		* @param Features *features object that defines what feature function that will be used.
  		*/
-		void learnPolicy(Environment<bool>& env);
+		void learnPolicy(Environment<FeatureType>& env);
 		/**
  		* After the policy was learned it is necessary to evaluate its quality. Therefore, a given number
  		* of episodes is run without learning (the vector of weights and the trace are not updated).
@@ -76,7 +77,7 @@ class TrueOnlineSarsaLearner : public RLLearner<bool>{
  		* @param ALEInterface& ale Arcade Learning Environment interface: object used to define agents'
  		*        actions, obtain simulator's screen, RAM, etc.
  		*/
-		double evaluatePolicy(Environment<bool>& env);
+		double evaluatePolicy(Environment<FeatureType>& env);
 		/**
 		* Destructor, not necessary in this class.
 		*/
