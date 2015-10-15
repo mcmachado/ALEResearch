@@ -1,0 +1,43 @@
+#include "common/Parameters.hpp"
+#include "agents/rl/fastSarsa/FastSarsaLearner.hpp"
+#include "environments/mountain_car/MountainCarEnvironment.hpp"
+#include "features/MountainCarFeatures.hpp"
+
+double curIter;
+
+void printBasicInfo(Parameters param){
+	printf("Seed: %d\n", param.getSeed());
+	printf("\nCommand Line Arguments:\nPath to Config. File: %s\nPath to ROM File: %s\nPath to Backg. File: %s\n", 
+		param.getConfigPath().c_str(), param.getRomPath().c_str(), param.getPathToBackground().c_str());
+	if(param.getSubtractBackground()){
+		printf("\nBackground will be subtracted...\n");
+	}
+	printf("\nParameters read from Configuration File:\n");
+	printf("alpha:   %f\ngamma:   %f\nepsilon: %f\nlambda:  %f\nep. length: %d\n\n", 
+		param.getAlpha(), param.getGamma(), param.getEpsilon(), param.getLambda(), 
+		param.getEpisodeLength());
+}
+
+using namespace std;
+int main(int argc, char** argv){
+	//Reading parameters from file defined as input in the run command:
+	Parameters param(argc, argv);
+	srand(param.getSeed());
+	
+	MountainCarFeatures features;
+	//Reporting parameters read:
+	printBasicInfo(param);
+	
+    MountainCarEnvironment<MountainCarFeatures> env(&features);
+    float scores;
+    env.setFlavor(0);
+    
+    //Instantiating the learning algorithm:
+    FastSarsaLearner fastSarsa(env, &param, param.getSeed());
+    //Learn a policy:
+    fastSarsa.learnPolicy(env);
+    printf("\n\n== Evaluation without Learning == \n\n");
+    scores = fastSarsa.evaluatePolicy(env);
+    
+    return 0;
+}

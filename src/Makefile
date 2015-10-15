@@ -18,6 +18,7 @@ FLAGS := -O3 -I$(ALE)/src -D_GNU_SOURCE=1 -D_REENTRANT -std=c++11 -Wno-deprecate
 MC := learnerMountainCar
 EXE := learnerALE
 GRID := learnerGridWorld
+FAST := learnerFastSarsa
 
 # Search for library 'ale' and library 'z' when linking.
 LDFLAGS := -L$(ALE) -lale -lz -lm
@@ -27,20 +28,24 @@ ifeq ($(strip $(USE_SDL)), 1)
   LDFLAGS += -lSDL -lSDL_gfx -lSDL_image `sdl-config --cflags --libs`
 endif
 
-all: $(EXE) $(GRID) $(MC)
+all: $(EXE) $(GRID) $(MC) $(FAST)
 
 mc: $(MC)
 ale: $(EXE)
 grid: $(GRID)
+fast: ${FAST}
 
-learnerALE: bin/main.o bin/Mathematics.o bin/Parameters.o bin/Timer.o bin/Features.o bin/Background.o bin/BasicFeatures.o bin/BASSFeatures.o bin/BPROFeatures.o bin/RAMFeatures.o bin/SarsaLearner.o bin/QLearner.o bin/TRSarsaLearner.o bin/RandomAgent.o bin/ConstantAgent.o bin/PerturbAgent.o bin/HumanAgent.o
-	$(CXX) $(FLAGS) bin/main.o bin/Mathematics.o bin/Timer.o bin/Parameters.o bin/Features.o bin/Background.o bin/BasicFeatures.o bin/BASSFeatures.o bin/BPROFeatures.o bin/RAMFeatures.o bin/SarsaLearner.o bin/QLearner.o bin/TRSarsaLearner.o bin/RandomAgent.o bin/ConstantAgent.o bin/PerturbAgent.o bin/HumanAgent.o $(LDFLAGS) -o $(EXE)
+learnerALE: bin/main.o bin/Mathematics.o bin/Parameters.o bin/Timer.o bin/Features.o bin/Background.o bin/BasicFeatures.o bin/BASSFeatures.o bin/BPROFeatures.o bin/RAMFeatures.o bin/SarsaLearner.o bin/QLearner.o bin/TRSarsaLearner.o bin/FastSarsaLearner.o bin/RandomAgent.o bin/ConstantAgent.o bin/PerturbAgent.o bin/HumanAgent.o
+	$(CXX) $(FLAGS) bin/main.o bin/Mathematics.o bin/Timer.o bin/Parameters.o bin/Features.o bin/Background.o bin/BasicFeatures.o bin/BASSFeatures.o bin/BPROFeatures.o bin/RAMFeatures.o bin/SarsaLearner.o bin/QLearner.o bin/TRSarsaLearner.o bin/FastSarsaLearner.o bin/RandomAgent.o bin/ConstantAgent.o bin/PerturbAgent.o bin/HumanAgent.o $(LDFLAGS) -o $(EXE)
 
-learnerGridWorld: bin/main_grid_example.o bin/Mathematics.o bin/Parameters.o bin/Timer.o bin/Features.o bin/Background.o bin/BasicFeatures.o bin/BASSFeatures.o bin/BPROFeatures.o bin/RAMFeatures.o bin/SarsaLearner.o #bin/QLearner.o bin/TRSarsaLearner.o bin/RandomAgent.o bin/ConstantAgent.o bin/PerturbAgent.o bin/HumanAgent.o
-	$(CXX) $(FLAGS) bin/main_grid_example.o bin/Mathematics.o bin/Timer.o bin/Parameters.o bin/Features.o bin/Background.o bin/BasicFeatures.o bin/BASSFeatures.o bin/BPROFeatures.o bin/RAMFeatures.o bin/SarsaLearner.o bin/QLearner.o bin/TRSarsaLearner.o bin/RandomAgent.o bin/ConstantAgent.o bin/PerturbAgent.o bin/HumanAgent.o $(LDFLAGS) -o $(GRID)
+learnerGridWorld: bin/main_grid_example.o bin/Mathematics.o bin/Parameters.o bin/Timer.o bin/Features.o bin/Background.o bin/BasicFeatures.o bin/BASSFeatures.o bin/BPROFeatures.o bin/RAMFeatures.o bin/SarsaLearner.o #bin/QLearner.o bin/TRSarsaLearner.o bin/FastSarsaLearner.o bin/RandomAgent.o bin/ConstantAgent.o bin/PerturbAgent.o bin/HumanAgent.o
+	$(CXX) $(FLAGS) bin/main_grid_example.o bin/Mathematics.o bin/Timer.o bin/Parameters.o bin/Features.o bin/Background.o bin/BasicFeatures.o bin/BASSFeatures.o bin/BPROFeatures.o bin/RAMFeatures.o bin/SarsaLearner.o bin/QLearner.o bin/TRSarsaLearner.o bin/FastSarsaLearner.o bin/RandomAgent.o bin/ConstantAgent.o bin/PerturbAgent.o bin/HumanAgent.o $(LDFLAGS) -o $(GRID)
 
-learnerMountainCar: bin/main_mountain_car_example.o bin/Mathematics.o bin/Parameters.o bin/Timer.o bin/Features.o bin/Background.o bin/BasicFeatures.o bin/BASSFeatures.o bin/BPROFeatures.o bin/RAMFeatures.o bin/SarsaLearner.o #bin/QLearner.o bin/TRSarsaLearner.o bin/RandomAgent.o bin/ConstantAgent.o bin/PerturbAgent.o bin/HumanAgent.o
-	$(CXX) $(FLAGS) bin/main_mountain_car_example.o bin/Mathematics.o bin/Timer.o bin/Parameters.o bin/Features.o bin/Background.o bin/BasicFeatures.o bin/BASSFeatures.o bin/BPROFeatures.o bin/RAMFeatures.o bin/SarsaLearner.o bin/QLearner.o bin/TRSarsaLearner.o bin/RandomAgent.o bin/ConstantAgent.o bin/PerturbAgent.o bin/HumanAgent.o $(LDFLAGS) -o $(MC)
+learnerMountainCar: bin/main_mountain_car_example.o bin/Mathematics.o bin/Parameters.o bin/Timer.o bin/Features.o bin/Background.o bin/BasicFeatures.o bin/BASSFeatures.o bin/BPROFeatures.o bin/RAMFeatures.o bin/SarsaLearner.o #bin/QLearner.o bin/TRSarsaLearner.o bin/FastSarsaLearner.o bin/RandomAgent.o bin/ConstantAgent.o bin/PerturbAgent.o bin/HumanAgent.o
+	$(CXX) $(FLAGS) bin/main_mountain_car_example.o bin/Mathematics.o bin/Timer.o bin/Parameters.o bin/Features.o bin/Background.o bin/BasicFeatures.o bin/BASSFeatures.o bin/BPROFeatures.o bin/RAMFeatures.o bin/SarsaLearner.o bin/QLearner.o bin/TRSarsaLearner.o bin/FastSarsaLearner.o bin/RandomAgent.o bin/ConstantAgent.o bin/PerturbAgent.o bin/HumanAgent.o $(LDFLAGS) -o $(MC)
+
+learnerFastSarsa: bin/main_mc_fastSarsa.o bin/Mathematics.o bin/Parameters.o bin/Timer.o bin/Features.o bin/Background.o bin/BasicFeatures.o bin/BASSFeatures.o bin/BPROFeatures.o bin/RAMFeatures.o bin/SarsaLearner.o #bin/QLearner.o bin/TRSarsaLearner.o bin/FastSarsaLearner.o bin/RandomAgent.o bin/ConstantAgent.o bin/PerturbAgent.o bin/HumanAgent.o
+	$(CXX) $(FLAGS) bin/main_mc_fastSarsa.o bin/Mathematics.o bin/Timer.o bin/Parameters.o bin/Features.o bin/Background.o bin/BasicFeatures.o bin/BASSFeatures.o bin/BPROFeatures.o bin/RAMFeatures.o bin/SarsaLearner.o bin/QLearner.o bin/TRSarsaLearner.o bin/RandomAgent.o bin/FastSarsaLearner.o bin/ConstantAgent.o bin/PerturbAgent.o bin/HumanAgent.o $(LDFLAGS) -o $(FAST)
 
 bin/main.o: main.cpp
 	$(CXX) $(FLAGS) -c main.cpp -o bin/main.o
@@ -50,6 +55,9 @@ bin/main_grid_example.o: main_grid_example.cpp
 
 bin/main_mountain_car_example.o: main_mountain_car_example.cpp
 	$(CXX) $(FLAGS) -c main_mountain_car_example.cpp -o bin/main_mountain_car_example.o
+
+bin/main_mc_fastSarsa.o: main_mc_fastSarsa.cpp
+	$(CXX) $(FLAGS) -c main_mc_fastSarsa.cpp -o bin/main_mc_fastSarsa.o
 
 bin/Mathematics.o: common/Mathematics.cpp
 	$(CXX) $(FLAGS) -c common/Mathematics.cpp -o bin/Mathematics.o
@@ -85,7 +93,10 @@ bin/QLearner.o: agents/rl/qlearning/QLearner.cpp
 	$(CXX) $(FLAGS) -c agents/rl/qlearning/QLearner.cpp -o bin/QLearner.o
 
 bin/TRSarsaLearner.o: agents/rl/true_online_sarsa/TrueOnlineSarsaLearner.cpp
-	$(CXX) $(FLAGS) -c agents/rl/true_online_sarsa/TrueOnlineSarsaLearner.cpp -o bin/TRSarsaLearner.o	
+	$(CXX) $(FLAGS) -c agents/rl/true_online_sarsa/TrueOnlineSarsaLearner.cpp -o bin/TRSarsaLearner.o
+
+bin/FastSarsaLearner.o: agents/rl/fastSarsa/FastSarsaLearner.cpp
+	$(CXX) $(FLAGS) -c agents/rl/fastSarsa/FastSarsaLearner.cpp -o bin/FastSarsaLearner.o
 
 bin/RandomAgent.o: agents/baseline/RandomAgent.cpp
 	$(CXX) $(FLAGS) -c agents/baseline/RandomAgent.cpp -o bin/RandomAgent.o	
