@@ -4,7 +4,7 @@ import numpy as np
 
 class Bandits:
 	numArms = 2
-	mus     = [1.0, 2.0]
+	mus     = [1.0, 3.0]
 	sigmas  = [0.1, 20.0]
 
 	def __init__(self, s, numIterations):
@@ -59,32 +59,79 @@ def epsilonGreedy(theta, epsilon = 0.05):
 	else:
 		return argmax
 
-def SARSA(b, numIterations):
+def AVG(b, numIterations):
+	n          = []
+	avg        = []
+	acumReturn = 0
+
+
+	for i in xrange(b.numArms):
+		n.append(1)
+		avg.append(b.pullArm(i))
+
+	for t in xrange(2, numIterations + 2):
+		assert(t == sum(n))
+
+		i           = np.argmax(avg)
+		reward      = b.pullArm(i)
+		acumReturn += reward
+		avg[i]      = (reward + avg[i] * n[i])/(n[i] + 1)
+		n[i]       += 1
+
+	return acumReturn
+
+def SARSA(b, numIterations, optimism):
 
 	phi   = []
 	theta = []
 	acumReturn = 0
-	alpha      = 0.1
+	alpha      = 1.0
 
 	for i in xrange(b.numArms):
 		phi.append(0.0)
-		theta.append(0.0)
+		theta.append(optimism)
 
 	for t in xrange(numIterations - 1):
 		i = epsilonGreedy(theta)
 		
 		reward = b.pullArm(i)
 		acumReturn += reward
-		theta[i] = theta[i] + alpha * (reward + 0 - theta[i])
+		theta[i] = theta[i] + alpha/(t+1) * (reward + 0 - theta[i])
+
+	return acumReturn
+
+def SARSA_SPLIT(b, numIterations, optimism):
+
+	phi        = []
+	psi        = []
+	theta      = []
+	acumReturn = 0
+	alpha      = 1.0
+
+	for i in xrange(b.numArms):
+		phi.append(0.0)
+		psi.append(optimism)
+		theta.append(0)
+
+	for t in xrange(numIterations - 1):
+		i = epsilonGreedy(np.add(theta, psi))
+
+		reward      = b.pullArm(i)
+		acumReturn += reward
+		theta[i]    = theta[i] + alpha/(t+1)        * (reward + 0 - theta[i])
+		psi[i]      = psi[i]   + alpha/np.sqrt(t+1) * (0      + 0 - psi[i])
 
 	return acumReturn
 
 def __init__():
 
-	res_MAX   = 0.0
-	res_UCB   = 0.0
-	res_SARSA = 0.0
+	res_MAX         = 0.0
+	res_AVG         = 0.0
+	res_UCB         = 0.0
+	res_SARSA       = 0.0
+	res_SARSA_SPLIT = 0.0
 
+ 	lvlOptimism   = 1.0
 	numSeeds      = 100
 	numIterations = 1000
 
@@ -93,22 +140,36 @@ def __init__():
 		b.append(Bandits(s, numIterations))
 
 	for s in xrange(1, numSeeds+1):
-		seed          = s
+		seed = s
 		r.seed(seed)
 
 		maxReturn = 0
 		for i in xrange(numIterations):
 			maxReturn += max(b[s-1].pullArm(0), b[s-1].pullArm(1))
 
+
 		res_MAX += maxReturn
 		b[s-1].resetEnv()
+
+		res_AVG += AVG(b[s-1], numIterations)
+		b[s-1].resetEnv()
+		r.seed(seed)
+
 		res_UCB += UCB1(b[s-1], numIterations)
 		b[s-1].resetEnv()
-		res_SARSA += SARSA(b[s-1], numIterations)
+		r.seed(seed)
+
+		res_SARSA += SARSA(b[s-1], numIterations, lvlOptimism)
+		b[s-1].resetEnv()
+		r.seed(seed)
+
+		res_SARSA_SPLIT += SARSA_SPLIT(b[s-1], numIterations, lvlOptimism)
 		b[s-1].resetEnv()
 		
-	print 'Max return:', res_MAX/numSeeds
-	print 'UCB-1     :', res_UCB/numSeeds
-	print 'SARSA     :', res_SARSA/numSeeds
+	print 'Max return :', res_MAX/numSeeds
+	print 'AVG        :', res_AVG/numSeeds
+	print 'UCB-1      :', res_UCB/numSeeds
+	print 'SARSA      :', res_SARSA/numSeeds
+	print 'SARSA_SPLIT:', res_SARSA_SPLIT/numSeeds
 
 __init__()
