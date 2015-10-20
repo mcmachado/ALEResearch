@@ -4,8 +4,8 @@ import numpy as np
 
 class Bandits:
 	numArms = 2
-	mus     = [1.0, 3.0]
-	sigmas  = [0.1, 20.0]
+	mus     = [0.5, 0.6]
+	sigmas  = [1.0, 1.0]
 
 	def __init__(self, s, numIterations):
 		np.random.seed(seed=s)
@@ -41,7 +41,7 @@ def UCB1(b, numIterations):
 	for t in xrange(2, numIterations + 2):
 		assert(t == sum(n))
 		for i in xrange(b.numArms):
-			armValue[i] = avg[i] + np.sqrt(2 * np.log(t/n[i]))
+			armValue[i] = avg[i] + np.sqrt(2 * np.log(t)/float(n[i]+1))
 
 		i           = np.argmax(armValue)
 		reward      = b.pullArm(i)
@@ -82,26 +82,30 @@ def AVG(b, numIterations):
 
 def SARSA(b, numIterations, optimism):
 
+	n     = []
 	phi   = []
 	theta = []
 	acumReturn = 0
 	alpha      = 1.0
 
 	for i in xrange(b.numArms):
+		n.append(0)
 		phi.append(0.0)
 		theta.append(optimism)
 
 	for t in xrange(numIterations - 1):
 		i = epsilonGreedy(theta)
+		n[i] += 1
 		
 		reward = b.pullArm(i)
 		acumReturn += reward
-		theta[i] = theta[i] + alpha/(t+1) * (reward + 0 - theta[i])
+		theta[i] = theta[i] + alpha/n[i] * (reward + 0 - theta[i])
 
 	return acumReturn
 
 def SARSA_SPLIT(b, numIterations, optimism):
 
+	n          = []
 	phi        = []
 	psi        = []
 	theta      = []
@@ -109,17 +113,19 @@ def SARSA_SPLIT(b, numIterations, optimism):
 	alpha      = 1.0
 
 	for i in xrange(b.numArms):
+		n.append(0)
 		phi.append(0.0)
 		psi.append(optimism)
 		theta.append(0)
 
 	for t in xrange(numIterations - 1):
 		i = epsilonGreedy(np.add(theta, psi))
+		n[i] += 1
 
 		reward      = b.pullArm(i)
 		acumReturn += reward
-		theta[i]    = theta[i] + alpha/(t+1)        * (reward + 0 - theta[i])
-		psi[i]      = psi[i]   + alpha/np.sqrt(t+1) * (0      + 0 - psi[i])
+		theta[i]    = theta[i] + alpha/n[i]                                   * (reward + 0 - theta[i])
+		psi[i]      = psi[i]   + (alpha - np.sqrt(float(n[i])/float(n[i]+1))) * (0      + 0 - psi[i])
 
 	return acumReturn
 
