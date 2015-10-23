@@ -1,10 +1,11 @@
 /**
  * @file   GridEnvironment.hpp
- * @author Nicolas Carion
- * @date   Wed Jun  3 08:26:10 2015
+ * @author Nicolas Carion, Marlos
  * 
- * @brief This file implements some simple grid environment, designed for testing purposes
- * 
+ * @brief This file implements some simple grid environment. 
+ * Mode 1: Just a -1 everywhere until reaching the goal (top right corner).
+ * Mode 2: Rewards on opposite corners (top left, bottom right), 
+ *           these rewards are stochastic (normally distributed) and they have huge variance.
  * 
  */
 
@@ -13,19 +14,32 @@
 
 #include "../Environment.hpp"
 #include <vector>
+#include <random>
 #include <iostream>
- #include <stdexcept>
+#include <stdexcept>
 
 template<typename FeatureComputer>
 class GridEnvironment : public t_Environment<FeatureComputer>{
+
+private:
+    std::default_random_engine generator;
+    std::normal_distribution<double> distributionTL;
+    std::normal_distribution<double> distributionBR;
+
 public:
     typedef typename FeatureComputer::FeatureType FeatureType;
-    GridEnvironment(FeatureComputer* feat) : t_Environment<FeatureComputer>(feat), m_width(10), m_height(10), m_frame(0) {reset();}
+    GridEnvironment(FeatureComputer* feat, int seed = 1) : 
+        t_Environment<FeatureComputer>(feat), distributionTL(50.0, 100.0), distributionBR(30.0, 100.0) {
+
+        generator.seed(seed); 
+        m_frame = 0;
+        reset();
+    }
 
     virtual void reset() final{
-        m_posx=0;
-        m_posy=0;
-        m_frame=0;
+        m_posx = 0;
+        m_posy = 0;
+        m_frame = 0;
     }
 
     std::vector<Action> getMinimalActionSet(){
@@ -77,18 +91,28 @@ public:
         default:
             throw std::runtime_error("illegal action taken by the agent");
         }
-        double reward = -1;
-        if(m_posx<0){
+
+        double reward = m_flavor == 0 ? -1 : 0;
+        
+        if(m_posx < 0){
             m_posx = 0;
         }
-        if(m_posy<0){
+        if(m_posy < 0){
             m_posy = 0;
         }
-        if(m_posx>m_width){
+        if(m_posx > m_width){
             m_posx = m_width;
         }
-        if(m_posy>m_height){
+        if(m_posy > m_height){
             m_posy = m_height;
+        }
+
+        if(m_flavor == 1 && m_posx == 0 && m_posy == m_height){
+            reward += distributionTL(generator);
+        }
+
+        if(m_flavor == 1 && m_posx == m_width && m_posy == 0){
+            reward += distributionBR(generator);
         }
 
         m_frame++;
@@ -96,7 +120,16 @@ public:
     }
 
     bool isTerminal(){
-        return m_posx==m_width&&m_posy==m_height;
+        bool reachedTopLeftCorner = m_posx == 0 && m_posy == m_height;
+        bool reachedBottomRightCorner = m_posx == m_width && m_posy == 0;
+
+        switch(m_flavor){
+            case 1:
+                return reachedTopLeftCorner || reachedBottomRightCorner;
+            case 0:
+            default:
+                return m_posx == m_width && m_posy == m_height;
+        }
     }
 
     int getEpisodeFrameNumber(){
@@ -110,10 +143,30 @@ public:
     std::pair<int,int> getPos(){
         return {m_posx, m_posy};
     }
+
+    virtual void setFlavor(unsigned f) override final{
+        
+        std::cout << "flavor " << f << std::endl;
+
+        switch(f){
+        case 1:
+            m_width = 50;
+            m_height = 50;
+            m_flavor = 1;
+            break;
+        case 0:
+            m_width = 10;
+            m_height = 10;
+            m_flavor = 0;
+        default:
+            break;
+        }
+    }
+
  protected:
     int m_posx, m_posy;
     int m_width, m_height;
-    int m_frame;
+    int m_frame, m_flavor;
 };
 
 #endif
