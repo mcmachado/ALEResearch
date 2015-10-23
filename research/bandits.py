@@ -4,8 +4,8 @@ import numpy as np
 
 class Bandits:
 	numArms = 2
-	mus     = [0.5, 0.6]
-	sigmas  = [1.0, 1.0]
+	mus     = [1.0, 3.0]
+	sigmas  = [0.5, 9.0]
 
 	def __init__(self, s, numIterations):
 		np.random.seed(seed=s)
@@ -41,7 +41,7 @@ def UCB1(b, numIterations):
 	for t in xrange(2, numIterations + 2):
 		assert(t == sum(n))
 		for i in xrange(b.numArms):
-			armValue[i] = avg[i] + np.sqrt(2 * np.log(t)/float(n[i]+1))
+			armValue[i] = avg[i] + 9.0 * np.sqrt(2 * np.log(t)/float(n[i]+1))
 
 		i           = np.argmax(armValue)
 		reward      = b.pullArm(i)
@@ -80,7 +80,7 @@ def AVG(b, numIterations):
 
 	return acumReturn
 
-def SARSA(b, numIterations, optimism):
+def SARSA(b, numIterations, optimism=0):
 
 	n     = []
 	phi   = []
@@ -103,7 +103,7 @@ def SARSA(b, numIterations, optimism):
 
 	return acumReturn
 
-def SARSA_SPLIT(b, numIterations, optimism):
+def SARSA_SQRT_SPLIT(b, numIterations, optimism):
 
 	n          = []
 	phi        = []
@@ -129,6 +129,34 @@ def SARSA_SPLIT(b, numIterations, optimism):
 
 	return acumReturn
 
+
+
+def SARSA_SPLIT(b, numIterations, optimism):
+
+	n          = []
+	phi        = []
+	psi        = []
+	theta      = []
+	acumReturn = 0
+	alpha      = 1.0
+
+	for i in xrange(b.numArms):
+		n.append(0)
+		phi.append(0.0)
+		psi.append(optimism)
+		theta.append(0)
+
+	for t in xrange(numIterations - 1):
+		i = epsilonGreedy(np.add(theta, psi))
+		n[i] += 1
+
+		reward      = b.pullArm(i)
+		acumReturn += reward
+		theta[i]    = theta[i] + alpha/n[i]  * (reward + 0 - theta[i])
+		psi[i]      = psi[i]   + alpha/n[i]  * (0      + 0 - psi[i])
+
+	return acumReturn
+
 def __init__():
 
 	res_MAX         = 0.0
@@ -136,8 +164,9 @@ def __init__():
 	res_UCB         = 0.0
 	res_SARSA       = 0.0
 	res_SARSA_SPLIT = 0.0
+	res_SARSA_SQRT_SPLIT = 0.0
 
- 	lvlOptimism   = 1.0
+ 	lvlOptimism   = 9.0
 	numSeeds      = 100
 	numIterations = 1000
 
@@ -165,7 +194,11 @@ def __init__():
 		b[s-1].resetEnv()
 		r.seed(seed)
 
-		res_SARSA += SARSA(b[s-1], numIterations, lvlOptimism)
+		res_SARSA += SARSA(b[s-1], numIterations)
+		b[s-1].resetEnv()
+		r.seed(seed)
+
+		res_SARSA_SQRT_SPLIT += SARSA_SQRT_SPLIT(b[s-1], numIterations, lvlOptimism)
 		b[s-1].resetEnv()
 		r.seed(seed)
 
@@ -177,5 +210,6 @@ def __init__():
 	print 'UCB-1      :', res_UCB/numSeeds
 	print 'SARSA      :', res_SARSA/numSeeds
 	print 'SARSA_SPLIT:', res_SARSA_SPLIT/numSeeds
+	print 'SARSA_SQRTS:', res_SARSA_SQRT_SPLIT/numSeeds
 
 __init__()
