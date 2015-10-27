@@ -12,19 +12,18 @@
 #include "../../../common/Timer.hpp"
 #include "FastSarsaLearner.hpp"
 
+#include <queue>
 #include <stdio.h>
 #include <math.h>
 
 using namespace std;
-
-//Freeway: Chicken height: 0x8E
-//Private Eye: Screen number: 0xDC
 
 FastSarsaLearner::FastSarsaLearner(Environment<bool>& env, Parameters *param, int seed) : RLLearner<bool>(env, param, seed) {
     totalNumberFrames = 0.0;
     maxFeatVectorNorm = 1;
 	
 	delta = 0.0;
+	kBound = 20;
 	alpha = param->getAlpha();
 	lambda = param->getLambda();
 	traceThreshold = param->getTraceThreshold();
@@ -39,8 +38,7 @@ FastSarsaLearner::FastSarsaLearner(Environment<bool>& env, Parameters *param, in
 		//Initialize Q;
 		Q.push_back(0);
 		Qnext.push_back(0);
-		//Initialize e:
-		e.push_back(vector<float>(numFeatures, 0.0));
+
 		w.push_back(vector<float>(numFeatures, 0.0));
 		nonZeroElig.push_back(vector<int>());
 	}
@@ -66,70 +64,6 @@ FastSarsaLearner::FastSarsaLearner(Environment<bool>& env, Parameters *param, in
 }
 
 FastSarsaLearner::~FastSarsaLearner(){}
-
-void FastSarsaLearner::updateReplTrace(int action, vector<int> &Features){
-	//e <- gamma * lambda * e
-	for(unsigned int a = 0; a < nonZeroElig.size(); a++){
-		int numNonZero = 0;
-	 	for(unsigned int i = 0; i < nonZeroElig[a].size(); i++){
-	 		int idx = nonZeroElig[a][i];
-	 		//To keep the trace sparse, if it is
-	 		//less than a threshold it is zero-ed.
-			e[a][idx] = gamma * lambda * e[a][idx];
-			if(e[a][idx] < traceThreshold){
-				e[a][idx] = 0;
-			}
-			else{
-				nonZeroElig[a][numNonZero] = idx;
-		  		numNonZero++;
-			}
-		}
-		nonZeroElig[a].resize(numNonZero);
-	}
-
-	//For all i in Fa:
-	for(unsigned int i = 0; i < Features.size(); i++){
-		int idx = Features[i];
-		//If the trace is zero it is not in the vector
-		//of non-zeros, thus it needs to be added
-		if(e[action][idx] == 0){
-	       nonZeroElig[action].push_back(idx);
-	    }
-		e[action][idx] = 1;
-	}
-}
-
-void FastSarsaLearner::updateAcumTrace(int action, vector<int> &Features){
-	//e <- gamma * lambda * e
-	for(unsigned int a = 0; a < nonZeroElig.size(); a++){
-		int numNonZero = 0;
-	 	for(unsigned int i = 0; i < nonZeroElig[a].size(); i++){
-	 		int idx = nonZeroElig[a][i];
-	 		//To keep the trace sparse, if it is
-	 		//less than a threshold it is zero-ed.
-			e[a][idx] = gamma * lambda * e[a][idx];
-			if(e[a][idx] < traceThreshold){
-				e[a][idx] = 0;
-			}
-			else{
-				nonZeroElig[a][numNonZero] = idx;
-		  		numNonZero++;
-			}
-		}
-		nonZeroElig[a].resize(numNonZero);
-	}
-
-	//For all i in Fa:
-	for(unsigned int i = 0; i < Features.size(); i++){
-		int idx = Features[i];
-		//If the trace is zero it is not in the vector
-		//of non-zeros, thus it needs to be added
-		if(e[action][idx] == 0){
-	       nonZeroElig[action].push_back(idx);
-	    }
-		e[action][idx] += 1;
-	}
-}
 
 void FastSarsaLearner::sanityCheck(){
 	for(int i = 0; i < numActions; i++){
@@ -170,9 +104,9 @@ void FastSarsaLearner::saveCheckPoint(int episode, int totalNumberFrames, vector
     checkPointFile << episode<<endl;
     checkPointFile << firstReward<<endl;
     checkPointFile << maxFeatVectorNorm<<endl;
-    for (int a=0;a<featureSeen.size();a++){
-        for (int index=0; index<featureSeen[a].size();index++){
-            checkPointFile<<a<<" "<<featureSeen[a][index]<<" "<<w[a][featureSeen[a][index]]<<"\t";
+    for(int a = 0; a < featureSeen.size(); a++){
+        for(int index = 0; index < featureSeen[a].size(); index++){
+            checkPointFile << a << " " << featureSeen[a][index] << " " << w[a][featureSeen[a][index]] << "\t";
         }
     }
     checkPointFile << endl;
@@ -182,7 +116,6 @@ void FastSarsaLearner::saveCheckPoint(int episode, int totalNumberFrames, vector
     string oldCheckPointName = currentCheckPointName;
     currentCheckPointName.replace(currentCheckPointName.end()-11,currentCheckPointName.end()-4,"finished");
     rename(oldCheckPointName.c_str(),currentCheckPointName.c_str());
-
 }
 
 void FastSarsaLearner::loadCheckPoint(ifstream& checkPointToLoad){
@@ -211,17 +144,21 @@ void FastSarsaLearner::learnPolicy(Environment<bool>& env){
     vector<double> episodeFps;
 
 	//Repeat (for each episode):
-	for(int episode = episodePassed+1; totalNumberFrames < totalNumberOfFramesToLearn; episode++){
-		//We have to clean the traces every episode:
-		for(unsigned int a = 0; a < nonZeroElig.size(); a++){
-			for(unsigned int i = 0; i < nonZeroElig[a].size(); i++){
-				int idx = nonZeroElig[a][i];
-				e[a][idx] = 0.0;
-			}
-			nonZeroElig[a].clear();
-		}
+	for(int episode = episodePassed + 1; totalNumberFrames < totalNumberOfFramesToLearn; episode++){
+		queue<vector<int>> nuFeatures;
+		queue<float> nuDelta;
+		queue<int> nuActions;
+
+		int step = 0;
+		float u = 0.0;
+		float uSync = 0.0;
+		float vCurrent = 0.0;
+		float vNext = 0.0;
+		bool ready = false;
+		
 		F.clear();
 		env.getActiveFeaturesIndices(F);
+
 		updateQValues(F, w, Q);
 		currentAction = epsilonGreedy(Q);
 
@@ -247,12 +184,10 @@ void FastSarsaLearner::learnPolicy(Environment<bool>& env){
 
 				updateQValues(Fnext, w, Qnext);     //Update Q-values for the new active features
 				nextAction = epsilonGreedy(Qnext);
+				vNext = Q[nextAction];
 			}
 			else{
-				nextAction = 0;
-				for(unsigned int i = 0; i < Qnext.size(); i++){
-					Qnext[i] = 0;
-				}
+				vNext = 0.0;
 			}
 			//To ensure the learning rate will never increase along
 			//the time, Marc used such approach in his JAIR paper		
@@ -260,22 +195,74 @@ void FastSarsaLearner::learnPolicy(Environment<bool>& env){
 				maxFeatVectorNorm = F.size();
 			}
 
-			delta = reward[0] + gamma * Qnext[nextAction] - Q[currentAction];
+			delta = reward[0] + gamma * (1 - lambda) * vNext;
+			nuFeatures.push(Fnext);
+			nuDelta.push(delta);
+			//I need to double-check this
+			nuActions.push(currentAction);
 
-			updateReplTrace(currentAction, F);
-			//Update weights vector:
-			for(unsigned int a = 0; a < nonZeroElig.size(); a++){
-				for(unsigned int i = 0; i < nonZeroElig[a].size(); i++){
-					int idx = nonZeroElig[a][i];
-					if (w[a][idx]==0 && delta!=0){
-                        featureSeen[a].push_back(idx);
+			delta = reward[0] + gamma * vNext - vCurrent;
+			vCurrent = vNext;
+
+			if(step == kBound - 1){
+				u = uSync;
+				uSync = vCurrent;
+				step = 0;
+				ready = true;
+			} else{
+				step = step + 1;
+				uSync = uSync + pow(gamma * lambda, step - 1) * delta;
+			}
+
+			if(ready){
+				vector<int> F_queue = nuFeatures.front();
+				nuFeatures.pop();
+				float delta_queue = nuDelta.front();
+				nuDelta.pop();
+				int action_queue = nuActions.front();
+				nuActions.pop();
+
+				u = u + pow(gamma * lambda, kBound - 1) * delta;
+
+				updateQValues(F_queue, w, Q);
+				for(int i = 0; i < F_queue.size(); i++){
+					int idx = F_queue[i];
+					delta = u - Q[action_queue];
+					if (w[action_queue][idx] == 0 && delta != 0){
+                        featureSeen[action_queue].push_back(idx);
                     }
-					w[a][idx] = w[a][idx] + (alpha/maxFeatVectorNorm) * delta * e[a][idx];
+					w[action_queue][F_queue[i]] = (alpha/maxFeatVectorNorm) * (u - delta);
 				}
+
+				u = (u - delta_queue)/(gamma * lambda);
 			}
 			F = Fnext;
 			currentAction = nextAction;
 		}
+
+		if(!ready){
+			u = uSync;
+		}
+		while(!nuFeatures.empty()){
+			vector<int> F_queue = nuFeatures.front();
+			nuFeatures.pop();
+			float delta_queue = nuDelta.front();
+			nuDelta.pop();
+			int action_queue = nuActions.front();
+			nuActions.pop();
+
+			updateQValues(F_queue, w, Q);
+			for(int i = 0; i < F_queue.size(); i++){
+				int idx = F_queue[i];
+				delta = u - Q[action_queue];
+				if (w[action_queue][idx] == 0 && delta != 0){
+                    featureSeen[action_queue].push_back(idx);
+                }
+				w[action_queue][F_queue[i]] = (alpha/maxFeatVectorNorm) * (u - delta);
+			}
+			u = (u - delta_queue)/(gamma * lambda);
+		}
+
 		gettimeofday(&tvEnd, NULL);
 		timeval_subtract(&tvDiff, &tvEnd, &tvBegin);
 		elapsedTime = float(tvDiff.tv_sec) + float(tvDiff.tv_usec)/1000000.0;
