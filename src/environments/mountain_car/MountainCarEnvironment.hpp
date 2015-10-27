@@ -1,13 +1,10 @@
 /**
  * @file   MontainCarEnvironment.hpp
- * @author Nicolas Carion
- * @date   Thu Aug 13 10:32:47 2015
+ * @author Nicolas Carion, Marlos C. Machado
  * 
  * @brief  Implementation of the moutain car environment. The tiling code is borrowed from Rich Sutton.
  * 
- * 
  */
-
 
 #ifndef MCENV_H
 #define MCENV_H
@@ -17,6 +14,7 @@
 #include <stdexcept>
 #include <iostream>
 #include <cmath>
+#include <random>
 
 template<typename FeatureComputer>
 class MountainCarEnvironment : public t_Environment<FeatureComputer>{
@@ -33,9 +31,12 @@ public:
     }
 
     virtual void reset() final{
-        //m_pos = -0.5;
+        /*
         m_pos = -3.1415926535 / 6.0;
         m_vel = 0.0;
+        */
+        m_pos = random_double(m_min_pos, m_max_pos);
+        m_vel = random_double(-1 * m_max_abs_vel, m_max_abs_vel);
         m_frame = 0;
     }
 
@@ -47,17 +48,8 @@ public:
         this->m_feat->getCompleteFeatureVector(this,features);
     }
 
-    void getActiveFeaturesIndices(std::vector<std::pair<int,FeatureType> >& active_feat){
-        return this->m_feat->getActiveFeaturesIndices(this,active_feat);
-    }
-
     void getActiveFeaturesIndices(std::vector<int>& active_feat){
-        std::vector<std::pair<int,FeatureType> > temp;
-        getActiveFeaturesIndices(temp);
-        active_feat.clear();
-        for(const auto& p : temp){
-            active_feat.push_back(p.first);
-        }
+        this->m_feat->getActiveFeaturesIndices(this, active_feat);
     }
 
     int getNumberOfFeatures(){
@@ -79,40 +71,33 @@ public:
         default:
             throw std::runtime_error("illegal action taken by the agent");
         }
-        /*m_vel += accel*m_coeff + cos(3.0*m_pos)*(-0.0025);
-        m_vel = std::min(m_vel,m_max_abs_vel);
-        m_vel = std::max(m_vel,-m_max_abs_vel);
-        m_pos += m_vel;
-        m_pos = std::min(m_pos,m_max_pos);
-        m_pos = std::max(m_pos,m_min_pos);
-        if(m_pos == m_min_pos)
-            m_vel = std::max(m_vel,float(0.0));
-        */
+
         m_vel = m_vel + accel * m_coeff - 0.0025 * cos(3.0 * m_pos);
-        if(m_vel > 0.07){
-            m_vel = 0.07;
+
+        if(m_vel > m_max_abs_vel){
+            m_vel = m_max_abs_vel;
         }
-        if(m_vel < -0.07){
-            m_vel = -0.07;
+        if(m_vel < -1 * m_max_abs_vel){
+            m_vel = -1 * m_max_abs_vel;
         }
         m_pos = m_pos + m_vel;
-        if(m_pos < -1.2){
-            m_pos = -1.2;
+        if(m_pos < m_min_pos){
+            m_pos = m_min_pos;
             m_vel = 0;
         }
-        if(m_pos > 0.5){
-            m_pos = 0.5;
+        if(m_pos > m_max_pos){
+            m_pos = m_max_pos;
             m_vel = 0;
         }
-        //std::cout<<cos(3*m_pos)<<"vel "<<m_vel<<" pos "<<m_pos<<std::endl;
         
         double reward = -1;
         m_frame++;
+
         return reward;
     }
 
     bool isTerminal(){
-        return m_pos == m_max_pos || m_frame>10000;
+        return m_pos == m_max_pos /*|| m_frame > 10000*/;
     }
 
     int getEpisodeFrameNumber(){
@@ -128,7 +113,6 @@ public:
     }
 
     virtual void setFlavor(unsigned f) override final{
-        std::cout<<"flavr "<<f<<std::endl;
         m_coeff = 0.001;
         switch(f){
         case 1:
@@ -145,14 +129,22 @@ public:
             break;
         case 0:
         default:
-            m_coeff=0.001;
+            m_coeff = 0.001;
             break;
         }
-        std::cout<<"coeff "<<m_coeff<<std::endl;
     }
+ 
  protected:
     float m_pos, m_vel, m_min_pos, m_max_pos, m_max_abs_vel, m_goal_pos, m_coeff;
     int m_frame;
+
+    double random_double(double lo, double hi){
+        int random_num = rand();
+        std::cout << "Random: " << random_num << std::endl;
+        double toReturn = lo + (hi-lo) * double(random_num) / double(RAND_MAX);
+        std::cout << "Returning: " << toReturn << std::endl;
+        return toReturn;
+    }
 };
 
 

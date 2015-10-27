@@ -78,12 +78,6 @@ public:
      */
     virtual void getCompleteFeatureVector(std::vector<FeatureType>& features) = 0;
 
-    /** @brief Return the indices of the non-zero features, allong with their values
-     *
-     * @param active_feat a return parameter containing the active features
-     */
-    virtual void getActiveFeaturesIndices(std::vector<std::pair<int,FeatureType> >& active_feat) = 0;
-
     /** @brief Return the indices of the non-zero features (usefull only if the features are boolean)
      *
      * @param active_feat a return parameter containing the active features

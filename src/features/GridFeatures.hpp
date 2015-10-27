@@ -24,8 +24,8 @@ public:
     void getCompleteFeatureVector(GridEnvironment<BasicGridFeatures>* env, std::vector<bool>& features){
         auto size = env->getGridSize();
         features.clear();
-        for(int i=0; i < size.first; i++){
-            for(int j=0; j<size.first; j++){
+        for(int i = 0; i < size.first; i++){
+            for(int j = 0; j < size.first; j++){
                 features.push_back(true);
             }
         }
@@ -55,7 +55,7 @@ public:
         auto size = env->getGridSize();
         features.clear();
         for(int i = 0; i < size.first; i++){
-            for(int j = 0;j < size.first; j++){
+            for(int j = 0; j < size.first; j++){
                 features.push_back(1);
             }
         }
