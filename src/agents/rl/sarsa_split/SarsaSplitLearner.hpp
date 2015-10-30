@@ -3,23 +3,21 @@
 ** Sarsa(lambda)) from the book "R. Sutton and A. Barto; Reinforcement Learning: An 
 ** Introduction. 1st edition. 1988."
 ** Some updates are made to make it more efficient, as not iterating over all features.
-**
-** TODO: Make it as efficient as possible.
 ** 
 ** Author: Marlos C. Machado
 ***************************************************************************************/
 
-#ifndef SARSALEARNER_H
-#define SARSALEARNER_H
+#ifndef SARSASPLITLEARNER_H
+#define SARSASPLITLEARNER_H
 
 #include "../RLLearner.hpp"
 #include <vector>
 #include <fstream>
 
-class SarsaLearner : public RLLearner<bool>{
+class SarsaSplitLearner : public RLLearner<bool>{
 	private:
 
-		float alpha, delta, lambda, traceThreshold;
+		float alpha, deltaW, deltaPsi, lambda, traceThreshold;
 		int numFeatures, currentAction, nextAction;
 		int toSaveWeightsAfterLearning, saveWeightsEveryXSteps, toSaveCheckPoint;
 
@@ -30,25 +28,26 @@ class SarsaLearner : public RLLearner<bool>{
         int totalNumberFrames, episodeLength;
         unsigned int maxFeatVectorNorm;
 
-		std::vector<int> F;					//Set of features active
-		std::vector<int> Fnext;              //Set of features active in next state
-		std::vector<float> Q;               //Q(a) entries
-		std::vector<float> Qnext;           //Q(a) entries for next action
-		std::vector<std::vector<float> > e;      //Eligibility trace
-		std::vector<std::vector<float> > w;      //Theta, weights vector
-		std::vector<std::vector<int> >nonZeroElig;//To optimize the implementation
+		std::vector<int> F;				  	       //Set of features active
+		std::vector<int> Fnext;			           //Set of features active in next state
+		std::vector<float> QW, QPsi, Q;            //Q(a) entries
+		std::vector<float> QnextW, QnextPsi;       //Q(a) entries for next action
+		std::vector<std::vector<float> > e;        //Eligibility trace
+		std::vector<std::vector<float> > w;        //Theta, weights vector
+		std::vector<std::vector<float> > psi;      //Psi, auxiliary Q-values
+		std::vector<std::vector<int> >nonZeroElig; //To optimize the implementation
 		std::vector<std::vector<int> > featureSeen;
 
 		/**
- 		* Constructor declared as private to force the user to instantiate SarsaLearner
+ 		* Constructor declared as private to force the user to instantiate SarsaSplitLearner
  		* informing the parameters to learning/execution.
  		*/
-		SarsaLearner();
+		SarsaSplitLearner();
 		/**
  		* This method evaluates whether the Q-values are sound. By unsound I mean huge Q-values (> 10e7)
  		* or NaN values. If so, it finishes the execution informing the algorithm has diverged. 
  		*/
-		void sanityCheck();
+		void sanityCheck(std::vector<float> &QValues);
 		/**
  		* When using Replacing traces, all values not related to the current action are set to 0, while the
  		* values for the current action that their features are active are set to 1. The traces decay following
@@ -72,7 +71,7 @@ class SarsaLearner : public RLLearner<bool>{
 		void saveCheckPoint(int episode, int totalNumberFrames,  std::vector<float>& episodeResults, int& frequency, std::vector<int>& episodeFrames, std::vector<double>& episodeFps);
         void loadCheckPoint(std::ifstream& checkPointToLoad);
 	public:
-		SarsaLearner(Environment<bool>& env, Parameters *param, int seed);
+		SarsaSplitLearner(Environment<bool>& env, Parameters *param, int seed);
 		/**
  		* Implementation of an agent controller. This implementation is Sarsa(lambda).
  		*
@@ -92,7 +91,7 @@ class SarsaLearner : public RLLearner<bool>{
 		/**
 		* Destructor, not necessary in this class.
 		*/
-		~SarsaLearner();
+		~SarsaSplitLearner();
 };
 
 #endif

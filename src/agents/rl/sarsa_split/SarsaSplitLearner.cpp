@@ -10,21 +10,24 @@
 ***************************************************************************************/
 
 #include "../../../common/Timer.hpp"
-#include "SarsaLearner.hpp"
+#include "SarsaSplitLearner.hpp"
 
 #include <stdio.h>
 #include <math.h>
+
+#define OPTIMISM 1.0
 
 using namespace std;
 
 //Freeway: Chicken height: 0x8E
 //Private Eye: Screen number: 0xDC
 
-SarsaLearner::SarsaLearner(Environment<bool>& env, Parameters *param, int seed) : RLLearner<bool>(env, param, seed) {
+SarsaSplitLearner::SarsaSplitLearner(Environment<bool>& env, Parameters *param, int seed) : RLLearner<bool>(env, param, seed) {
     totalNumberFrames = 0.0;
     maxFeatVectorNorm = 1;
 	
-	delta = 0.0;
+	deltaW = 0.0;
+	deltaPsi = 0.0;
 	alpha = param->getAlpha();
 	lambda = param->getLambda();
 	traceThreshold = param->getTraceThreshold();
@@ -36,14 +39,18 @@ SarsaLearner::SarsaLearner(Environment<bool>& env, Parameters *param, int seed) 
 	numEpisodesEval = param->getNumEpisodesEval();
 	numEpisodesLearn = param->getNumEpisodesLearn();
 	episodeLength = param->getEpisodeLength();
-	
+
 	for(int i = 0; i < numActions; i++){
 		//Initialize Q;
 		Q.push_back(0);
-		Qnext.push_back(0);
+		QW.push_back(0);
+		QnextW.push_back(0);
+		QPsi.push_back(0);
+		QnextPsi.push_back(0);
 		//Initialize e:
 		e.push_back(vector<float>(numFeatures, 0.0));
 		w.push_back(vector<float>(numFeatures, 0.0));
+		psi.push_back(vector<float>(numFeatures, OPTIMISM));
 		nonZeroElig.push_back(vector<int>());
 	}
 
@@ -67,9 +74,9 @@ SarsaLearner::SarsaLearner(Environment<bool>& env, Parameters *param, int seed) 
     }
 }
 
-SarsaLearner::~SarsaLearner(){}
+SarsaSplitLearner::~SarsaSplitLearner(){}
 
-void SarsaLearner::updateReplTrace(int action, vector<int> &Features){
+void SarsaSplitLearner::updateReplTrace(int action, vector<int> &Features){
 	//e <- gamma * lambda * e
 	for(unsigned int a = 0; a < nonZeroElig.size(); a++){
 		int numNonZero = 0;
@@ -101,7 +108,7 @@ void SarsaLearner::updateReplTrace(int action, vector<int> &Features){
 	}
 }
 
-void SarsaLearner::updateAcumTrace(int action, vector<int> &Features){
+void SarsaSplitLearner::updateAcumTrace(int action, vector<int> &Features){
 	//e <- gamma * lambda * e
 	for(unsigned int a = 0; a < nonZeroElig.size(); a++){
 		int numNonZero = 0;
@@ -133,9 +140,9 @@ void SarsaLearner::updateAcumTrace(int action, vector<int> &Features){
 	}
 }
 
-void SarsaLearner::sanityCheck(){
+void SarsaSplitLearner::sanityCheck(std::vector<float> &QValues){
 	for(int i = 0; i < numActions; i++){
-		if(fabs(Q[i]) > 10e7 || Q[i] != Q[i] /*NaN*/){
+		if(fabs(QValues[i]) > 10e7 || QValues[i] != QValues[i] /*NaN*/){
 			printf("It seems your algorithm diverged!\n");
 			exit(0);
 		}
@@ -143,7 +150,7 @@ void SarsaLearner::sanityCheck(){
 }
 
 //To do: we do not want to save weights that are zero
-void SarsaLearner::saveCheckPoint(int episode, int totalNumberFrames, vector<float>& episodeResults,int& frequency,vector<int>& episodeFrames, vector<double>& episodeFps){
+void SarsaSplitLearner::saveCheckPoint(int episode, int totalNumberFrames, vector<float>& episodeResults,int& frequency,vector<int>& episodeFrames, vector<double>& episodeFps){
     ofstream learningConditionFile;
     string newNameForLearningCondition = checkPointName+"-learningCondition-Episode"+to_string(episode)+"-writing.txt";
     int renameReturnCode = rename(nameForLearningCondition.c_str(),newNameForLearningCondition.c_str());
@@ -187,7 +194,7 @@ void SarsaLearner::saveCheckPoint(int episode, int totalNumberFrames, vector<flo
 
 }
 
-void SarsaLearner::loadCheckPoint(ifstream& checkPointToLoad){
+void SarsaSplitLearner::loadCheckPoint(ifstream& checkPointToLoad){
     checkPointToLoad >> agentRand;
     checkPointToLoad >> totalNumberFrames;
     checkPointToLoad >> episodePassed;
@@ -201,7 +208,7 @@ void SarsaLearner::loadCheckPoint(ifstream& checkPointToLoad){
     checkPointToLoad.close();
 }
 
-void SarsaLearner::learnPolicy(Environment<bool>& env){
+void SarsaSplitLearner::learnPolicy(Environment<bool>& env){
 	
 	struct timeval tvBegin, tvEnd, tvDiff;
 	vector<float> reward;
@@ -213,8 +220,7 @@ void SarsaLearner::learnPolicy(Environment<bool>& env){
     vector<double> episodeFps;
 
 	//Repeat (for each episode):
-	//for(int episode = episodePassed+1; totalNumberFrames < totalNumberOfFramesToLearn; episode++){
-    for(int episode = episodePassed+1; episode <= numEpisodesLearn; episode++){
+	for(int episode = episodePassed + 1; episode <= numEpisodesLearn; episode++){
 		//We have to clean the traces every episode:
 		for(unsigned int a = 0; a < nonZeroElig.size(); a++){
 			for(unsigned int i = 0; i < nonZeroElig[a].size(); i++){
@@ -225,20 +231,20 @@ void SarsaLearner::learnPolicy(Environment<bool>& env){
 		}
 		F.clear();
 		env.getActiveFeaturesIndices(F);
-		updateQValues(F, w, Q);
+		updateQValues(F, w, QW); updateQValues(F, psi, QPsi);
+		for(int i = 0; i < Q.size(); i++){ Q[i] = QW[i] + QPsi[i]; }
 		currentAction = epsilonGreedy(Q);
 
 		//Repeat(for each step of episode) until game is over:
 		gettimeofday(&tvBegin, NULL);
 
 		//This also stops when the maximum number of steps per episode is reached
-		//while(!env.isTerminal()){
 		while(!env.isTerminal() && episodeLength > env.getEpisodeFrameNumber()){
 			reward.clear();
 			reward.push_back(0.0);
 			reward.push_back(0.0);
-			updateQValues(F, w, Q);
-			sanityCheck();
+			updateQValues(F, w, QW); updateQValues(F, psi, QPsi);
+			sanityCheck(QW); sanityCheck(QPsi);
 
 			//Take action, observe reward and next state:
 			act(env, currentAction, reward);
@@ -249,13 +255,15 @@ void SarsaLearner::learnPolicy(Environment<bool>& env){
 				Fnext.clear();
 				env.getActiveFeaturesIndices(Fnext);
 
-				updateQValues(Fnext, w, Qnext);     //Update Q-values for the new active features
-				nextAction = epsilonGreedy(Qnext);
+				updateQValues(Fnext, w, QnextW); updateQValues(Fnext, w, QnextPsi);
+				for(int i = 0; i < Q.size(); i++){ Q[i] = QnextW[i] + QnextPsi[i]; }
+				nextAction = epsilonGreedy(Q);
 			}
 			else{
 				nextAction = 0;
-				for(unsigned int i = 0; i < Qnext.size(); i++){
-					Qnext[i] = 0;
+				for(unsigned int i = 0; i < QnextW.size(); i++){
+					QnextW[i] = 0;
+					QPsi[i] = 0;
 				}
 			}
 			//To ensure the learning rate will never increase along
@@ -264,17 +272,19 @@ void SarsaLearner::learnPolicy(Environment<bool>& env){
 				maxFeatVectorNorm = F.size();
 			}
 
-			delta = reward[0] + gamma * Qnext[nextAction] - Q[currentAction];
+			deltaW = reward[0] + gamma * QnextW[nextAction] - QW[currentAction];
+			deltaPsi = gamma * QnextPsi[nextAction] - QPsi[currentAction];
 
 			updateReplTrace(currentAction, F);
 			//Update weights vector:
 			for(unsigned int a = 0; a < nonZeroElig.size(); a++){
 				for(unsigned int i = 0; i < nonZeroElig[a].size(); i++){
 					int idx = nonZeroElig[a][i];
-					if (w[a][idx]==0 && delta!=0){
+					if (w[a][idx]==0 && deltaW!=0){
                         featureSeen[a].push_back(idx);
                     }
-					w[a][idx] = w[a][idx] + (alpha/maxFeatVectorNorm) * delta * e[a][idx];
+					w[a][idx] = w[a][idx] + (alpha/maxFeatVectorNorm) * deltaW * e[a][idx];
+					psi[a][idx] = psi[a][idx] + (alpha/maxFeatVectorNorm) * deltaPsi * e[a][idx];
 				}
 			}
 			F = Fnext;
@@ -300,7 +310,7 @@ void SarsaLearner::learnPolicy(Environment<bool>& env){
 	}
 }
 
-double SarsaLearner::evaluatePolicy(Environment<bool>& env){
+double SarsaSplitLearner::evaluatePolicy(Environment<bool>& env){
 	float reward = 0;
 	float cumReward = 0; 
 	float prevCumReward = 0;
@@ -320,8 +330,8 @@ double SarsaLearner::evaluatePolicy(Environment<bool>& env){
 			//Get state and features active on that state:		
 			F.clear();
 			env.getActiveFeaturesIndices(F);
-			updateQValues(F, w, Q);       //Update Q-values for each possible action
-			currentAction = epsilonGreedy(Q);
+			updateQValues(F, w, QW);       //Update Q-values for each possible action
+			currentAction = epsilonGreedy(QW);
 			//Take action, observe reward and next state:
 			reward = env.act(actions[currentAction]);
 			cumReward  += reward;
@@ -345,7 +355,7 @@ double SarsaLearner::evaluatePolicy(Environment<bool>& env){
     return double(cumReward)/double(episode);
 }
 
-void SarsaLearner::saveWeightsToFile(string suffix){
+void SarsaSplitLearner::saveWeightsToFile(string suffix){
     std::ofstream weightsFile ((nameWeightsFile + suffix).c_str());
     if(weightsFile.is_open()){
         weightsFile << w.size() << " " << w[0].size() << std::endl;
@@ -363,7 +373,7 @@ void SarsaLearner::saveWeightsToFile(string suffix){
     }
 }
 
-void SarsaLearner::loadWeights(){
+void SarsaSplitLearner::loadWeights(){
     string line;
     int nActions, nFeatures;
     int i, j;

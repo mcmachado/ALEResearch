@@ -34,6 +34,7 @@ public:
         generator.seed(seed); 
         m_frame = 0;
         reset();
+        setFlavor(0);
     }
 
     virtual void reset() final{

@@ -20,6 +20,7 @@ EXE := learnerALE
 GRID := learnerGridWorld
 FAST := learnerFastSarsa
 TEST := testEnvStepByStep
+EXPL := learnerExplorationGridWorld
 
 # Search for library 'ale' and library 'z' when linking.
 LDFLAGS := -L$(ALE) -lale -lz -lm
@@ -29,13 +30,14 @@ ifeq ($(strip $(USE_SDL)), 1)
   LDFLAGS += -lSDL -lSDL_gfx -lSDL_image `sdl-config --cflags --libs`
 endif
 
-all: $(EXE) $(GRID) $(MC) $(FAST) $(TEST)
+all: $(EXE) $(GRID) $(MC) $(FAST) $(TEST) ${EXPL}
 
 mc: $(MC)
 ale: $(EXE)
 grid: $(GRID)
 fast: ${FAST}
 test: ${TEST}
+expl: ${EXPL}
 
 learnerALE: bin/main.o bin/Mathematics.o bin/Parameters.o bin/Timer.o bin/Features.o bin/Background.o bin/BasicFeatures.o bin/BASSFeatures.o bin/BPROFeatures.o bin/RAMFeatures.o bin/SarsaLearner.o bin/QLearner.o bin/TRSarsaLearner.o bin/FastSarsaLearner.o bin/RandomAgent.o bin/ConstantAgent.o bin/PerturbAgent.o bin/HumanAgent.o
 	$(CXX) $(FLAGS) bin/main.o bin/Mathematics.o bin/Timer.o bin/Parameters.o bin/Features.o bin/Background.o bin/BasicFeatures.o bin/BASSFeatures.o bin/BPROFeatures.o bin/RAMFeatures.o bin/SarsaLearner.o bin/QLearner.o bin/TRSarsaLearner.o bin/FastSarsaLearner.o bin/RandomAgent.o bin/ConstantAgent.o bin/PerturbAgent.o bin/HumanAgent.o $(LDFLAGS) -o $(EXE)
@@ -52,6 +54,9 @@ learnerFastSarsa: bin/main_mc_fastSarsa.o bin/Mathematics.o bin/Parameters.o bin
 testEnvStepByStep: bin/testEnvironmentStepByStep.o bin/Parameters.o bin/Features.o bin/Background.o bin/BasicFeatures.o bin/BASSFeatures.o bin/BPROFeatures.o bin/RAMFeatures.o
 	$(CXX) $(FLAGS) bin/testEnvironmentStepByStep.o bin/Mathematics.o bin/Timer.o bin/Parameters.o bin/Features.o bin/Background.o bin/BasicFeatures.o bin/BASSFeatures.o bin/BPROFeatures.o bin/RAMFeatures.o $(LDFLAGS) -o $(TEST)
 
+learnerExplorationGridWorld: bin/main_grid_exploration.o bin/Mathematics.o bin/Parameters.o bin/Timer.o bin/Features.o bin/Background.o bin/BasicFeatures.o bin/BASSFeatures.o bin/BPROFeatures.o bin/RAMFeatures.o bin/SarsaLearner.o bin/QLearner.o bin/TRSarsaLearner.o bin/FastSarsaLearner.o bin/SarsaSplitLearner.o bin/RandomAgent.o bin/ConstantAgent.o bin/PerturbAgent.o bin/HumanAgent.o
+	$(CXX) $(FLAGS) bin/main_grid_exploration.o bin/Mathematics.o bin/Timer.o bin/Parameters.o bin/Features.o bin/Background.o bin/BasicFeatures.o bin/BASSFeatures.o bin/BPROFeatures.o bin/RAMFeatures.o bin/SarsaLearner.o bin/QLearner.o bin/TRSarsaLearner.o bin/FastSarsaLearner.o bin/SarsaSplitLearner.o bin/RandomAgent.o bin/ConstantAgent.o bin/PerturbAgent.o bin/HumanAgent.o $(LDFLAGS) -o $(EXPL)
+
 bin/main.o: main.cpp
 	$(CXX) $(FLAGS) -c main.cpp -o bin/main.o
 
@@ -63,6 +68,9 @@ bin/main_mountain_car_example.o: main_mountain_car_example.cpp
 
 bin/main_mc_fastSarsa.o: main_mc_fastSarsa.cpp
 	$(CXX) $(FLAGS) -c main_mc_fastSarsa.cpp -o bin/main_mc_fastSarsa.o
+
+bin/main_grid_exploration.o: main_grid_exploration.cpp
+	$(CXX) $(FLAGS) -c main_grid_exploration.cpp -o bin/main_grid_exploration.o
 
 bin/testEnvironmentStepByStep.o: testEnvironmentStepByStep.cpp
 	$(CXX) $(FLAGS) -c testEnvironmentStepByStep.cpp -o bin/testEnvironmentStepByStep.o
@@ -105,6 +113,9 @@ bin/TRSarsaLearner.o: agents/rl/true_online_sarsa/TrueOnlineSarsaLearner.cpp
 
 bin/FastSarsaLearner.o: agents/rl/fastSarsa/FastSarsaLearner.cpp
 	$(CXX) $(FLAGS) -c agents/rl/fastSarsa/FastSarsaLearner.cpp -o bin/FastSarsaLearner.o
+
+bin/SarsaSplitLearner.o: agents/rl/sarsa_split/SarsaSplitLearner.cpp
+	$(CXX) $(FLAGS) -c agents/rl/sarsa_split/SarsaSplitLearner.cpp -o bin/SarsaSplitLearner.o
 
 bin/RandomAgent.o: agents/baseline/RandomAgent.cpp
 	$(CXX) $(FLAGS) -c agents/baseline/RandomAgent.cpp -o bin/RandomAgent.o	
