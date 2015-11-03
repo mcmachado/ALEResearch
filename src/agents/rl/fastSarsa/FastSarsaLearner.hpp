@@ -20,7 +20,7 @@ class FastSarsaLearner : public RLLearner<bool>{
 		std::string nameWeightsFile, pathWeightsFileToLoad;
 		std::string checkPointName;
         std::string nameForLearningCondition;
-        int episodePassed, numEpisodesEval;
+        int episodePassed, numEpisodesEval, numEpisodesLearn;
         int totalNumberFrames;
         unsigned int maxFeatVectorNorm;
 

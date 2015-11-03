@@ -41,7 +41,7 @@ public:
     }
 
     std::vector<Action> getLegalActionSet(){
-        return {PLAYER_A_NOOP,PLAYER_A_LEFT,PLAYER_A_RIGHT};
+        return {PLAYER_A_LEFT,PLAYER_A_NOOP,PLAYER_A_RIGHT};
     }
 
     void getCompleteFeatureVector(std::vector<FeatureType>& features){
@@ -140,9 +140,9 @@ public:
 
     double random_double(double lo, double hi){
         int random_num = rand();
-        std::cout << "Random: " << random_num << std::endl;
+//        printf("Random: %d\n", random_num);
         double toReturn = lo + (hi-lo) * double(random_num) / double(RAND_MAX);
-        std::cout << "Returning: " << toReturn << std::endl;
+//        printf("Return: %f\n", toReturn);
         return toReturn;
     }
 };

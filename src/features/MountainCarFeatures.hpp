@@ -54,7 +54,7 @@ public:
 
 	    double x_size = (x_max - x_min)/double(NUM_TILES_X - 1);
 	    double v_size = (v_max - v_min)/double(NUM_TILES_V - 1);
-	    
+
 	    for(int i = 0; i < NUM_ACTIVE_FEAT; i++){
 	        double x = env->getPos();
 	        double v = env->getVel();
@@ -67,9 +67,10 @@ public:
 	        int ft = fx + NUM_TILES_X * fv + i * (NUM_TILES_X * NUM_TILES_V);
 	        assert(ft >= 0);
 	        assert(ft < (NUM_TILINGS * NUM_TILES_X * NUM_TILES_V));
-	        
+
 	        features.push_back(ft);
 	    }
+	    //printf("(%f, %f) ", env->getPos(), env->getVel());
     }
 };
 
