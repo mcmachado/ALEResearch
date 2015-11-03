@@ -140,9 +140,7 @@ public:
 
     double random_double(double lo, double hi){
         int random_num = rand();
-//        printf("Random: %d\n", random_num);
         double toReturn = lo + (hi-lo) * double(random_num) / double(RAND_MAX);
-//        printf("Return: %f\n", toReturn);
         return toReturn;
     }
 };

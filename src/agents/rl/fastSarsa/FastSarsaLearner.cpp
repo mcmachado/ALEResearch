@@ -165,13 +165,7 @@ void FastSarsaLearner::learnPolicy(Environment<bool>& env){
 
 		//Repeat(for each step of episode) until game is over:
 		gettimeofday(&tvBegin, NULL);
-/*
-		printf("I started at the state [ ");
-		for(int jj = 0; jj < F.size(); jj++){
-			printf("%d ", F[jj]);
-		}
-		printf("]\n");
-*/
+
 		//This also stops when the maximum number of steps per episode is reached
 		while(!env.isTerminal()){
 			reward.clear();
@@ -203,33 +197,13 @@ void FastSarsaLearner::learnPolicy(Environment<bool>& env){
 			if (F.size() > maxFeatVectorNorm){
 				maxFeatVectorNorm = F.size();
 			}
-/*			printf("%d) I took the action %d and I observed a reward %f and a new state [", env.getEpisodeFrameNumber(), currentAction, reward[0]);
 
-			for(int jj = 0; jj < Fnext.size(); jj++){
-				printf("%d ", Fnext[jj]);
-			}
-			printf("]\n");
-
-			printf("With the following Q-values: [\n");
-			for(int i = 0; i < Qnext.size(); i++){
-				printf("%f (", Qnext[i]);
-				for(int j = 0; j < Fnext.size(); j++){
-					printf("%f ", w[i][Fnext[j]]);
-				}
-				printf(")\n");
-			}
-			printf("]\n");
-
-			printf("vNext = %f\n", vNext);
-*/
 			delta = reward[0] + gamma * (1 - lambda) * vNext;
 			nuFeatures.push(F);
 			nuDelta.push(delta);
 			nuActions.push(currentAction);
-//			printf("Pushing %f\n", delta);
 
 			delta = reward[0] + gamma * vNext - vCurrent;
-//			printf("Delta = %f + %f * %f - %f = %f\n", reward[0], gamma, vNext, vCurrent, delta);
 			vCurrent = vNext;
 
 			if(step == kBound - 1){
@@ -250,22 +224,17 @@ void FastSarsaLearner::learnPolicy(Environment<bool>& env){
 				int action_queue = nuActions.front();
 				nuActions.pop();
 
-//				printf("U = %f + %f * %f\n", u, pow(gamma*lambda, kBound-1), delta);
 				u = u + pow(gamma * lambda, kBound - 1) * delta;
 
 				updateQValues(F_queue, w, Q);
-//				printf("I updated the following weights: [\n");
 				for(int i = 0; i < F_queue.size(); i++){
 					int idx = F_queue[i];
 					delta = u - Q[action_queue];
 					if (w[action_queue][idx] == 0 && delta != 0){
                         featureSeen[action_queue].push_back(idx);
                     }
-//                  printf("w[%d][%d] (%.3f to ", action_queue, F_queue[i], w[action_queue][F_queue[i]]);
 					w[action_queue][F_queue[i]] += (alpha/maxFeatVectorNorm) * delta;
-//					printf("%.3f $%f*%f$)\n", w[action_queue][F_queue[i]], u, Q[action_queue]);
 				}
-//				printf("]\n");
 				u = (u - delta_queue)/(gamma * lambda);
 			}
 			F = Fnext;
@@ -284,18 +253,14 @@ void FastSarsaLearner::learnPolicy(Environment<bool>& env){
 			nuActions.pop();
 
 			updateQValues(F_queue, w, Q);
-//			printf("*I updated the following weights: [\n");
 			for(int i = 0; i < F_queue.size(); i++){
 				int idx = F_queue[i];
 				delta = u - Q[action_queue];
 				if (w[action_queue][idx] == 0 && delta != 0){
                     featureSeen[action_queue].push_back(idx);
                 }
-//				printf("w[%d][%d] (%.3f to ", action_queue, F_queue[i], w[action_queue][F_queue[i]]);
 				w[action_queue][F_queue[i]] += (alpha/maxFeatVectorNorm) * delta;
-//				printf("%.3f $%f*%f$)\n", w[action_queue][F_queue[i]], u, Q[action_queue]);
 			}
-//			printf("]\n");
 			u = (u - delta_queue)/(gamma * lambda);
 		}
 
@@ -312,11 +277,11 @@ void FastSarsaLearner::learnPolicy(Environment<bool>& env){
         episodeFps.push_back(fps);
 		totalNumberFrames += env.getEpisodeFrameNumber();
 		prevCumReward = cumReward;
+//		rand(); //I'm calling this to have equivalence to Harm's code.
 		env.reset_game();
 		if(toSaveCheckPoint && episode%saveWeightsEveryXSteps == 0){
             saveCheckPoint(episode,totalNumberFrames,episodeResults,saveWeightsEveryXSteps,episodeFrames,episodeFps);
         }
-//      getchar();
 	}
 }
 

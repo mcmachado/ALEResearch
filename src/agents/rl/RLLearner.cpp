@@ -25,6 +25,43 @@ RLLearner<FeatureType>::RLLearner(Environment<FeatureType>& env, Parameters *par
 
 template<typename FeatureType>
 int RLLearner<FeatureType>::epsilonGreedy(std::vector<float> &QValues){
+/*
+    double Qmax = QValues[0];
+    int num_max = 1;
+    for (int i = 1; i < QValues.size(); i++)
+    {
+        if (QValues[i] > Qmax)
+        {
+            Qmax = QValues[i];
+            num_max = 1;
+        }
+        else if (QValues[i] == Qmax)
+        {
+            ++num_max;
+        }
+    }
+
+    double rnd = double(rand()) / double(RAND_MAX);
+    double cumulative_prob = 0.0; // prob_cs is the cumulative probablity
+    int action = QValues.size() - 1;
+    for (int a = 0; a < numActions - 1; a++)
+    {
+        double prob = epsilon / double(numActions);
+        if (QValues[a] == Qmax)
+        {
+            prob += (1-epsilon) / double(num_max);
+        }
+        cumulative_prob += prob;
+
+        if (rnd < cumulative_prob)
+        {
+            action = a;
+            break;
+        }
+    }
+
+    return action;
+*/
 	randomActionTaken = 0;
 
 	int action = Mathematics::argmax(QValues);
@@ -34,15 +71,16 @@ int RLLearner<FeatureType>::epsilonGreedy(std::vector<float> &QValues){
 		randomActionTaken = 1;
 		action = agentRand() % numActions;
 	}
+
 	return action;
 }
 
 template<typename FeatureType>
-void RLLearner<FeatureType>::updateQValues(std::vector<int> &Features, std::vector<std::vector<float> > &w, std::vector<float> &QValues){
+void RLLearner<FeatureType>::updateQValues(std::vector<int> &Features, std::vector<std::vector<float> > &wgt, std::vector<float> &QValues){
 	for(int a = 0; a < numActions; a++){
 		float sumW = 0;
 		for(unsigned int i = 0; i < Features.size(); i++){
-			sumW += w[a][Features[i]];
+			sumW += wgt[a][Features[i]];
 		}
 		QValues[a] = sumW;
 	}

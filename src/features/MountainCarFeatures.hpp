@@ -70,7 +70,6 @@ public:
 
 	        features.push_back(ft);
 	    }
-	    //printf("(%f, %f) ", env->getPos(), env->getVel());
     }
 };
 
