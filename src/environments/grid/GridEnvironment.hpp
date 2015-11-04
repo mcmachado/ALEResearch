@@ -108,7 +108,7 @@ public:
             m_posy = m_height;
         }
 
-        if(m_flavor == 1 && m_posx == 0 && m_posy == m_height){
+        if(m_flavor == 1 && m_posx == 0 && m_posy == m_height){ 
             reward += distributionTL(generator);
         }
 
@@ -147,12 +147,12 @@ public:
 
     virtual void setFlavor(unsigned f) override final{
         
-        std::cout << "flavor " << f << std::endl;
+        //std::cout << "flavor " << f << std::endl;
 
         switch(f){
         case 1:
-            m_width = 50;
-            m_height = 50;
+            m_width = 10;
+            m_height = 10;
             m_flavor = 1;
             break;
         case 0:

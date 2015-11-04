@@ -251,6 +251,8 @@ void SarsaLearner::learnPolicy(Environment<bool>& env){
 
 				updateQValues(Fnext, w, Qnext);     //Update Q-values for the new active features
 				nextAction = epsilonGreedy(Qnext);
+				//for(int i= 0; i < Qnext.size(); i++) printf("%f ", Qnext[i]);
+				//printf("%d\n", nextAction);
 			}
 			else{
 				nextAction = 0;
@@ -268,13 +270,14 @@ void SarsaLearner::learnPolicy(Environment<bool>& env){
 
 			updateReplTrace(currentAction, F);
 			//Update weights vector:
+			float stepSize = alpha/maxFeatVectorNorm;
 			for(unsigned int a = 0; a < nonZeroElig.size(); a++){
 				for(unsigned int i = 0; i < nonZeroElig[a].size(); i++){
 					int idx = nonZeroElig[a][i];
 					if (w[a][idx]==0 && delta!=0){
                         featureSeen[a].push_back(idx);
                     }
-					w[a][idx] = w[a][idx] + (alpha/maxFeatVectorNorm) * delta * e[a][idx];
+					w[a][idx] = w[a][idx] + stepSize * delta * e[a][idx];
 				}
 			}
 			F = Fnext;
@@ -285,9 +288,9 @@ void SarsaLearner::learnPolicy(Environment<bool>& env){
 		elapsedTime = float(tvDiff.tv_sec) + float(tvDiff.tv_usec)/1000000.0;
 		
 		float fps = float(env.getEpisodeFrameNumber())/elapsedTime;
-		printf("episode: %d,\t%.0f points,\tavg. return: %.1f,\t%d frames,\t%.0f fps\n",
-			episode, cumReward - prevCumReward, (float)cumReward/(float) episode,
-			env.getEpisodeFrameNumber(), fps);
+//		printf("episode: %d,\t%.0f points,\tavg. return: %.1f,\t%d frames,\t%.0f fps\n",
+//			episode, cumReward - prevCumReward, (float)cumReward/(float) episode,
+//			env.getEpisodeFrameNumber(), fps);
         episodeResults.push_back(cumReward-prevCumReward);
         episodeFrames.push_back(env.getEpisodeFrameNumber());
         episodeFps.push_back(fps);
@@ -298,6 +301,7 @@ void SarsaLearner::learnPolicy(Environment<bool>& env){
             saveCheckPoint(episode,totalNumberFrames,episodeResults,saveWeightsEveryXSteps,episodeFrames,episodeFps);
         }
 	}
+	std::cout << (float)cumReward/(float)numEpisodesLearn << std::endl;
 }
 
 double SarsaLearner::evaluatePolicy(Environment<bool>& env){
