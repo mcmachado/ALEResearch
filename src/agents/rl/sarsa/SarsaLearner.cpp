@@ -15,6 +15,7 @@
 #include <stdio.h>
 #include <math.h>
 
+#define OPTIMISM 70.0
 using namespace std;
 
 //Freeway: Chicken height: 0x8E
@@ -43,7 +44,7 @@ SarsaLearner::SarsaLearner(Environment<bool>& env, Parameters *param, int seed) 
 		Qnext.push_back(0);
 		//Initialize e:
 		e.push_back(vector<float>(numFeatures, 0.0));
-		w.push_back(vector<float>(numFeatures, 0.0));
+		w.push_back(vector<float>(numFeatures, OPTIMISM));
 		nonZeroElig.push_back(vector<int>());
 	}
 
@@ -288,9 +289,9 @@ void SarsaLearner::learnPolicy(Environment<bool>& env){
 		elapsedTime = float(tvDiff.tv_sec) + float(tvDiff.tv_usec)/1000000.0;
 		
 		float fps = float(env.getEpisodeFrameNumber())/elapsedTime;
-//		printf("episode: %d,\t%.0f points,\tavg. return: %.1f,\t%d frames,\t%.0f fps\n",
-//			episode, cumReward - prevCumReward, (float)cumReward/(float) episode,
-//			env.getEpisodeFrameNumber(), fps);
+		//printf("episode: %d,\t%.0f points,\tavg. return: %.1f,\t%d frames,\t%.0f fps\n",
+		//	episode, cumReward - prevCumReward, (float)cumReward/(float) episode,
+		//	env.getEpisodeFrameNumber(), fps);
         episodeResults.push_back(cumReward-prevCumReward);
         episodeFrames.push_back(env.getEpisodeFrameNumber());
         episodeFps.push_back(fps);

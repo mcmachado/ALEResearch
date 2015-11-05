@@ -15,7 +15,7 @@
 #include <stdio.h>
 #include <math.h>
 
-#define OPTIMISM 70.0
+#define OPTIMISM 1.0
 
 using namespace std;
 
@@ -48,9 +48,10 @@ SarsaSplitLearner::SarsaSplitLearner(Environment<bool>& env, Parameters *param, 
 		QPsi.push_back(0);
 		QnextPsi.push_back(0);
 		//Initialize e:
+		Fcount.push_back(vector<int>(numFeatures, 0));
 		e.push_back(vector<float>(numFeatures, 0.0));
 		w.push_back(vector<float>(numFeatures, 0.0));
-		psi.push_back(vector<float>(numFeatures, OPTIMISM));
+		psi.push_back(vector<float>(numFeatures, param->getDegreeOfOptimism()));
 		nonZeroElig.push_back(vector<int>());
 	}
 
@@ -234,6 +235,7 @@ void SarsaSplitLearner::learnPolicy(Environment<bool>& env){
 		for(int i = 0; i < Q.size(); i++){
 			Q[i] = QW[i] + QPsi[i];
 		}
+
 		currentAction = epsilonGreedy(Q);
 
 		//Repeat(for each step of episode) until game is over:
@@ -249,8 +251,33 @@ void SarsaSplitLearner::learnPolicy(Environment<bool>& env){
 			updateQValues(F, w, QW); updateQValues(F, psi, QPsi);
 			sanityCheck(QW); sanityCheck(QPsi);
 
+			for(int i = 0; i < F.size(); i++){
+				Fcount[currentAction][F[i]]++;
+			}
+/*
+			printf(" UP: \t\t\t\t\t\t\t\t DOWN: \t\t\t\t\t\t\t\t LEFT: \t\t\t\t\t\t\t\t RIGHT: \n");
+			for(int i = 0; i < 10; i++){
+				for(int j = 0; j < 10; j++){
+					printf("%.2f ", psi[0][(9-i)*10 + j]);
+				}
+				printf("\t");
+				for(int j = 0; j < 10; j++){
+					printf("%.2f ", psi[1][(9-i)*10 + j]);
+				}
+				printf("\t");
+				for(int j = 0; j < 10; j++){
+					printf("%.2f ", psi[2][(9-i)*10 + j]);
+				}
+				printf("\t");
+				for(int j = 0; j < 10; j++){
+					printf("%.2f ", psi[3][(9-i)*10 + j]);
+				}
+				printf("\n");
+			}
+*/
 			//Take action, observe reward and next state:
 			act(env, currentAction, reward);
+//			printf("Reward: %f\n", reward[1]);
 			cumReward  += reward[1];
 
 			if(!env.isTerminal()){
@@ -263,6 +290,7 @@ void SarsaSplitLearner::learnPolicy(Environment<bool>& env){
 					Q[i] = QnextW[i] + QnextPsi[i];
 				}
 				nextAction = epsilonGreedy(Q);
+				//cin >> nextAction;
 			}
 			else{
 				nextAction = 0;
@@ -278,13 +306,12 @@ void SarsaSplitLearner::learnPolicy(Environment<bool>& env){
 			}
 
 			deltaW = reward[0] + gamma * QnextW[nextAction] - QW[currentAction];
+//			printf("Delta = %f * %f - %f\n", gamma, QnextPsi[nextAction], QPsi[currentAction]);
 			deltaPsi = gamma * QnextPsi[nextAction] - QPsi[currentAction];
 
 			updateReplTrace(currentAction, F);
 			//Update weights vector:
 			float stepSize = alpha/maxFeatVectorNorm;
-			float stepSizeExp = (1.0 - sqrt((t-1)/(t)))/maxFeatVectorNorm;
-			//float stepSizeExp = 0.50;
 			for(unsigned int a = 0; a < nonZeroElig.size(); a++){
 				for(unsigned int i = 0; i < nonZeroElig[a].size(); i++){
 					int idx = nonZeroElig[a][i];
@@ -292,11 +319,14 @@ void SarsaSplitLearner::learnPolicy(Environment<bool>& env){
                         featureSeen[a].push_back(idx);
                     }
 					w[a][idx] = w[a][idx] + stepSize * deltaW * e[a][idx];
+					float stepSizeExp = (1.0 - sqrt(float(Fcount[a][idx]-1)/(float)Fcount[a][idx]));
+//					printf("psi[%d][%d] = %f + %f * %f * %f = %f\n", a, idx, psi[a][idx], stepSizeExp, deltaPsi, e[a][idx], psi[a][idx] + stepSizeExp * deltaPsi * e[a][idx]);
 					psi[a][idx] = psi[a][idx] + stepSizeExp * deltaPsi * e[a][idx];
 				}
 			}
 			F = Fnext;
 			currentAction = nextAction;
+			//getchar();
 		}
 		gettimeofday(&tvEnd, NULL);
 		timeval_subtract(&tvDiff, &tvEnd, &tvBegin);

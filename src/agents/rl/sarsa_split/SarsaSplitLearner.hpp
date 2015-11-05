@@ -30,6 +30,7 @@ class SarsaSplitLearner : public RLLearner<bool>{
 
 		std::vector<int> F;				  	       //Set of features active
 		std::vector<int> Fnext;			           //Set of features active in next state
+		std::vector<std::vector<int> > Fcount;     //Used to calculate the step sizes
 		std::vector<float> QW, QPsi, Q;            //Q(a) entries
 		std::vector<float> QnextW, QnextPsi;       //Q(a) entries for next action
 		std::vector<std::vector<float> > e;        //Eligibility trace
