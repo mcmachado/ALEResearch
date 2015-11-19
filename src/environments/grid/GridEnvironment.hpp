@@ -29,7 +29,7 @@ private:
 public:
     typedef typename FeatureComputer::FeatureType FeatureType;
     GridEnvironment(FeatureComputer* feat, int seed = 1) : 
-        t_Environment<FeatureComputer>(feat), distributionTL(50.0, 100.0), distributionBR(30.0, 100.0) {
+        t_Environment<FeatureComputer>(feat), distributionTL(3.0, 9.0), distributionBR(0.5, 0.1) {
 
         generator.seed(seed); 
         m_frame = 0;
@@ -44,14 +44,14 @@ public:
     }
 
     std::vector<Action> getMinimalActionSet(){
+        return {PLAYER_A_UP, PLAYER_A_DOWN, PLAYER_A_LEFT, PLAYER_A_RIGHT};
+    }
+
+    std::vector<Action> getLegalActionSet(){
         return {PLAYER_A_NOOP, PLAYER_A_FIRE, PLAYER_A_UP, PLAYER_A_RIGHT, PLAYER_A_LEFT,
             PLAYER_A_DOWN, PLAYER_A_UPRIGHT, PLAYER_A_UPLEFT, PLAYER_A_DOWNRIGHT, PLAYER_A_DOWNLEFT,
             PLAYER_A_UPFIRE, PLAYER_A_RIGHTFIRE, PLAYER_A_LEFTFIRE, PLAYER_A_DOWNFIRE,
             PLAYER_A_UPRIGHTFIRE, PLAYER_A_UPLEFTFIRE, PLAYER_A_DOWNRIGHTFIRE, PLAYER_A_DOWNLEFTFIRE};
-    }
-
-    std::vector<Action> getLegalActionSet(){
-        return {PLAYER_A_UP, PLAYER_A_DOWN, PLAYER_A_LEFT, PLAYER_A_RIGHT};
     }
 
     void getCompleteFeatureVector(std::vector<FeatureType>& features){
@@ -76,17 +76,22 @@ public:
     }
 
     double doAct(Action action){
+//        printf("Grid: (%d, %d) -> ", m_posx, m_posy);
         switch(action){
         case PLAYER_A_UP:
-            m_posy--;
-            break;
-        case PLAYER_A_DOWN:
+//            printf("UP -> ");
             m_posy++;
             break;
+        case PLAYER_A_DOWN:
+//            printf("DOWN -> ");
+            m_posy--;
+            break;
         case PLAYER_A_LEFT:
+//            printf("LEFT -> ");
             m_posx--;
             break;
         case PLAYER_A_RIGHT:
+//            printf("RIGHT -> ");
             m_posx++;
             break;
         default:
@@ -107,7 +112,7 @@ public:
         if(m_posy > m_height){
             m_posy = m_height;
         }
-
+//        printf("(%d, %d)\n", m_posx, m_posy);
         if(m_flavor == 1 && m_posx == 0 && m_posy == m_height){ 
             reward += distributionTL(generator);
         }
@@ -126,6 +131,12 @@ public:
 
         switch(m_flavor){
             case 1:
+                if(reachedTopLeftCorner){
+//                    printf("Terminal: (0, 9)\n");
+                }
+                if(reachedBottomRightCorner){
+//                    printf("Terminal: (9, 0)\n");
+                }
                 return reachedTopLeftCorner || reachedBottomRightCorner;
             case 0:
             default:
