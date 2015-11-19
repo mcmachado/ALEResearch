@@ -15,8 +15,6 @@
 #include <stdio.h>
 #include <math.h>
 
-#define OPTIMISM 1.0
-
 using namespace std;
 
 //Freeway: Chicken height: 0x8E
@@ -221,6 +219,7 @@ void SarsaSplitLearner::learnPolicy(Environment<bool>& env){
 
 	//Repeat (for each episode):
 	for(int episode = episodePassed + 1; episode <= numEpisodesLearn; episode++){
+		double disc_return = 0.0;
 		//We have to clean the traces every episode:
 		for(unsigned int a = 0; a < nonZeroElig.size(); a++){
 			for(unsigned int i = 0; i < nonZeroElig[a].size(); i++){
@@ -254,31 +253,12 @@ void SarsaSplitLearner::learnPolicy(Environment<bool>& env){
 			for(int i = 0; i < F.size(); i++){
 				Fcount[currentAction][F[i]]++;
 			}
-/*
-			printf(" UP: \t\t\t\t\t\t\t\t DOWN: \t\t\t\t\t\t\t\t LEFT: \t\t\t\t\t\t\t\t RIGHT: \n");
-			for(int i = 0; i < 10; i++){
-				for(int j = 0; j < 10; j++){
-					printf("%.2f ", psi[0][(9-i)*10 + j]);
-				}
-				printf("\t");
-				for(int j = 0; j < 10; j++){
-					printf("%.2f ", psi[1][(9-i)*10 + j]);
-				}
-				printf("\t");
-				for(int j = 0; j < 10; j++){
-					printf("%.2f ", psi[2][(9-i)*10 + j]);
-				}
-				printf("\t");
-				for(int j = 0; j < 10; j++){
-					printf("%.2f ", psi[3][(9-i)*10 + j]);
-				}
-				printf("\n");
-			}
-*/
+
 			//Take action, observe reward and next state:
 			act(env, currentAction, reward);
-//			printf("Reward: %f\n", reward[1]);
 			cumReward  += reward[1];
+
+			disc_return = reward[1] + gamma * disc_return;
 
 			if(!env.isTerminal()){
 				//Obtain active features in the new state:
@@ -290,7 +270,8 @@ void SarsaSplitLearner::learnPolicy(Environment<bool>& env){
 					Q[i] = QnextW[i] + QnextPsi[i];
 				}
 				nextAction = epsilonGreedy(Q);
-				//cin >> nextAction;
+//				printf("S: %d, A: %s, R: %f, S': %d, A': %s\n", F[0], currentAction == 0 ? "LEFT" : "RIGHT", reward[1], Fnext[0], nextAction == 0 ? "LEFT" : "RIGHT");
+//				printf("Q[LEFT]: %f (%f + %f), Q[RIGHT]: %f (%f + %f)\n", Q[0], QnextW[0], QnextPsi[0], Q[1], QnextW[1], QnextPsi[1]);
 			}
 			else{
 				nextAction = 0;
@@ -306,7 +287,6 @@ void SarsaSplitLearner::learnPolicy(Environment<bool>& env){
 			}
 
 			deltaW = reward[0] + gamma * QnextW[nextAction] - QW[currentAction];
-//			printf("Delta = %f * %f - %f\n", gamma, QnextPsi[nextAction], QPsi[currentAction]);
 			deltaPsi = gamma * QnextPsi[nextAction] - QPsi[currentAction];
 
 			updateReplTrace(currentAction, F);
@@ -315,27 +295,29 @@ void SarsaSplitLearner::learnPolicy(Environment<bool>& env){
 			for(unsigned int a = 0; a < nonZeroElig.size(); a++){
 				for(unsigned int i = 0; i < nonZeroElig[a].size(); i++){
 					int idx = nonZeroElig[a][i];
-					if (w[a][idx]==0 && deltaW!=0){
+					if (w[a][idx] == 0 && deltaW != 0){
                         featureSeen[a].push_back(idx);
                     }
 					w[a][idx] = w[a][idx] + stepSize * deltaW * e[a][idx];
-					float stepSizeExp = (1.0 - sqrt(float(Fcount[a][idx]-1)/(float)Fcount[a][idx]));
-//					printf("psi[%d][%d] = %f + %f * %f * %f = %f\n", a, idx, psi[a][idx], stepSizeExp, deltaPsi, e[a][idx], psi[a][idx] + stepSizeExp * deltaPsi * e[a][idx]);
-					psi[a][idx] = psi[a][idx] + stepSizeExp * deltaPsi * e[a][idx];
+					if(fabs(e[a][idx] - 1.0) < 10e-4){
+						float stepSizeExp = (1.0 - sqrt(float(Fcount[a][idx]-1)/(float)Fcount[a][idx]));
+						psi[a][idx] = psi[a][idx] + stepSizeExp * deltaPsi * e[a][idx];
+					}
 				}
 			}
 			F = Fnext;
 			currentAction = nextAction;
-			//getchar();
+//			getchar();
 		}
 		gettimeofday(&tvEnd, NULL);
 		timeval_subtract(&tvDiff, &tvEnd, &tvBegin);
 		elapsedTime = float(tvDiff.tv_sec) + float(tvDiff.tv_usec)/1000000.0;
 		
 		float fps = float(env.getEpisodeFrameNumber())/elapsedTime;
-//		printf("episode: %d,\t%.0f points,\tavg. return: %.1f,\t%d frames,\t%.0f fps\n",
-//			episode, cumReward - prevCumReward, (float)cumReward/(float) episode,
-//			env.getEpisodeFrameNumber(), fps);
+		//printf("episode: %d,\t%.0f points,\tavg. return: %.1f,\t%d frames,\t%.0f fps\n",
+		//	episode, cumReward - prevCumReward, (float)cumReward/(float) episode,
+		//	env.getEpisodeFrameNumber(), fps);
+		printf("episode: %d,\t disc. return: %f,\t cum. return: %f,\t reward/step: %f\n", episode, disc_return, (cumReward - prevCumReward), (cumReward - prevCumReward)/(float)env.getEpisodeFrameNumber());
         episodeResults.push_back(cumReward-prevCumReward);
         episodeFrames.push_back(env.getEpisodeFrameNumber());
         episodeFps.push_back(fps);
@@ -346,7 +328,6 @@ void SarsaSplitLearner::learnPolicy(Environment<bool>& env){
             saveCheckPoint(episode,totalNumberFrames,episodeResults,saveWeightsEveryXSteps,episodeFrames,episodeFps);
         }
 	}
-	std::cout << (float)cumReward/(float) numEpisodesLearn << std::endl;
 }
 
 double SarsaSplitLearner::evaluatePolicy(Environment<bool>& env){

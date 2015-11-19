@@ -21,6 +21,7 @@ GRID := learnerGridWorld
 FAST := learnerFastSarsa
 TEST := testEnvStepByStep
 EXPL := learnerExplorationGridWorld
+RIVER := learnerRiverSwim
 
 # Search for library 'ale' and library 'z' when linking.
 LDFLAGS := -L$(ALE) -lale -lz -lm
@@ -30,7 +31,7 @@ ifeq ($(strip $(USE_SDL)), 1)
   LDFLAGS += -lSDL -lSDL_gfx -lSDL_image `sdl-config --cflags --libs`
 endif
 
-all: $(EXE) $(GRID) $(MC) $(FAST) $(TEST) ${EXPL}
+all: $(EXE) $(GRID) $(MC) $(FAST) $(TEST) ${EXPL} ${RIVER}
 
 mc: $(MC)
 ale: $(EXE)
@@ -38,12 +39,16 @@ grid: $(GRID)
 fast: ${FAST}
 test: ${TEST}
 expl: ${EXPL}
+river: ${RIVER}
 
 learnerALE: bin/main.o bin/Mathematics.o bin/Parameters.o bin/Timer.o bin/Features.o bin/Background.o bin/BasicFeatures.o bin/BASSFeatures.o bin/BPROFeatures.o bin/RAMFeatures.o bin/SarsaLearner.o bin/QLearner.o bin/TRSarsaLearner.o bin/FastSarsaLearner.o bin/RandomAgent.o bin/ConstantAgent.o bin/PerturbAgent.o bin/HumanAgent.o
 	$(CXX) $(FLAGS) bin/main.o bin/Mathematics.o bin/Timer.o bin/Parameters.o bin/Features.o bin/Background.o bin/BasicFeatures.o bin/BASSFeatures.o bin/BPROFeatures.o bin/RAMFeatures.o bin/SarsaLearner.o bin/QLearner.o bin/TRSarsaLearner.o bin/FastSarsaLearner.o bin/RandomAgent.o bin/ConstantAgent.o bin/PerturbAgent.o bin/HumanAgent.o $(LDFLAGS) -o $(EXE)
 
 learnerGridWorld: bin/main_grid_example.o bin/Mathematics.o bin/Parameters.o bin/Timer.o bin/Features.o bin/Background.o bin/BasicFeatures.o bin/BASSFeatures.o bin/BPROFeatures.o bin/RAMFeatures.o bin/SarsaLearner.o bin/QLearner.o bin/TRSarsaLearner.o bin/FastSarsaLearner.o bin/RandomAgent.o bin/ConstantAgent.o bin/PerturbAgent.o bin/HumanAgent.o
 	$(CXX) $(FLAGS) bin/main_grid_example.o bin/Mathematics.o bin/Timer.o bin/Parameters.o bin/Features.o bin/Background.o bin/BasicFeatures.o bin/BASSFeatures.o bin/BPROFeatures.o bin/RAMFeatures.o bin/SarsaLearner.o bin/QLearner.o bin/TRSarsaLearner.o bin/FastSarsaLearner.o bin/RandomAgent.o bin/ConstantAgent.o bin/PerturbAgent.o bin/HumanAgent.o $(LDFLAGS) -o $(GRID)
+
+learnerRiverSwim: bin/main_river_swim.o bin/Mathematics.o bin/Parameters.o bin/Timer.o bin/Features.o bin/Background.o bin/BasicFeatures.o bin/BASSFeatures.o bin/BPROFeatures.o bin/RAMFeatures.o bin/SarsaLearner.o bin/QLearner.o bin/TRSarsaLearner.o bin/FastSarsaLearner.o bin/SarsaSplitLearner.o
+	$(CXX) $(FLAGS) bin/main_river_swim.o bin/Mathematics.o bin/Timer.o bin/Parameters.o bin/Features.o bin/Background.o bin/BasicFeatures.o bin/BASSFeatures.o bin/BPROFeatures.o bin/RAMFeatures.o bin/SarsaLearner.o bin/QLearner.o bin/TRSarsaLearner.o bin/FastSarsaLearner.o $(LDFLAGS) bin/SarsaSplitLearner.o -o $(RIVER)
 
 learnerMountainCar: bin/main_mountain_car_example.o bin/Mathematics.o bin/Parameters.o bin/Timer.o bin/Features.o bin/Background.o bin/BasicFeatures.o bin/BASSFeatures.o bin/BPROFeatures.o bin/RAMFeatures.o bin/SarsaLearner.o bin/QLearner.o bin/TRSarsaLearner.o bin/FastSarsaLearner.o bin/RandomAgent.o bin/ConstantAgent.o bin/PerturbAgent.o bin/HumanAgent.o
 	$(CXX) $(FLAGS) bin/main_mountain_car_example.o bin/Mathematics.o bin/Timer.o bin/Parameters.o bin/Features.o bin/Background.o bin/BasicFeatures.o bin/BASSFeatures.o bin/BPROFeatures.o bin/RAMFeatures.o bin/SarsaLearner.o bin/QLearner.o bin/TRSarsaLearner.o bin/FastSarsaLearner.o bin/RandomAgent.o bin/ConstantAgent.o bin/PerturbAgent.o bin/HumanAgent.o $(LDFLAGS) -o $(MC)
@@ -62,6 +67,9 @@ bin/main.o: main.cpp
 
 bin/main_grid_example.o: main_grid_example.cpp
 	$(CXX) $(FLAGS) -c main_grid_example.cpp -o bin/main_grid_example.o
+
+bin/main_river_swim.o: main_river_swim.cpp
+	$(CXX) $(FLAGS) -c main_river_swim.cpp -o bin/main_river_swim.o
 
 bin/main_mountain_car_example.o: main_mountain_car_example.cpp
 	$(CXX) $(FLAGS) -c main_mountain_car_example.cpp -o bin/main_mountain_car_example.o
