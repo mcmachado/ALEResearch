@@ -166,7 +166,7 @@ def SARSA_SPLIT(b, numIterations, optimism):
 def __init__():
 
  	lvlOptimism   = RMAX
-	numSeeds      = 100
+	numSeeds      = 2000
 	numIterations = 1000
 
     #Variables that will store the results for all methods
@@ -202,8 +202,9 @@ def __init__():
 		'''First I just calculate the max return one could've get.'''
 		for i in xrange(numIterations):
 			maxReturn += max(b[s-1].pullArm(0), b[s-1].pullArm(1))
-			res_MAX[s-1].append(maxReturn)
-			b[s-1].resetEnv()
+		
+		res_MAX[s-1].append(maxReturn)
+		b[s-1].resetEnv()
 
 		'''Agent pulling the arm with highest running average.'''
 		r.seed(seed)
