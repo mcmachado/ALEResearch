@@ -40,7 +40,7 @@ public:
     void getActiveFeaturesIndices(RiverSwimEnvironment<RiverSwimFeatures>* env, std::vector<int>& features){
         assert(features.size() == 0); //If the vector is not empty this can be a mess
         features.push_back(env->getCurrentState());
-        features.push_back(env->getNumberOfFeatures() - 1);
+        /*features.push_back(env->getNumberOfFeatures() - 1);*/ //This is a tabular representation, no bias term is necessary
     }
 };
 

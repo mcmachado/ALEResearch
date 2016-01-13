@@ -31,7 +31,7 @@ public:
 	virtual void reset() final{
 		m_frame = 0;
 		/* The MDP has 6 states. One can start in state 1 or 2.*/
-		m_state = (rand() % 2) + 1;
+		m_state = (rand() % 2)/* + 1*/;
 	}
  	
  	std::vector<Action> getMinimalActionSet(){
@@ -54,7 +54,7 @@ public:
     }
 
     int getNumberOfFeatures(){
-    	return NUM_STATES + 1;
+    	return NUM_STATES/* + 1*/;
     }
 
     double doAct(Action action){
@@ -116,6 +116,8 @@ public:
     }
 
     bool isTerminal(){
+    	//In Strehl and Littman (2008) there is no termination condition,
+    	//the task is running for a finite number of steps, that is it.
     	return false;//(m_state == MAX_STATES) || (m_state == MIN_STATES);
     }
 
