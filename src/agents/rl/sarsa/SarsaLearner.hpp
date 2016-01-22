@@ -34,6 +34,7 @@ class SarsaLearner : public RLLearner<bool>{
 		std::vector<int> Fnext;              //Set of features active in next state
 		std::vector<float> Q;               //Q(a) entries
 		std::vector<float> Qnext;           //Q(a) entries for next action
+		std::vector<std::vector<int> > Fcount;     //Used to calculate the step sizes
 		std::vector<std::vector<float> > e;      //Eligibility trace
 		std::vector<std::vector<float> > w;      //Theta, weights vector
 		std::vector<std::vector<int> >nonZeroElig;//To optimize the implementation

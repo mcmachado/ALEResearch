@@ -17,7 +17,8 @@
 class SarsaSplitLearner : public RLLearner<bool>{
 	private:
 
-		float alpha, deltaW, deltaPsi, lambda, traceThreshold;
+		float alphaW, deltaW, deltaPsi, lambdaW, traceThreshold;
+		float alphaPsi, lambdaPsi, gammaPsi;
 		int numFeatures, currentAction, nextAction;
 		int toSaveWeightsAfterLearning, saveWeightsEveryXSteps, toSaveCheckPoint;
 
@@ -33,10 +34,11 @@ class SarsaSplitLearner : public RLLearner<bool>{
 		std::vector<std::vector<int> > Fcount;     //Used to calculate the step sizes
 		std::vector<float> QW, QPsi, Q;            //Q(a) entries
 		std::vector<float> QnextW, QnextPsi;       //Q(a) entries for next action
-		std::vector<std::vector<float> > e;        //Eligibility trace
+		std::vector<std::vector<float> > eW, ePsi; //Eligibility trace
 		std::vector<std::vector<float> > w;        //Theta, weights vector
 		std::vector<std::vector<float> > psi;      //Psi, auxiliary Q-values
-		std::vector<std::vector<int> >nonZeroElig; //To optimize the implementation
+		std::vector<std::vector<int> >nonZeroEligW;//To optimize the implementation
+		std::vector<std::vector<int> >nonZeroEligPsi;
 		std::vector<std::vector<int> > featureSeen;
 
 		/**

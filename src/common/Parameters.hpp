@@ -30,11 +30,14 @@ class Parameters{
         std::string checkPointName;     //name to save the temporary local checkPoint
         int toSaveCheckPoint;
 		std::string pathToWeightsFiles; //path to the file that we will load the weights from
-		float alpha;                   //learning rate
-		float gamma;                   //discount factor
-		float epsilon;                 //exploration probability
-		float lambda;                  //trace
-		float traceThreshold;          //threshold to make the trace zero, to avoid very small values
+		float alpha;                    //learning rate
+		float gamma;                    //discount factor
+		float epsilon;                  //exploration probability
+		float alpha_aux;                //learning rate
+		float gamma_aux;                //discount factor
+		float lambda_aux;               //trace
+		float lambda;                   //trace
+		float traceThreshold;           //threshold to make the trace zero, to avoid very small values
 		float degreeOfOptimism;         //how much optimism we want to have (0 is none, 1 is the expectation of a reward at each step, gamma - 1 is one reward in the whole episode) 
 		int seed;                       //seed to be used by the random number generator
 		int display;                    //if it should display screen
@@ -131,10 +134,12 @@ class Parameters{
  		* @param float value that represents ALPHA in the config file
  		*/
 		void setAlpha(float a);
+		void setAuxAlpha(float a);
 		/**
  		* @param float value that represents GAMMA in the config file
  		*/
 		void setGamma(float a);
+		void setAuxGamma(float a);
 		/**
  		* @param float value that represents EPSILON in the config file
  		*/
@@ -143,6 +148,7 @@ class Parameters{
  		* @param float value that represents LAMBDA in the config file
  		*/
 		void setLambda(float a);
+		void setAuxLambda(float a);
 		/**
  		* @param int (representing float) value that represents DISPLAY in the config file.
  		* If 1 the game will be shown, otherwise it is just run without graphical output.
@@ -266,10 +272,12 @@ class Parameters{
  		* @return float value read for ALPHA parameter
  		*/
 		float getAlpha();
+		float getAuxAlpha();
 		/**
  		* @return float value read for GAMMA parameter
  		*/
 		float getGamma();
+		float getAuxGamma();
 		/**
  		* @return float value read for EPSILON parameter
  		*/
@@ -278,6 +286,7 @@ class Parameters{
  		* @return float value read for LAMBDA parameter
  		*/
 		float getLambda();
+		float getAuxLambda();
 		/**
  		* @return int (representing bool) value read for DISPLAY parameter
  		* If 1 the game will be shown, otherwise it is just run without graphical output.

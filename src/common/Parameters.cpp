@@ -89,13 +89,28 @@ void Parameters::readParameters(int argc, char* argv[]){
 	this->setToLoadWeights(0);
 	this->setToSaveWeightsAfterLearning(0);
     this->setToSaveCheckPoint(0);
-	while ((option = getopt(argc, argv, "c:r:s:t:w:l:n:h")) != -1)
+	while ((option = getopt(argc, argv, "c:r:s:t:w:l:n:a:b:o:e:u:h")) != -1)
 	{
 		if (option == -1){
 			break;
 		}
 		switch(option)
 		{
+			case 'a':
+				this->setAlpha(atof(optarg));
+				break;
+			case 'b':
+				this->setAuxAlpha(atof(optarg));
+				break;
+			case 'o':
+				this->setAuxGamma(atof(optarg));
+				break;
+			case 'e':
+				this->setLambda(atof(optarg));
+				break;
+			case 'u':
+				this->setAuxLambda(atof(optarg));
+				break;
 			case 'c':
 				this->setConfigPath(optarg);
 				break;
@@ -164,10 +179,10 @@ void Parameters::parseParametersFromConfigFile(std::string cfgFileName){
 		printf("Unable to open the file '%s', defined as the configuration file.\n", cfgFileName.c_str());
 	}
 
-	this->setAlpha(atof(parameters["ALPHA"].c_str()));
+	//this->setAlpha(atof(parameters["ALPHA"].c_str()));
 	this->setGamma(atof(parameters["GAMMA"].c_str()));
 	this->setEpsilon(atof(parameters["EPSILON"].c_str()));
-	this->setLambda(atof(parameters["LAMBDA"].c_str()));
+	//this->setLambda(atof(parameters["LAMBDA"].c_str()));
 	this->setDisplay(atoi(parameters["DISPLAY"].c_str()));
 	this->setEpisodeLength(atoi(parameters["EPISODE_LENGTH"].c_str()));
 	this->setNumEpisodesLearn(atoi(parameters["NUM_EPISODES_LEARN"].c_str()));
@@ -236,16 +251,32 @@ void Parameters::setAlpha(float a){
 	this->alpha = a;
 }
 
+void Parameters::setAuxAlpha(float a){
+	this->alpha_aux = a;
+}
+
 float Parameters::getAlpha(){
 	return this->alpha;
+}
+
+float Parameters::getAuxAlpha(){
+	return this->alpha_aux;
 }
 
 void Parameters::setGamma(float a){
 	this->gamma = a;
 }
 
+void Parameters::setAuxGamma(float a){
+	this->gamma_aux = a;
+}
+
 float Parameters::getGamma(){
 	return this->gamma;
+}
+
+float Parameters::getAuxGamma(){
+	return this->gamma_aux;
 }
 
 void Parameters::setEpsilon(float a){
@@ -256,8 +287,16 @@ float Parameters::getEpsilon(){
 	return this->epsilon;
 }
 
+void Parameters::setAuxLambda(float a){
+	this->lambda_aux = a;
+}
+
 void Parameters::setLambda(float a){
 	this->lambda = a;
+}
+
+float Parameters::getAuxLambda(){
+	return this->lambda_aux;
 }
 
 float Parameters::getLambda(){

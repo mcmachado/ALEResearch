@@ -1,13 +1,11 @@
 template<typename FeatureType>
 RLLearner<FeatureType>::RLLearner(Environment<FeatureType>& env, Parameters *param, int seed){
 	randomActionTaken   = 0;
-
 	gamma               = param->getGamma();
 	epsilon             = param->getEpsilon();
 	toUseOnlyRewardSign = param->getUseRewardSign();
 	degreeOfOptimism    = param->getDegreeOfOptimism();
-	toBeOptimistic      = fabs(degreeOfOptimism - 0.0) < 10e-4 ? 0 : 1;
-	
+	toBeOptimistic      = false; //fabs(degreeOfOptimism - 0.0) < 10e-4 ? 0 : 1;
 	episodeLength       = param->getEpisodeLength();
 	numEpisodesEval     = param->getNumEpisodesEval();
 	totalNumberOfFramesToLearn = param->getLearningLength();
@@ -85,12 +83,14 @@ void RLLearner<FeatureType>::updateQValues(std::vector<int> &Features, std::vect
 		QValues[a] = sumW;
 	}
 
+/*
 	if(toBeOptimistic){
 		float optimism = degreeOfOptimism / (1.0 - gamma);
 		for(int a = 0; a < numActions; a++){
 			QValues[a] += optimism;
 		}
 	}
+*/
 }
 
 /**
@@ -106,6 +106,8 @@ void RLLearner<FeatureType>::act(Environment<FeatureType>& env, int action, std:
     double prob_action = epsilon/double(numActions) + (randomActionTaken ? 0 : 1.0 - epsilon);
 
 	r_real = env.act(actions[action], prob_action);
+
+/*
 	if(toUseOnlyRewardSign){
 		if(r_real > 0){ 
 			r_alg = 1.0;
@@ -126,6 +128,9 @@ void RLLearner<FeatureType>::act(Environment<FeatureType>& env, int action, std:
 			r_alg = r_real/firstReward;
 		}
 	}
+*/
+
+	r_alg = r_real;
 	reward[0] = r_alg;
 	reward[1] = r_real;
 }

@@ -42,6 +42,7 @@ SarsaLearner::SarsaLearner(Environment<bool>& env, Parameters *param, int seed) 
 		Q.push_back(0);
 		Qnext.push_back(0);
 		//Initialize e:
+		Fcount.push_back(vector<int>(numFeatures, 0));
 		e.push_back(vector<float>(numFeatures, 0.0));
 		w.push_back(vector<float>(numFeatures, param->getDegreeOfOptimism()));
 		nonZeroElig.push_back(vector<int>());
@@ -213,7 +214,8 @@ void SarsaLearner::learnPolicy(Environment<bool>& env){
     vector<double> episodeFps;
 
 	//Repeat (for each episode):
-    for(int episode = 0; episode <= numEpisodesLearn; episode++){
+    for(int episode = 1; episode <= numEpisodesLearn; episode++){
+    	double disc_return = 0.0;
 		//We have to clean the traces every episode:
 		for(unsigned int a = 0; a < nonZeroElig.size(); a++){
 			for(unsigned int i = 0; i < nonZeroElig[a].size(); i++){
@@ -232,7 +234,6 @@ void SarsaLearner::learnPolicy(Environment<bool>& env){
 
 		//This also stops when the maximum number of steps per episode is reached
 		//while(!env.isTerminal()){
-		printf("%d %d %d\n", !env.isTerminal(), episodeLength, env.getEpisodeFrameNumber());
 		while(!env.isTerminal() && episodeLength > env.getEpisodeFrameNumber()){
 			reward.clear();
 			reward.push_back(0.0);
@@ -240,9 +241,15 @@ void SarsaLearner::learnPolicy(Environment<bool>& env){
 			updateQValues(F, w, Q);
 			sanityCheck();
 
+			for(int i = 0; i < F.size(); i++){
+				Fcount[currentAction][F[i]]++;
+			}
+
 			//Take action, observe reward and next state:
 			act(env, currentAction, reward);
 			cumReward  += reward[1];
+			disc_return = reward[1] + gamma * disc_return;
+			
 			if(!env.isTerminal()){
 				//Obtain active features in the new state:
 				Fnext.clear();
@@ -250,8 +257,6 @@ void SarsaLearner::learnPolicy(Environment<bool>& env){
 
 				updateQValues(Fnext, w, Qnext);     //Update Q-values for the new active features
 				nextAction = epsilonGreedy(Qnext);
-				printf("%d %d\n", F.size(), Fnext.size());
-				printf("S: %d, A: %d, R: %f, S': %d", F[0], currentAction, reward[1], Fnext[0]);
 			}
 			else{
 				nextAction = 0;
@@ -269,17 +274,15 @@ void SarsaLearner::learnPolicy(Environment<bool>& env){
 
 			updateReplTrace(currentAction, F);
 			//Update weights vector:
-			float stepSize = alpha/maxFeatVectorNorm;
 			for(unsigned int a = 0; a < nonZeroElig.size(); a++){
 				for(unsigned int i = 0; i < nonZeroElig[a].size(); i++){
 					int idx = nonZeroElig[a][i];
 					if (w[a][idx]==0 && delta!=0){
                         featureSeen[a].push_back(idx);
                     }
-                    //printf("w[%d][%d] = %f + %f * %f * %f\n", a, idx, w[a][idx], stepSize, delta, e[a][idx]);
-                    if(fabs(e[a][idx] - 1.0) < 10e-4){
-						w[a][idx] = w[a][idx] + stepSize * delta * e[a][idx];
-					}
+                    //float stepSize = alpha/maxFeatVectorNorm;
+                    float stepSize = (alpha/maxFeatVectorNorm) * (1.0/(float)Fcount[a][idx]);
+					w[a][idx] = w[a][idx] + stepSize * delta * e[a][idx];
 				}
 			}
 			F = Fnext;
@@ -290,10 +293,10 @@ void SarsaLearner::learnPolicy(Environment<bool>& env){
 		elapsedTime = float(tvDiff.tv_sec) + float(tvDiff.tv_usec)/1000000.0;
 		
 		float fps = float(env.getEpisodeFrameNumber())/elapsedTime;
-		printf("episode: %d,\t%.2f points,\tavg. return: %.1f,\t%d frames,\t%.0f fps\n",
-			episode, cumReward - prevCumReward, (float)cumReward/(float) episode,
-			env.getEpisodeFrameNumber(), fps);
-		getchar();
+//		printf("episode: %d,\t%.2f points,\tavg. return: %.1f,\t%d frames,\t%.0f fps\n",
+//			episode, cumReward - prevCumReward, (float)cumReward/(float) episode,
+//			env.getEpisodeFrameNumber(), fps);
+		printf("episode: %d,\t disc. return: %f,\t cum. return: %f,\t reward/step: %f\n", episode, cumReward, (cumReward - prevCumReward), (cumReward - prevCumReward)/(float)env.getEpisodeFrameNumber());
         episodeResults.push_back(cumReward-prevCumReward);
         episodeFrames.push_back(env.getEpisodeFrameNumber());
         episodeFps.push_back(fps);

@@ -22,6 +22,7 @@ FAST := learnerFastSarsa
 TEST := testEnvStepByStep
 EXPL := learnerExplorationGridWorld
 RIVER := learnerRiverSwim
+SIMPLE := learnerSimpleMDP
 
 # Search for library 'ale' and library 'z' when linking.
 LDFLAGS := -L$(ALE) -lale -lz -lm
@@ -31,7 +32,7 @@ ifeq ($(strip $(USE_SDL)), 1)
   LDFLAGS += -lSDL -lSDL_gfx -lSDL_image `sdl-config --cflags --libs`
 endif
 
-all: $(EXE) $(GRID) $(MC) $(FAST) $(TEST) ${EXPL} ${RIVER}
+all: $(EXE) $(GRID) $(MC) $(FAST) $(TEST) ${EXPL} ${RIVER} ${SIMPLE}
 
 mc: $(MC)
 ale: $(EXE)
@@ -40,6 +41,7 @@ fast: ${FAST}
 test: ${TEST}
 expl: ${EXPL}
 river: ${RIVER}
+simple: ${SIMPLE}
 
 learnerALE: bin/main.o bin/Mathematics.o bin/Parameters.o bin/Timer.o bin/Features.o bin/Background.o bin/BasicFeatures.o bin/BASSFeatures.o bin/BPROFeatures.o bin/RAMFeatures.o bin/SarsaLearner.o bin/QLearner.o bin/TRSarsaLearner.o bin/FastSarsaLearner.o bin/RandomAgent.o bin/ConstantAgent.o bin/PerturbAgent.o bin/HumanAgent.o
 	$(CXX) $(FLAGS) bin/main.o bin/Mathematics.o bin/Timer.o bin/Parameters.o bin/Features.o bin/Background.o bin/BasicFeatures.o bin/BASSFeatures.o bin/BPROFeatures.o bin/RAMFeatures.o bin/SarsaLearner.o bin/QLearner.o bin/TRSarsaLearner.o bin/FastSarsaLearner.o bin/RandomAgent.o bin/ConstantAgent.o bin/PerturbAgent.o bin/HumanAgent.o $(LDFLAGS) -o $(EXE)
@@ -62,8 +64,14 @@ testEnvStepByStep: bin/testEnvironmentStepByStep.o bin/Parameters.o bin/Features
 learnerExplorationGridWorld: bin/main_grid_exploration.o bin/Mathematics.o bin/Parameters.o bin/Timer.o bin/Features.o bin/Background.o bin/BasicFeatures.o bin/BASSFeatures.o bin/BPROFeatures.o bin/RAMFeatures.o bin/SarsaLearner.o bin/QLearner.o bin/TRSarsaLearner.o bin/FastSarsaLearner.o bin/SarsaSplitLearner.o bin/RandomAgent.o bin/ConstantAgent.o bin/PerturbAgent.o bin/HumanAgent.o
 	$(CXX) $(FLAGS) bin/main_grid_exploration.o bin/Mathematics.o bin/Timer.o bin/Parameters.o bin/Features.o bin/Background.o bin/BasicFeatures.o bin/BASSFeatures.o bin/BPROFeatures.o bin/RAMFeatures.o bin/SarsaLearner.o bin/QLearner.o bin/TRSarsaLearner.o bin/FastSarsaLearner.o bin/SarsaSplitLearner.o bin/RandomAgent.o bin/ConstantAgent.o bin/PerturbAgent.o bin/HumanAgent.o $(LDFLAGS) -o $(EXPL)
 
+learnerSimpleMDP: bin/main_simple_mdp.o bin/Mathematics.o bin/Parameters.o bin/Timer.o bin/Features.o bin/Background.o bin/BasicFeatures.o bin/BASSFeatures.o bin/BPROFeatures.o bin/RAMFeatures.o bin/SarsaLearner.o bin/QLearner.o bin/TRSarsaLearner.o bin/FastSarsaLearner.o bin/SarsaSplitLearner.o
+	$(CXX) $(FLAGS) bin/main_simple_mdp.o bin/Mathematics.o bin/Timer.o bin/Parameters.o bin/Features.o bin/Background.o bin/BasicFeatures.o bin/BASSFeatures.o bin/BPROFeatures.o bin/RAMFeatures.o bin/SarsaLearner.o bin/QLearner.o bin/TRSarsaLearner.o bin/FastSarsaLearner.o $(LDFLAGS) bin/SarsaSplitLearner.o -o $(SIMPLE)
+
 bin/main.o: main.cpp
 	$(CXX) $(FLAGS) -c main.cpp -o bin/main.o
+
+bin/main_simple_mdp.o: main_simple_mdp.cpp
+	$(CXX) $(FLAGS) -c main_simple_mdp.cpp -o bin/main_simple_mdp.o
 
 bin/main_grid_example.o: main_grid_example.cpp
 	$(CXX) $(FLAGS) -c main_grid_example.cpp -o bin/main_grid_example.o

@@ -44,6 +44,10 @@ public:
         return {PLAYER_A_LEFT,PLAYER_A_NOOP,PLAYER_A_RIGHT};
     }
 
+    std::vector<Action> getMinimalActionSet(){
+        return {PLAYER_A_LEFT,PLAYER_A_NOOP,PLAYER_A_RIGHT};
+    }
+
     void getCompleteFeatureVector(std::vector<FeatureType>& features){
         this->m_feat->getCompleteFeatureVector(this,features);
     }

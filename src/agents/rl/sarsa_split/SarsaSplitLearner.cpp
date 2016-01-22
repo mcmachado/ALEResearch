@@ -26,8 +26,11 @@ SarsaSplitLearner::SarsaSplitLearner(Environment<bool>& env, Parameters *param, 
 	
 	deltaW = 0.0;
 	deltaPsi = 0.0;
-	alpha = param->getAlpha();
-	lambda = param->getLambda();
+	alphaW = param->getAlpha();
+	lambdaW = param->getLambda();
+	alphaPsi = param->getAuxAlpha();
+	lambdaPsi = param->getAuxLambda();
+	gammaPsi = param->getAuxGamma();
 	traceThreshold = param->getTraceThreshold();
 	numFeatures = env.getNumberOfFeatures();
 	toSaveCheckPoint = param->getToSaveCheckPoint();
@@ -47,10 +50,12 @@ SarsaSplitLearner::SarsaSplitLearner(Environment<bool>& env, Parameters *param, 
 		QnextPsi.push_back(0);
 		//Initialize e:
 		Fcount.push_back(vector<int>(numFeatures, 0));
-		e.push_back(vector<float>(numFeatures, 0.0));
+		eW.push_back(vector<float>(numFeatures, 0.0));
+		ePsi.push_back(vector<float>(numFeatures, 0.0));
 		w.push_back(vector<float>(numFeatures, 0.0));
 		psi.push_back(vector<float>(numFeatures, param->getDegreeOfOptimism()));
-		nonZeroElig.push_back(vector<int>());
+		nonZeroEligW.push_back(vector<int>());
+		nonZeroEligPsi.push_back(vector<int>());
 	}
 
     episodePassed = 0;
@@ -77,22 +82,51 @@ SarsaSplitLearner::~SarsaSplitLearner(){}
 
 void SarsaSplitLearner::updateReplTrace(int action, vector<int> &Features){
 	//e <- gamma * lambda * e
-	for(unsigned int a = 0; a < nonZeroElig.size(); a++){
+	for(unsigned int a = 0; a < nonZeroEligW.size(); a++){
 		int numNonZero = 0;
-	 	for(unsigned int i = 0; i < nonZeroElig[a].size(); i++){
-	 		int idx = nonZeroElig[a][i];
+	 	for(unsigned int i = 0; i < nonZeroEligW[a].size(); i++){
+	 		int idx = nonZeroEligW[a][i];
 	 		//To keep the trace sparse, if it is
 	 		//less than a threshold it is zero-ed.
-			e[a][idx] = gamma * lambda * e[a][idx];
-			if(e[a][idx] < traceThreshold){
-				e[a][idx] = 0;
+			eW[a][idx] = gamma * lambdaW * eW[a][idx];
+			if(eW[a][idx] < traceThreshold){
+				eW[a][idx] = 0;
 			}
 			else{
-				nonZeroElig[a][numNonZero] = idx;
+				nonZeroEligW[a][numNonZero] = idx;
 		  		numNonZero++;
 			}
 		}
-		nonZeroElig[a].resize(numNonZero);
+		nonZeroEligW[a].resize(numNonZero);
+	}
+	//For all i in Fa:
+	for(unsigned int i = 0; i < Features.size(); i++){
+		int idx = Features[i];
+		//If the trace is zero it is not in the vector
+		//of non-zeros, thus it needs to be added
+		if(eW[action][idx] == 0){
+	       nonZeroEligW[action].push_back(idx);
+	    }
+		eW[action][idx] = 1;
+	}
+
+	//e <- gamma * lambda * e
+	for(unsigned int a = 0; a < nonZeroEligPsi.size(); a++){
+		int numNonZero = 0;
+	 	for(unsigned int i = 0; i < nonZeroEligPsi[a].size(); i++){
+	 		int idx = nonZeroEligPsi[a][i];
+	 		//To keep the trace sparse, if it is
+	 		//less than a threshold it is zero-ed.
+			ePsi[a][idx] = gammaPsi * lambdaPsi * ePsi[a][idx];
+			if(ePsi[a][idx] < traceThreshold){
+				ePsi[a][idx] = 0;
+			}
+			else{
+				nonZeroEligPsi[a][numNonZero] = idx;
+		  		numNonZero++;
+			}
+		}
+		nonZeroEligPsi[a].resize(numNonZero);
 	}
 
 	//For all i in Fa:
@@ -100,13 +134,14 @@ void SarsaSplitLearner::updateReplTrace(int action, vector<int> &Features){
 		int idx = Features[i];
 		//If the trace is zero it is not in the vector
 		//of non-zeros, thus it needs to be added
-		if(e[action][idx] == 0){
-	       nonZeroElig[action].push_back(idx);
+		if(ePsi[action][idx] == 0){
+	       nonZeroEligPsi[action].push_back(idx);
 	    }
-		e[action][idx] = 1;
+		ePsi[action][idx] = 1;
 	}
 }
 
+/*
 void SarsaSplitLearner::updateAcumTrace(int action, vector<int> &Features){
 	//e <- gamma * lambda * e
 	for(unsigned int a = 0; a < nonZeroElig.size(); a++){
@@ -138,6 +173,7 @@ void SarsaSplitLearner::updateAcumTrace(int action, vector<int> &Features){
 		e[action][idx] += 1;
 	}
 }
+*/
 
 void SarsaSplitLearner::sanityCheck(std::vector<float> &QValues){
 	for(int i = 0; i < numActions; i++){
@@ -221,13 +257,21 @@ void SarsaSplitLearner::learnPolicy(Environment<bool>& env){
 	for(int episode = episodePassed + 1; episode <= numEpisodesLearn; episode++){
 		double disc_return = 0.0;
 		//We have to clean the traces every episode:
-		for(unsigned int a = 0; a < nonZeroElig.size(); a++){
-			for(unsigned int i = 0; i < nonZeroElig[a].size(); i++){
-				int idx = nonZeroElig[a][i];
-				e[a][idx] = 0.0;
+		for(unsigned int a = 0; a < nonZeroEligW.size(); a++){
+			for(unsigned int i = 0; i < nonZeroEligW[a].size(); i++){
+				int idx = nonZeroEligW[a][i];
+				eW[a][idx] = 0.0;
 			}
-			nonZeroElig[a].clear();
+			nonZeroEligW[a].clear();
 		}
+		for(unsigned int a = 0; a < nonZeroEligPsi.size(); a++){
+			for(unsigned int i = 0; i < nonZeroEligPsi[a].size(); i++){
+				int idx = nonZeroEligPsi[a][i];
+				ePsi[a][idx] = 0.0;
+			}
+			nonZeroEligPsi[a].clear();
+		}
+
 		F.clear();
 		env.getActiveFeaturesIndices(F);
 		updateQValues(F, w, QW); updateQValues(F, psi, QPsi);
@@ -238,9 +282,8 @@ void SarsaSplitLearner::learnPolicy(Environment<bool>& env){
 		currentAction = epsilonGreedy(Q);
 
 		//Repeat(for each step of episode) until game is over:
-		gettimeofday(&tvBegin, NULL);
-
 		double t = 0.0;
+		gettimeofday(&tvBegin, NULL);
 		//This also stops when the maximum number of steps per episode is reached
 		while(!env.isTerminal() && episodeLength > env.getEpisodeFrameNumber()){
 			t += 1.0;
@@ -257,7 +300,6 @@ void SarsaSplitLearner::learnPolicy(Environment<bool>& env){
 			//Take action, observe reward and next state:
 			act(env, currentAction, reward);
 			cumReward  += reward[1];
-
 			disc_return = reward[1] + gamma * disc_return;
 
 			if(!env.isTerminal()){
@@ -270,8 +312,6 @@ void SarsaSplitLearner::learnPolicy(Environment<bool>& env){
 					Q[i] = QnextW[i] + QnextPsi[i];
 				}
 				nextAction = epsilonGreedy(Q);
-//				printf("S: %d, A: %s, R: %f, S': %d, A': %s\n", F[0], currentAction == 0 ? "LEFT" : "RIGHT", reward[1], Fnext[0], nextAction == 0 ? "LEFT" : "RIGHT");
-//				printf("Q[LEFT]: %f (%f + %f), Q[RIGHT]: %f (%f + %f)\n", Q[0], QnextW[0], QnextPsi[0], Q[1], QnextW[1], QnextPsi[1]);
 			}
 			else{
 				nextAction = 0;
@@ -287,37 +327,43 @@ void SarsaSplitLearner::learnPolicy(Environment<bool>& env){
 			}
 
 			deltaW = reward[0] + gamma * QnextW[nextAction] - QW[currentAction];
-			deltaPsi = gamma * QnextPsi[nextAction] - QPsi[currentAction];
+			deltaPsi = gammaPsi * QnextPsi[nextAction] - QPsi[currentAction];
 
 			updateReplTrace(currentAction, F);
 			//Update weights vector:
-			float stepSize = alpha/maxFeatVectorNorm;
-			for(unsigned int a = 0; a < nonZeroElig.size(); a++){
-				for(unsigned int i = 0; i < nonZeroElig[a].size(); i++){
-					int idx = nonZeroElig[a][i];
+			for(unsigned int a = 0; a < nonZeroEligW.size(); a++){
+				for(unsigned int i = 0; i < nonZeroEligW[a].size(); i++){
+					int idx = nonZeroEligW[a][i];
 					if (w[a][idx] == 0 && deltaW != 0){
                         featureSeen[a].push_back(idx);
                     }
-					w[a][idx] = w[a][idx] + stepSize * deltaW * e[a][idx];
-					if(fabs(e[a][idx] - 1.0) < 10e-4){
-						float stepSizeExp = (1.0 - sqrt(float(Fcount[a][idx]-1)/(float)Fcount[a][idx]));
-						psi[a][idx] = psi[a][idx] + stepSizeExp * deltaPsi * e[a][idx];
-					}
+                    float stepSizeW = alphaW/maxFeatVectorNorm;
+                    //float stepSizeW = (alphaW/maxFeatVectorNorm) * (1.0/(float)Fcount[a][idx]);
+					w[a][idx] = w[a][idx] + stepSizeW * deltaW * eW[a][idx];
+				}
+			}
+
+			for(unsigned int a = 0; a < nonZeroEligPsi.size(); a++){
+				for(unsigned int i = 0; i < nonZeroEligPsi[a].size(); i++){
+					int idx = nonZeroEligPsi[a][i];
+					//float stepSizeExpPsi = alphaPsi/maxFeatVectorNorm;
+					//float stepSizeExpPsi = (alphaPsi/maxFeatVectorNorm) * (1.0/(float)env.getEpisodeFrameNumber()/*Fcount[a][idx]*/);
+					float stepSizeExpPsi = (alphaPsi/maxFeatVectorNorm) * (1.0 - sqrt(float(/*Fcount[a][idx]*/env.getEpisodeFrameNumber()-1)/(float)/*Fcount[a][idx]*/env.getEpisodeFrameNumber()));
+//					printf("psi[%d] = %f + %f * %f * %f\n", idx, psi[a][idx], stepSizeExpPsi, deltaPsi, ePsi[a][idx]);
+					psi[a][idx] = psi[a][idx] + stepSizeExpPsi * deltaPsi * ePsi[a][idx];
 				}
 			}
 			F = Fnext;
 			currentAction = nextAction;
-//			getchar();
+
+			printf("%f %f %f %f\n", psi[0][0], psi[0][1], psi[0][2], psi[0][3]);
 		}
 		gettimeofday(&tvEnd, NULL);
 		timeval_subtract(&tvDiff, &tvEnd, &tvBegin);
 		elapsedTime = float(tvDiff.tv_sec) + float(tvDiff.tv_usec)/1000000.0;
 		
 		float fps = float(env.getEpisodeFrameNumber())/elapsedTime;
-		//printf("episode: %d,\t%.0f points,\tavg. return: %.1f,\t%d frames,\t%.0f fps\n",
-		//	episode, cumReward - prevCumReward, (float)cumReward/(float) episode,
-		//	env.getEpisodeFrameNumber(), fps);
-		printf("episode: %d,\t disc. return: %f,\t cum. return: %f,\t reward/step: %f\n", episode, disc_return, (cumReward - prevCumReward), (cumReward - prevCumReward)/(float)env.getEpisodeFrameNumber());
+		//printf("episode: %d,\t disc. return: %f,\t cum. return: %f,\t reward/step: %f\n", episode, cumReward, (cumReward - prevCumReward), (cumReward - prevCumReward)/(float)env.getEpisodeFrameNumber());
         episodeResults.push_back(cumReward-prevCumReward);
         episodeFrames.push_back(env.getEpisodeFrameNumber());
         episodeFps.push_back(fps);
